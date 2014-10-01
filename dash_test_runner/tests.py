@@ -61,6 +61,15 @@ class DashTest(SmartminTest):
 
         self.admin = self.create_user("Administrator")
 
+    def clear_uploads(self):
+        import os
+        for org_bg in OrgBackground.objects.all():
+            os.remove(org_bg.image.path)
+
+        for cat_image in CategoryImage.objects.all():
+            os.remove(cat_image.image.path)
+
+
 
     def create_org(self, subdomain, user):
 
@@ -952,11 +961,7 @@ class OrgBackgroundTest(DashTest):
         self.assertEquals(response.request['PATH_INFO'], nigeria_bg_update_url)
         self.assertEquals(len(response.context['form'].fields), 5)
 
-        # clean up all uploaded images
-        import os
-        for org_bg in OrgBackground.objects.all():
-            os.remove(org_bg.image.path)
-
+        self.clear_uploads()
 
 class MockResponse(object):
 
@@ -1579,7 +1584,4 @@ class CategoryTest(DashTest):
         cat_image = CategoryImage.objects.filter(pk=cat_image.pk)[0]
         self.assertEquals(cat_image.name, 'health image')
 
-        # clean up all uploaded images
-        import os
-        for cat_image in CategoryImage.objects.all():
-            os.remove(cat_image.image.path)
+        self.clear_uploads()
