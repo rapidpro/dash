@@ -4,7 +4,7 @@ from datetime import datetime
 import json
 import urllib
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.core import mail
 from django.core.urlresolvers import reverse
 from django.http import HttpRequest
@@ -12,13 +12,13 @@ import pytz
 from smartmin.tests import SmartminTest
 from dash.api import API
 from dash.categories.models import Category, CategoryImage
+from dash.orgs.context_processors import GroupPermWrapper
 from dash.orgs.middleware import SetOrgMiddleware
 from dash.orgs.models import Org, OrgBackground, Invitation
 from django.core.exceptions import DisallowedHost
 
 from mock import patch, Mock
 from django.utils import timezone
-from dash.orgs.views import OrgPermsMixin
 from django.db.utils import IntegrityError
 
 
@@ -157,6 +157,21 @@ class SetOrgMiddlewareTest(DashTest):
         self.assertEquals(len(response.context_data['orgs']), 2)
         self.assertTrue(rw_org in response.context_data['orgs'])
         self.assertTrue(ug_org in response.context_data['orgs'])
+
+
+class OrgContextProcessorTestcase(DashTest):
+    def test_group_perms_wrapper(self):
+        administrators = Group.objects.get(name="Administrators")
+        editors = Group.objects.get(name="Editors")
+        viewers = Group.objects.get(name="Viewers")
+
+        administrators_wrapper = GroupPermWrapper(administrators)
+        self.assertTrue(administrators_wrapper['orgs']['org_edit'])
+        self.assertTrue(administrators_wrapper["orgs"]["org_home"])
+
+        editors_wrapper = GroupPermWrapper(editors)
+        self.assertFalse(editors_wrapper["orgs"]["org_edit"])
+        self.assertTrue(editors_wrapper["orgs"]["org_home"])
 
 class OrgTest(DashTest):
 
