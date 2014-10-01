@@ -1,0 +1,19 @@
+{
+    "results": [
+        {
+            "geometry": "B_GEOMETRY_DICT_3",
+            "boundary": "B_BOUNDARY_3",
+            "name": "B_NAME_3",
+            "parent": "B_BOUNDARY_1",
+            "level": 1
+        },
+        {
+            "geometry": "B_GEOMETRY_DICT_4",
+            "boundary": "B_BOUNDARY_4",
+            "name": "B_NAME_4",
+            "parent": "B_BOUNDARY_2",
+            "level": 2
+        }
+    ],
+    "next": null
+}

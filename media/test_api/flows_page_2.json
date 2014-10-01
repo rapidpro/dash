@@ -1,0 +1,17 @@
+{
+    "results": [
+        {
+            "rulesets": [],
+            "name": "FLOW_4"
+        },
+        {
+            "rulesets": ["FLOW_5_RULESET_DICT"],
+            "name": "FLOW_5"
+        },
+        {
+            "rulesets": ["FLOW_6_RULESET_DICT"],
+            "name": "FLOW_6"
+        }
+    ],
+    "next": null
+}

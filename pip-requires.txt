@@ -1,0 +1,10 @@
+-e git+https://github.com/nyaruka/smartmin.git@to_django_1_7#egg=smartmin-dev
+-e git+https://github.com/django/django.git@stable/1.7.x#egg=django
+coverage
+django-nose
+django-celery
+celery-with-redis
+xlutils
+Pillow
+mock
+requests
