@@ -1579,3 +1579,7 @@ class CategoryTest(DashTest):
         cat_image = CategoryImage.objects.filter(pk=cat_image.pk)[0]
         self.assertEquals(cat_image.name, 'health image')
 
+        # clean up all uploaded images
+        import os
+        for cat_image in CategoryImage.objects.all():
+            os.remove(cat_image.image.path)
