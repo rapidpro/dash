@@ -11,6 +11,7 @@ from django.http import HttpRequest
 import pytz
 from smartmin.tests import SmartminTest
 from dash.api import API
+from dash.categories.models import Category, CategoryImage
 from dash.orgs.middleware import SetOrgMiddleware
 from dash.orgs.models import Org, OrgBackground, Invitation
 from django.core.exceptions import DisallowedHost
@@ -18,6 +19,7 @@ from django.core.exceptions import DisallowedHost
 from mock import patch, Mock
 from django.utils import timezone
 from dash.orgs.views import OrgPermsMixin
+from django.db.utils import IntegrityError
 
 
 class UserTest(SmartminTest):
@@ -344,7 +346,7 @@ class OrgTest(DashTest):
         response = self.client.get(create_url)
         self.assertEquals(200, response.status_code)
         self.assertFalse(Org.objects.filter(name="kLab"))
-        self.assertEquals(User.objects.all().count(), 3)
+        self.assertEquals(User.objects.all().count(), 4)
 
         user_alice = User.objects.create_user("alicefox")
 
@@ -353,7 +355,7 @@ class OrgTest(DashTest):
         self.assertTrue('form' not in response.context)
         self.assertTrue(Org.objects.filter(name="kLab"))
         org = Org.objects.get(name="kLab")
-        self.assertEquals(User.objects.all().count(), 4)
+        self.assertEquals(User.objects.all().count(), 5)
         self.assertTrue(org.administrators.filter(username="alicefox"))
 
 
@@ -1367,3 +1369,213 @@ class APITest(DashTest):
                                                                                                            level=2))])
 
             self.assertEquals(self.api.get_state_geojson('B_BOUNDARY_2'), boundary_cached['geojson:%d:B_BOUNDARY_2' % self.org.id])
+
+class CategoryTest(DashTest):
+
+    def setUp(self):
+        super(CategoryTest, self).setUp()
+        self.uganda = self.create_org('uganda', self.admin)
+        self.nigeria = self.create_org('nigeria', self.admin)
+
+    def test_category_model(self):
+        category1 = Category.objects.create(name='category 1',
+                                            org=self.uganda,
+                                            image='categories/image.jpg',
+                                            created_by=self.admin,
+                                            modified_by=self.admin)
+
+        self.assertEquals(category1.__unicode__(), 'category 1')
+
+        with self.assertRaises(IntegrityError):
+            Category.objects.create(name='category 1',
+                                    org=self.uganda,
+                                    created_by=self.admin,
+                                    modified_by=self.admin)
+
+
+    def test_category_get_first_image(self):
+        category1 = Category.objects.create(name='category 1',
+                                            org=self.uganda,
+                                            created_by=self.admin,
+                                            modified_by=self.admin)
+
+        self.assertIsNone(category1.get_first_image())
+
+        category_image1 = CategoryImage.objects.create(category=category1,
+                                                       name='image 1',
+                                                       image=None,
+                                                       created_by=self.admin,
+                                                       modified_by=self.admin)
+
+        self.assertEquals(unicode(category_image1), 'category 1 - image 1')
+        self.assertIsNone(category1.get_first_image())
+
+        category_image1.image = 'categories/image.jpg'
+        category_image1.is_active = False
+        category_image1.save()
+
+        self.assertIsNone(category1.get_first_image())
+
+        category_image1.is_active = True
+        category_image1.save()
+
+        self.assertTrue(category1.get_first_image())
+        self.assertEquals(category1.get_first_image(), category_image1.image)
+
+    def test_create_category(self):
+        create_url = reverse('categories.category_create')
+
+        response = self.client.get(create_url, SERVER_NAME='uganda.ureport.io')
+        self.assertLoginRedirect(response)
+
+        self.login(self.admin)
+        response = self.client.get(create_url, SERVER_NAME='uganda.ureport.io')
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(len(response.context['form'].fields), 2)
+        self.assertTrue('org' not in response.context['form'].fields)
+
+        post_data = dict()
+        response = self.client.post(create_url, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
+        self.assertTrue(response.context['form'].errors)
+        self.assertTrue('name' in response.context['form'].errors)
+
+        post_data = dict(name="Health")
+        response = self.client.post(create_url, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
+        category = Category.objects.order_by('-pk')[0]
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(response.request['PATH_INFO'], reverse('categories.category_list'))
+        self.assertEquals(category.name, "Health")
+        self.assertEquals(category.org, self.uganda)
+
+        self.login(self.superuser)
+        response = self.client.get(create_url, SERVER_NAME='uganda.ureport.io')
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(len(response.context['form'].fields), 3)
+        self.assertTrue('org' in response.context['form'].fields)
+
+        post_data= dict(name="Education", org=self.uganda.pk)
+        response = self.client.post(create_url, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
+        category = Category.objects.order_by('-pk')[0]
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(response.request['PATH_INFO'], reverse('categories.category_list'))
+        self.assertEquals(category.name, "Education")
+        self.assertEquals(category.org, self.uganda)
+
+    def test_list_category(self):
+        uganda_health = Category.objects.create(name="Health", org=self.uganda, created_by=self.admin, modified_by=self.admin)
+        uganda_education = Category.objects.create(name="Education", org=self.uganda, created_by=self.admin, modified_by=self.admin)
+
+        nigeria_health = Category.objects.create(name="Health", org=self.nigeria, created_by=self.admin, modified_by=self.admin)
+
+        list_url =reverse('categories.category_list')
+
+        response = self.client.get(list_url, SERVER_NAME='uganda.ureport.io')
+        self.assertLoginRedirect(response)
+
+        self.login(self.admin)
+        response = self.client.get(list_url, SERVER_NAME='uganda.ureport.io')
+        self.assertEquals(len(response.context['object_list']), 2)
+        self.assertTrue(nigeria_health not in response.context['object_list'])
+        self.assertTrue(uganda_health in response.context['object_list'])
+        self.assertTrue(uganda_education in response.context['object_list'])
+
+        response = self.client.get(list_url, SERVER_NAME='nigeria.ureport.io')
+        self.assertEquals(len(response.context['object_list']), 1)
+        self.assertTrue(uganda_health not in response.context['object_list'])
+        self.assertTrue(uganda_education not in response.context['object_list'])
+        self.assertTrue(nigeria_health in response.context['object_list'])
+        self.assertEquals(len(response.context['fields']), 3)
+
+        self.login(self.superuser)
+        response = self.client.get(list_url, SERVER_NAME='uganda.ureport.io')
+        self.assertEquals(len(response.context['fields']), 4)
+        self.assertEquals(len(response.context['object_list']), 2)
+        self.assertTrue(uganda_health in response.context['object_list'])
+        self.assertTrue(uganda_education in response.context['object_list'])
+        self.assertTrue(nigeria_health not in response.context['object_list'])
+
+    def test_category_update(self):
+        uganda_health = Category.objects.create(name="Health", org=self.uganda, created_by=self.admin, modified_by=self.admin)
+
+        nigeria_health = Category.objects.create(name="Health", org=self.nigeria, created_by=self.admin, modified_by=self.admin)
+
+        uganda_update_url = reverse('categories.category_update', args=[uganda_health.pk])
+        nigeria_update_url = reverse('categories.category_update', args=[nigeria_health.pk])
+
+        response = self.client.get(uganda_update_url, SERVER_NAME='uganda.ureport.io')
+        self.assertLoginRedirect(response)
+
+        self.login(self.admin)
+
+        response = self.client.get(uganda_update_url, SERVER_NAME='nigeria.ureport.io')
+        self.assertLoginRedirect(response)
+
+        response = self.client.get(nigeria_update_url, SERVER_NAME='uganda.ureport.io')
+        self.assertLoginRedirect(response)
+
+        response = self.client.get(uganda_update_url, SERVER_NAME='uganda.ureport.io')
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(len(response.context['form'].fields), 3)
+
+        post_data = dict(name='Sanitation', is_active=True)
+        response = self.client.post(uganda_update_url, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
+        self.assertEquals(response.request['PATH_INFO'], reverse('categories.category_list'))
+        category = Category.objects.get(pk=uganda_health.pk)
+        self.assertEquals(category.name, "Sanitation")
+
+
+    def test_create_category_image(self):
+        uganda_health = Category.objects.create(name="Health", org=self.uganda, created_by=self.admin, modified_by=self.admin)
+
+        nigeria_health = Category.objects.create(name="Health", org=self.nigeria, created_by=self.admin, modified_by=self.admin)
+
+        create_url = reverse('categories.categoryimage_create')
+
+        response = self.client.get(create_url, SERVER_NAME='uganda.ureport.io')
+        self.assertLoginRedirect(response)
+
+        self.login(self.admin)
+        response = self.client.get(create_url, SERVER_NAME='nigeria.ureport.io')
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(len(response.context['form'].fields), 4)
+        self.assertEquals(response.context['form'].fields['category'].choices.queryset.count(), 1)
+        self.assertEquals(nigeria_health, response.context['form'].fields['category'].choices.queryset[0])
+
+        response = self.client.get(create_url, SERVER_NAME='uganda.ureport.io')
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(len(response.context['form'].fields), 4)
+        self.assertEquals(response.context['form'].fields['category'].choices.queryset.count(), 1)
+        self.assertEquals(uganda_health, response.context['form'].fields['category'].choices.queryset[0])
+
+        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "r")
+        post_data = dict(name="health hero", image=upload, category=uganda_health.pk)
+        response = self.client.post(create_url, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
+        cat_image = CategoryImage.objects.order_by('-pk')[0]
+        self.assertEquals(cat_image.name, 'health hero')
+        self.assertEquals(cat_image.category, uganda_health)
+
+        list_url = reverse('categories.categoryimage_list')
+
+        response = self.client.get(list_url, SERVER_NAME='uganda.ureport.io')
+        self.assertEquals(len(response.context['object_list']), 1)
+        self.assertTrue(cat_image in response.context['object_list'])
+
+        response = self.client.get(list_url, SERVER_NAME='nigeria.ureport.io')
+        self.assertEquals(len(response.context['object_list']), 0)
+        self.assertTrue(cat_image  not in response.context['object_list'])
+
+        update_url = reverse('categories.categoryimage_update', args=[cat_image.pk])
+
+        response = self.client.get(update_url, SERVER_NAME='nigeria.ureport.io')
+        self.assertLoginRedirect(response)
+
+        response = self.client.get(update_url, SERVER_NAME='uganda.ureport.io')
+        self.assertEquals(len(response.context['form'].fields), 5)
+
+        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "r")
+        post_data = dict(name='health image', image=upload, category=uganda_health.pk, is_active=True)
+        response = self.client.post(update_url, post_data, follow=True, SERVER_NAME='uganda.ureprt.io')
+        self.assertEquals(response.request['PATH_INFO'], reverse('categories.categoryimage_list'))
+        cat_image = CategoryImage.objects.filter(pk=cat_image.pk)[0]
+        self.assertEquals(cat_image.name, 'health image')
+

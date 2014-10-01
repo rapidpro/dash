@@ -54,6 +54,7 @@ INSTALLED_APPS = (
 
     #dash
     'dash.orgs',
+    'dash.categories',
 
 )
 
@@ -219,6 +220,8 @@ PERMISSIONS = {
 # authority to create and change users
 GROUP_PERMISSIONS = {
     "Administrators": (
+        'categories.category.*',
+        'categories.categoryimage.*',
         'users.user_profile',
         'orgs.org_home',
         'orgs.org_edit',
