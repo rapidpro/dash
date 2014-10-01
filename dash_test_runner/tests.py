@@ -83,7 +83,7 @@ class DashTest(SmartminTest):
 
     def read_json(self, filename):
         from django.conf import settings
-        handle = open('%s/test_api/%s.json' % (settings.MEDIA_ROOT, filename))
+        handle = open('%s/test_api/%s.json' % (settings.TESTFILES_DIR, filename))
         contents = handle.read()
         handle.close()
         return contents
@@ -867,7 +867,7 @@ class OrgBackgroundTest(DashTest):
         self.assertEquals(len(response.context['form'].fields), 4)
         self.assertTrue('org' not in response.context['form'].fields)
 
-        upload = open("test-data/image.jpg", "r")
+        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "r")
 
         post_data = dict(name="Orange Pattern", background_type="P", image=upload)
         response = self.client.post(create_url, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
@@ -881,7 +881,7 @@ class OrgBackgroundTest(DashTest):
         self.assertEquals(len(response.context['form'].fields), 4)
         self.assertTrue('org' not in response.context['form'].fields)
 
-        upload = open("test-data/image.jpg", "r")
+        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "r")
 
         post_data = dict(name="Orange Pattern", background_type="P", image=upload)
         response = self.client.post(create_url, post_data, follow=True, SERVER_NAME='nigeria.ureport.io')
@@ -914,7 +914,7 @@ class OrgBackgroundTest(DashTest):
         self.assertEquals(len(response.context['form'].fields), 5)
         self.assertTrue('org' not in response.context['form'].fields)
 
-        upload = open("test-data/image.jpg", "r")
+        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "r")
         post_data = dict(name="Orange Pattern Updated", background_type="P", image=upload)
         response = self.client.post(uganda_bg_update_url, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
         self.assertEquals(response.request['PATH_INFO'], list_url)
@@ -927,14 +927,14 @@ class OrgBackgroundTest(DashTest):
         self.assertEquals(len(response.context['form'].fields), 5)
         self.assertTrue('org' in response.context['form'].fields)
 
-        upload = open("test-data/image.jpg", "r")
+        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "r")
 
         post_data = dict(name="Blue Pattern", background_type="P", image=upload)
         response = self.client.post(create_url, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
         self.assertTrue('form' in response.context)
         self.assertTrue('org' in response.context['form'].errors)
 
-        upload = open("test-data/image.jpg", "r")
+        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "r")
 
         post_data = dict(name="Blue Pattern", background_type="P", image=upload, org=self.uganda.pk)
 
