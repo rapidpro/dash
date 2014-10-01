@@ -950,6 +950,11 @@ class OrgBackgroundTest(DashTest):
         self.assertEquals(response.request['PATH_INFO'], nigeria_bg_update_url)
         self.assertEquals(len(response.context['form'].fields), 5)
 
+        # clean up all uploaded images
+        import os
+        for org_bg in OrgBackground.objects.all():
+            os.remove(org_bg.image.path)
+
 
 class MockResponse(object):
 
