@@ -20,6 +20,7 @@ from django.core.exceptions import DisallowedHost
 from mock import patch, Mock
 from django.utils import timezone
 from django.db.utils import IntegrityError
+from dash.stories.models import Story, StoryImage
 
 
 class UserTest(SmartminTest):
@@ -52,8 +53,6 @@ class UserTest(SmartminTest):
 
 
 
-
-
 class DashTest(SmartminTest):
 
     def setUp(self):
@@ -69,7 +68,8 @@ class DashTest(SmartminTest):
         for cat_image in CategoryImage.objects.all():
             os.remove(cat_image.image.path)
 
-
+        for story_image in StoryImage.objects.all():
+            os.remove(story_image.image.path)
 
     def create_org(self, subdomain, user):
 
@@ -1404,7 +1404,7 @@ class CategoryTest(DashTest):
                                             created_by=self.admin,
                                             modified_by=self.admin)
 
-        self.assertEquals(category1.__unicode__(), 'category 1')
+        self.assertEquals(category1.__unicode__(), 'uganda - category 1')
 
         with self.assertRaises(IntegrityError):
             Category.objects.create(name='category 1',
@@ -1598,5 +1598,361 @@ class CategoryTest(DashTest):
         self.assertEquals(response.request['PATH_INFO'], reverse('categories.categoryimage_list'))
         cat_image = CategoryImage.objects.filter(pk=cat_image.pk)[0]
         self.assertEquals(cat_image.name, 'health image')
+
+        self.clear_uploads()
+
+
+class StoryTest(DashTest):
+    def setUp(self):
+        super(StoryTest, self).setUp()
+        self.uganda = self.create_org('uganda', self.admin)
+        self.nigeria = self.create_org('nigeria', self.admin)
+
+
+        self.health_uganda = Category.objects.create(org=self.uganda,
+                                                     name="Health",
+                                                     created_by=self.admin,
+                                                     modified_by=self.admin)
+
+        self.education_nigeria = Category.objects.create(org=self.nigeria,
+                                                         name="Education",
+                                                         created_by=self.admin,
+                                                         modified_by=self.admin)
+
+    def test_story_model(self):
+        self.story = Story.objects.create(title="Story 1",
+                                          content='content ' * 20,
+                                          org=self.uganda,
+                                          created_by=self.admin,
+                                          modified_by=self.admin)
+
+        self.assertEquals(self.story.teaser(self.story.summary, 30), "")
+        self.assertEquals(self.story.teaser(self.story.content, 30), self.story.content)
+
+        self.story.content = 'content ' * 250
+        self.story.save()
+
+        self.assertEquals(self.story.teaser(self.story.summary, 30), "")
+        self.assertEquals(self.story.teaser(self.story.content, 30), "content " * 30 + "..")
+        self.assertEquals(self.story.long_teaser(), "content " * 100 + "..")
+        self.assertEquals(self.story.short_teaser(), "content " * 40 +  "..")
+
+        self.story.summary = "summary " * 150
+        self.story.save()
+
+        self.assertEquals(self.story.long_teaser(), "summary " * 100 + "..")
+        self.assertEquals(self.story.short_teaser(), "summary " * 40 + "..")
+
+        story_image_1 = StoryImage.objects.create(name='image 1',
+                                                  story=self.story,
+                                                  image='',
+                                                  created_by=self.admin,
+                                                  modified_by=self.admin)
+
+        self.assertFalse(self.story.get_featured_images())
+
+        story_image_1.image = 'stories/someimage.jpg'
+        story_image_1.is_active = False
+        story_image_1.save()
+
+        self.assertFalse(self.story.get_featured_images())
+
+        story_image_1.is_active = True
+        story_image_1.save()
+
+        self.assertTrue(self.story.get_featured_images())
+        self.assertEquals(len(self.story.get_featured_images()), 1)
+        self.assertTrue(story_image_1 in self.story.get_featured_images())
+
+        self.assertEquals(self.story.get_category_image(), 'stories/someimage.jpg')
+        self.assertEquals(self.story.get_image(), 'stories/someimage.jpg')
+
+        self.story.category = self.health_uganda
+        self.story.save()
+
+        self.assertEquals(self.story.get_category_image(), 'stories/someimage.jpg')
+        self.assertEquals(self.story.get_image(), 'stories/someimage.jpg')
+
+        category_image1 = CategoryImage.objects.create(category=self.health_uganda,
+                                                       name='image 1',
+                                                       image='categories/some_image.jpg',
+                                                       created_by=self.admin,
+                                                       modified_by=self.admin)
+
+        self.assertEquals(self.story.get_category_image(), 'categories/some_image.jpg')
+        self.assertEquals(self.story.get_image(), 'stories/someimage.jpg')
+
+        story_image_1.is_active = False
+        story_image_1.save()
+
+        self.assertEquals(self.story.get_category_image(), 'categories/some_image.jpg')
+        self.assertEquals(self.story.get_image(), 'categories/some_image.jpg')
+
+        self.health_uganda.is_active = False
+        self.health_uganda.save()
+
+        self.assertFalse(self.story.get_category_image())
+        self.assertFalse(self.story.get_image(), 'categories/some_image.jpg')
+
+    def test_create_story(self):
+        create_url = reverse('stories.story_create')
+
+        response = self.client.get(create_url)
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
+        self.assertEquals(len(response.context['orgs']), 2)
+        self.assertTrue(self.uganda in response.context['orgs'])
+        self.assertTrue(self.nigeria in response.context['orgs'])
+
+        self.login(self.admin)
+        response = self.client.get(create_url)
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
+        self.assertEquals(len(response.context['orgs']), 2)
+        self.assertTrue(self.uganda in response.context['orgs'])
+        self.assertTrue(self.nigeria in response.context['orgs'])
+
+        response = self.client.get(create_url, SERVER_NAME='uganda.ureport.io')
+        self.assertEquals(response.status_code, 200)
+        self.assertTrue('form' in response.context)
+        fields = response.context['form'].fields
+        self.assertEquals(len(fields), 8)
+        self.assertTrue('loc' in fields)
+        self.assertTrue('title' in fields)
+        self.assertTrue('featured' in fields)
+        self.assertTrue('summary' in fields)
+        self.assertTrue('content' in fields)
+        self.assertTrue('video_id' in fields)
+        self.assertTrue('tags' in fields)
+        self.assertTrue('category' in fields)
+
+        self.assertEquals(len(fields['category'].choices.queryset), 1)
+
+        response = self.client.post(create_url, dict(), SERVER_NAME='uganda.ureport.io')
+        self.assertTrue(response.context['form'].errors)
+        errors = response.context['form'].errors
+        self.assertTrue('title' in errors)
+        self.assertTrue('content' in errors)
+        self.assertTrue('category' in errors)
+
+        post_data = dict(title='foo', content='bar', category=self.health_uganda.pk, featured=True, summary='baz',
+                         video_id='yt_id', tags='   first SECOND third')
+
+        response = self.client.post(create_url, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
+        story = Story.objects.get()
+        self.assertEquals(response.request['PATH_INFO'], reverse('stories.story_images', args=[story.pk]))
+        self.assertEquals(story.title, 'foo')
+        self.assertEquals(story.content, 'bar')
+        self.assertEquals(story.category, self.health_uganda)
+        self.assertTrue(story.featured)
+        self.assertEquals(story.summary, 'baz')
+        self.assertEquals(story.video_id, 'yt_id')
+        self.assertEquals(story.tags, ' first second third ')
+
+    def test_update_story(self):
+        story1 = Story.objects.create(title='foo',
+                                     content='bar',
+                                     category=self.health_uganda,
+                                     org=self.uganda,
+                                     created_by=self.admin,
+                                     modified_by=self.admin)
+
+        story2 = Story.objects.create(title='foo',
+                                     content='bar',
+                                     category=self.education_nigeria,
+                                     org=self.nigeria,
+                                     created_by=self.admin,
+                                     modified_by=self.admin)
+
+        update_url_uganda = reverse('stories.story_update', args=[story1.pk])
+        update_url_nigeria = reverse('stories.story_update', args=[story2.pk])
+
+        response = self.client.get(update_url_uganda)
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
+        self.assertEquals(len(response.context['orgs']), 2)
+        self.assertTrue(self.uganda in response.context['orgs'])
+        self.assertTrue(self.nigeria in response.context['orgs'])
+
+        response = self.client.get(update_url_nigeria)
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
+        self.assertEquals(len(response.context['orgs']), 2)
+        self.assertTrue(self.uganda in response.context['orgs'])
+        self.assertTrue(self.nigeria in response.context['orgs'])
+
+        response = self.client.get(update_url_uganda, SERVER_NAME='uganda.ureport.io')
+        self.assertLoginRedirect(response)
+
+        response = self.client.get(update_url_nigeria, SERVER_NAME='uganda.ureport.io')
+        self.assertLoginRedirect(response)
+
+        self.login(self.admin)
+        response = self.client.get(update_url_uganda)
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
+        self.assertEquals(len(response.context['orgs']), 2)
+        self.assertTrue(self.uganda in response.context['orgs'])
+        self.assertTrue(self.nigeria in response.context['orgs'])
+
+        response = self.client.get(update_url_nigeria)
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
+        self.assertEquals(len(response.context['orgs']), 2)
+        self.assertTrue(self.uganda in response.context['orgs'])
+        self.assertTrue(self.nigeria in response.context['orgs'])
+
+
+        response = self.client.get(update_url_nigeria, SERVER_NAME='uganda.ureport.io')
+        self.assertLoginRedirect(response)
+
+        response = self.client.get(update_url_uganda, SERVER_NAME='uganda.ureport.io')
+        self.assertEquals(response.status_code, 200)
+        self.assertTrue('form' in response.context)
+        fields = response.context['form'].fields
+
+        self.assertEquals(len(fields), 9)
+        self.assertTrue('loc' in fields)
+        self.assertTrue('is_active' in fields)
+        self.assertTrue('title' in fields)
+        self.assertTrue('featured' in fields)
+        self.assertTrue('summary' in fields)
+        self.assertTrue('content' in fields)
+        self.assertTrue('video_id' in fields)
+        self.assertTrue('tags' in fields)
+        self.assertTrue('category' in fields)
+        self.assertEquals(len(fields['category'].choices.queryset), 1)
+
+        response = self.client.post(update_url_uganda, dict(), SERVER_NAME='uganda.ureport.io')
+
+        self.assertTrue(response.context['form'].errors)
+        errors = response.context['form'].errors
+        self.assertTrue('title' in errors)
+        self.assertTrue('content' in errors)
+
+        post_data = dict(title='foo updated', content='bar updated', category=self.health_uganda.pk, featured=True,
+                         summary='baz updated', video_id='yt_idUpdated', tags='   first SECOND third UPDATED')
+        response = self.client.post(update_url_uganda, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
+        updated_story = Story.objects.get(pk=story1.pk)
+        self.assertEquals(response.request['PATH_INFO'], reverse('stories.story_list'))
+
+        self.assertEquals(updated_story.title, 'foo updated')
+        self.assertEquals(updated_story.content, 'bar updated')
+        self.assertEquals(updated_story.category, self.health_uganda)
+        self.assertTrue(updated_story.featured)
+        self.assertEquals(updated_story.summary, 'baz updated')
+        self.assertEquals(updated_story.video_id, 'yt_idUpdated')
+        self.assertEquals(updated_story.tags, ' first second third updated ')
+
+    def test_list_stories(self):
+        story1 = Story.objects.create(title='foo',
+                                      content='bar',
+                                      category=self.health_uganda,
+                                      org=self.uganda,
+                                      created_by=self.admin,
+                                      modified_by=self.admin)
+
+        story2 = Story.objects.create(title='foo',
+                                      content='bar',
+                                      category=self.education_nigeria,
+                                      org=self.nigeria,
+                                      created_by=self.admin,
+                                      modified_by=self.admin)
+
+        list_url = reverse('stories.story_list')
+
+        response = self.client.get(list_url)
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
+        self.assertEquals(len(response.context['orgs']), 2)
+        self.assertTrue(self.uganda in response.context['orgs'])
+        self.assertTrue(self.nigeria in response.context['orgs'])
+
+        self.login(self.admin)
+        response = self.client.get(list_url)
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
+        self.assertEquals(len(response.context['orgs']), 2)
+        self.assertTrue(self.uganda in response.context['orgs'])
+        self.assertTrue(self.nigeria in response.context['orgs'])
+
+        response = self.client.get(list_url, SERVER_NAME='uganda.ureport.io')
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(len(response.context['object_list']), 1)
+        self.assertTrue(story1 in response.context['object_list'])
+        self.assertFalse(story2 in response.context['object_list'])
+
+        self.assertTrue(reverse('stories.story_images', args=[story1.pk]) in response.content)
+
+
+    def test_images_story(self):
+        story1 = Story.objects.create(title='foo',
+                                      content='bar',
+                                      category=self.health_uganda,
+                                      org=self.uganda,
+                                      created_by=self.admin,
+                                      modified_by=self.admin)
+
+        story2 = Story.objects.create(title='foo',
+                                      content='bar',
+                                      category=self.education_nigeria,
+                                      org=self.nigeria,
+                                      created_by=self.admin,
+                                      modified_by=self.admin)
+
+        images_url_uganda = reverse('stories.story_images', args=[story1.pk])
+        images_url_nigeria = reverse('stories.story_images', args=[story2.pk])
+
+
+        response = self.client.get(images_url_uganda)
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
+        self.assertEquals(len(response.context['orgs']), 2)
+        self.assertTrue(self.uganda in response.context['orgs'])
+        self.assertTrue(self.nigeria in response.context['orgs'])
+
+        response = self.client.get(images_url_nigeria)
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
+        self.assertEquals(len(response.context['orgs']), 2)
+        self.assertTrue(self.uganda in response.context['orgs'])
+        self.assertTrue(self.nigeria in response.context['orgs'])
+
+        response = self.client.get(images_url_uganda, SERVER_NAME='uganda.ureport.io')
+        self.assertLoginRedirect(response)
+
+        response = self.client.get(images_url_nigeria, SERVER_NAME='uganda.ureport.io')
+        self.assertLoginRedirect(response)
+
+        self.login(self.admin)
+        response = self.client.get(images_url_nigeria, SERVER_NAME='uganda.ureport.io')
+        self.assertLoginRedirect(response)
+
+        response = self.client.get(images_url_uganda, SERVER_NAME='uganda.ureport.io')
+        self.assertEquals(response.status_code, 200)
+        self.assertTrue('form' in response.context)
+        self.assertEquals(len(response.context['form'].fields), 3)
+        for field in response.context['form'].fields:
+            self.assertFalse(response.context['form'].fields[field].initial)
+
+        self.assertFalse(StoryImage.objects.filter(story=story1))
+
+        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "r")
+        post_data = dict(image_1=upload)
+        response = self.client.post(images_url_uganda, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
+        self.assertTrue(StoryImage.objects.filter(story=story1))
+        self.assertEquals(StoryImage.objects.filter(story=story1).count(), 1)
+
+        response = self.client.get(images_url_uganda, SERVER_NAME='uganda.ureport.io')
+        self.assertEquals(len(response.context['form'].fields), 3)
+        self.assertTrue(response.context['form'].fields['image_1'].initial)
+
+        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "r")
+        post_data = dict(image_1=upload)
+        response = self.client.post(images_url_uganda, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
+        self.assertTrue(StoryImage.objects.filter(story=story1))
+        self.assertEquals(StoryImage.objects.filter(story=story1).count(), 1)
+
+        self.assertEquals(response.request['PATH_INFO'], reverse('stories.story_list'))
 
         self.clear_uploads()

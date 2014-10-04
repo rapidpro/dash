@@ -13,7 +13,7 @@ class Category(SmartModel):
     image = models.ImageField(upload_to='categories', null=True, blank=True,
                               help_text=_("An optional image that can describe this category"))
 
-    org = models.ForeignKey(Org,
+    org = models.ForeignKey(Org, related_name='categories',
                             help_text=_("The organization this category applies to"))
 
 
@@ -23,7 +23,7 @@ class Category(SmartModel):
             return cat_images.first().image
 
     def __unicode__(self):
-        return self.name
+        return "%s - %s" % (self.org, self.name)
 
     class Meta:
         unique_together = ('name', 'org')

@@ -55,6 +55,7 @@ INSTALLED_APPS = (
     #dash
     'dash.orgs',
     'dash.categories',
+    'dash.stories',
 
 )
 
@@ -216,6 +217,7 @@ PERMISSIONS = {
           'list'),  # can view a list of the objects
     'auth.user': ('profile','forget', 'recover', 'expired', 'failed', 'newpassword', 'mimic'),
     'orgs.org': ('choose', 'home', 'edit', 'manage_accounts', 'create_login', 'join'),
+    'stories.story': ('images',),
 }
 
 # assigns the permissions that each group should have, here creating an Administrator group with
@@ -229,6 +231,7 @@ GROUP_PERMISSIONS = {
         'orgs.org_edit',
         'orgs.org_manage_accounts',
         'orgs.orgbackground.*',
+        'stories.story.*',
 
     ),
     "Editors": (
@@ -264,7 +267,7 @@ BROKER_VHOST = '4'
 # RapidPRO
 API_ENDPOINT = 'http://localhost:8001'
 SITE_HOST_PATTERN = 'http://%s.localhost:8000'
-SITE_CHOOSER_TEMPLATE = 'public/org_chooser.html'
+SITE_CHOOSER_TEMPLATE = 'orgs/org_chooser.html'
 
 CACHES = {
     'default': {
