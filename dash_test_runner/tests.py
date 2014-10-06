@@ -12,6 +12,7 @@ import pytz
 from smartmin.tests import SmartminTest
 from dash.api import API
 from dash.categories.models import Category, CategoryImage
+from dash.dashblocks.models import DashBlockType, DashBlock, DashBlockImage
 from dash.orgs.context_processors import GroupPermWrapper
 from dash.orgs.middleware import SetOrgMiddleware
 from dash.orgs.models import Org, OrgBackground, Invitation
@@ -70,6 +71,9 @@ class DashTest(SmartminTest):
 
         for story_image in StoryImage.objects.all():
             os.remove(story_image.image.path)
+
+        for dash_image in DashBlockImage.objects.all():
+            os.remove(dash_image.image.path)
 
     def create_org(self, subdomain, user):
 
@@ -1954,5 +1958,537 @@ class StoryTest(DashTest):
         self.assertEquals(StoryImage.objects.filter(story=story1).count(), 1)
 
         self.assertEquals(response.request['PATH_INFO'], reverse('stories.story_list'))
+
+        self.clear_uploads()
+
+class DashBlockTypeTest(DashTest):
+    def setUp(self):
+        super(DashBlockTypeTest, self).setUp()
+        self.uganda = self.create_org('uganda', self.admin)
+        self.nigeria = self.create_org('nigeria', self.admin)
+
+
+    def test_create_dashblocktype(self):
+        create_url = reverse('dashblocks.dashblocktype_create')
+
+        response = self.client.get(create_url, SERVER_NAME='uganda.ureport.io')
+        self.assertLoginRedirect(response)
+
+        self.login(self.admin)
+        response = self.client.get(create_url, SERVER_NAME='uganda.ureport.io')
+        self.assertLoginRedirect(response)
+
+        self.login(self.superuser)
+        response = self.client.get(create_url, SERVER_NAME='uganda.ureport.io')
+        self.assertEquals(response.status_code, 200)
+        self.assertTrue('form' in response.context)
+        fields = response.context['form'].fields
+        self.assertEquals(len(fields), 13)
+
+        response = self.client.post(create_url, dict(), SERVER_NAME='uganda.uerport.io')
+        self.assertTrue(response.context['form'].errors)
+        errors = response.context['form'].errors
+        self.assertEquals(len(errors), 2)
+        self.assertTrue('name' in errors)
+        self.assertTrue('slug' in errors)
+
+        post_data = dict(name='Test Pages', slug='test_pages', description='foo')
+        response = self.client.post(create_url, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
+        self.assertEquals(response.status_code, 200)
+        dashblocktype = DashBlockType.objects.get()
+        self.assertEquals(dashblocktype.name, 'Test Pages')
+        self.assertEquals(dashblocktype.slug, 'test_pages')
+        self.assertEquals(dashblocktype.description, 'foo')
+        self.assertFalse(dashblocktype.has_title)
+        self.assertFalse(dashblocktype.has_image)
+        self.assertFalse(dashblocktype.has_rich_text)
+        self.assertFalse(dashblocktype.has_summary)
+        self.assertFalse(dashblocktype.has_link)
+        self.assertFalse(dashblocktype.has_color)
+        self.assertFalse(dashblocktype.has_gallery)
+        self.assertFalse(dashblocktype.has_tags)
+        self.assertFalse(dashblocktype.has_video)
+
+        self.assertEquals(dashblocktype.__unicode__(), 'Test Pages')
+
+    def test_list_dashblocktype(self):
+        list_url = reverse('dashblocks.dashblocktype_list')
+
+        dashblock_type = DashBlockType.objects.create(name='Test', slug='test',
+                                                      description='foo',
+                                                      has_title=True,
+                                                      has_image=True,
+                                                      has_rich_text=True,
+                                                      has_summary=True,
+                                                      has_link=True,
+                                                      has_color=False,
+                                                      has_video=False,
+                                                      has_tags=False,
+                                                      has_gallery=False,
+                                                      created_by=self.admin,
+                                                      modified_by=self.admin)
+
+        response = self.client.get(list_url, SERVER_NAME='uganda.ureport.io')
+        self.assertLoginRedirect(response)
+
+        self.login(self.admin)
+        response = self.client.get(list_url, SERVER_NAME='uganda.ureport.io')
+        self.assertLoginRedirect(response)
+
+        self.login(self.superuser)
+        response = self.client.get(list_url, SERVER_NAME='uganda.ureport.io')
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(len(response.context['fields']), 3)
+        self.assertTrue('name' in response.context['fields'])
+        self.assertTrue('slug' in response.context['fields'])
+        self.assertTrue('description' in response.context['fields'])
+        self.assertTrue(dashblock_type in response.context['object_list'])
+
+    def test_update_dashblocktype(self):
+
+        dashblock_type = DashBlockType.objects.create(name='Test', slug='test',
+                                                      description='foo',
+                                                      has_title=True,
+                                                      has_image=True,
+                                                      has_rich_text=True,
+                                                      has_summary=True,
+                                                      has_link=True,
+                                                      has_color=False,
+                                                      has_video=False,
+                                                      has_tags=False,
+                                                      has_gallery=False,
+                                                      created_by=self.admin,
+                                                      modified_by=self.admin)
+
+        update_url = reverse('dashblocks.dashblocktype_update', args=[dashblock_type.pk])
+
+        response = self.client.get(update_url, SERVER_NAME='uganda.ureport.io')
+        self.assertLoginRedirect(response)
+
+        self.login(self.admin)
+        response = self.client.get(update_url, SERVER_NAME='uganda.ureport.io')
+        self.assertLoginRedirect(response)
+
+        self.login(self.superuser)
+        response = self.client.get(update_url, SERVER_NAME='uganda.ureport.io')
+        self.assertEquals(response.status_code, 200)
+        self.assertTrue('form' in response.context)
+        fields = response.context['form'].fields
+        self.assertEquals(len(fields), 14)
+
+        response = self.client.post(update_url, dict(), SERVER_NAME='uganda.ureport.io')
+        self.assertTrue(response.context['form'].errors)
+        errors = response.context['form'].errors
+        self.assertEquals(len(errors), 2)
+        self.assertTrue('name' in errors)
+        self.assertTrue('slug' in errors)
+
+        post_data = dict(is_active=True, name='foo', slug='bar', description='baz', has_rich_text=True, has_video=True)
+        response = self.client.post(update_url, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
+        self.assertFalse('form' in response.context)
+        updated_dashblock_type = DashBlockType.objects.get(pk=dashblock_type.pk)
+        self.assertEquals(updated_dashblock_type.name, 'foo')
+        self.assertEquals(updated_dashblock_type.slug, 'bar')
+        self.assertEquals(updated_dashblock_type.description, 'baz')
+        self.assertTrue(updated_dashblock_type.has_rich_text)
+        self.assertTrue(updated_dashblock_type.has_video)
+        self.assertFalse(updated_dashblock_type.has_title)
+        self.assertFalse(updated_dashblock_type.has_summary)
+        self.assertFalse(updated_dashblock_type.has_color)
+        self.assertFalse(updated_dashblock_type.has_tags)
+        self.assertFalse(updated_dashblock_type.has_gallery)
+
+
+class DashBlockTest(DashTest):
+    def setUp(self):
+        super(DashBlockTest, self).setUp()
+        self.uganda = self.create_org('uganda', self.admin)
+        self.nigeria = self.create_org('nigeria', self.admin)
+
+        self.type_foo = DashBlockType.objects.create(name='Foo', slug='foo',
+                                                      description='foo description',
+                                                      has_title=True,
+                                                      has_image=True,
+                                                      has_rich_text=True,
+                                                      has_summary=True,
+                                                      has_link=True,
+                                                      has_color=False,
+                                                      has_video=False,
+                                                      has_tags=True,
+                                                      has_gallery=False,
+                                                      created_by=self.admin,
+                                                      modified_by=self.admin)
+
+        self.type_bar = DashBlockType.objects.create(name='Bar', slug='bar',
+                                                     description='bar description',
+                                                     has_title=False,
+                                                     has_image=False,
+                                                     has_rich_text=False,
+                                                     has_summary=False,
+                                                     has_link=False,
+                                                     has_color=False,
+                                                     has_video=False,
+                                                     has_tags=True,
+                                                     has_gallery=False,
+                                                     created_by=self.admin,
+                                                     modified_by=self.admin)
+
+
+    def test_dashblock_model(self):
+        dashblock1 = DashBlock.objects.create(dashblock_type=self.type_foo,
+                                              org=self.uganda,
+                                              title='First',
+                                              content='First content',
+                                              summary='first summary',
+                                              created_by=self.admin,
+                                              modified_by=self.admin)
+
+        self.assertEquals(dashblock1.__unicode__(), 'First')
+
+
+        dashblock2 = DashBlock.objects.create(dashblock_type=self.type_bar,
+                                              org=self.uganda,
+                                              content='Bar content',
+                                              summary='bar summary here',
+                                              created_by=self.admin,
+                                              modified_by=self.admin)
+
+        self.assertEquals(dashblock2.__unicode__(), 'Bar - %d' % dashblock2.pk)
+
+        self.assertEquals(dashblock1.teaser(dashblock1.content, 1), 'First ...')
+        self.assertEquals(dashblock1.teaser(dashblock1.content, 10), 'First content')
+
+        self.assertEquals(dashblock1.long_content_teaser(), 'First content')
+        self.assertEquals(dashblock1.short_content_teaser(), 'First content')
+        self.assertEquals(dashblock1.long_summary_teaser(), 'first summary')
+        self.assertEquals(dashblock1.short_summary_teaser(), 'first summary')
+
+        dashblock1.content = 'ab ' * 150
+        dashblock1.summary = 'cd ' * 120
+        dashblock1.save()
+
+        self.assertEquals(dashblock1.long_content_teaser(), 'ab ' * 100 + "...")
+        self.assertEquals(dashblock1.short_content_teaser(), 'ab ' * 40 + "...")
+        self.assertEquals(dashblock1.long_summary_teaser(), 'cd ' * 100 + "...")
+        self.assertEquals(dashblock1.short_summary_teaser(), 'cd ' * 40 + "...")
+
+    def test_create_dashblock(self):
+        create_url = reverse('dashblocks.dashblock_create')
+
+        response = self.client.get(create_url, SERVER_NAME='uganda.ureport.io')
+        self.assertLoginRedirect(response)
+
+        self.login(self.admin)
+        response = self.client.get(create_url, SERVER_NAME='uganda.ureport.io')
+        self.assertEquals(response.status_code, 200)
+        self.assertTrue('form' in response.context)
+        fields = response.context['form'].fields
+        self.assertEquals(len(fields), 11)
+        self.assertTrue('dashblock_type' in fields)
+        self.assertTrue('title' in fields)
+        self.assertTrue('summary' in fields)
+        self.assertTrue('content' in fields)
+        self.assertTrue('image' in fields)
+        self.assertTrue('color' in fields)
+        self.assertTrue('link' in fields)
+        self.assertTrue('video_id' in fields)
+        self.assertTrue('tags' in fields)
+        self.assertTrue('priority' in fields)
+        self.assertTrue('loc' in fields)
+        self.assertFalse('gallery' in fields)
+        self.assertFalse('org' in fields)
+
+        self.assertEquals(fields['priority'].initial, 0)
+        self.assertIsNone(response.context['type'])
+
+        response = self.client.post(create_url, dict(), SERVER_NAME='uganda.ureport.io')
+        self.assertTrue(response.context['form'].errors)
+        self.assertTrue('dashblock_type' in response.context['form'].errors)
+        self.assertTrue('priority' in response.context['form'].errors)
+
+        post_data = dict(dashblock_type=self.type_bar.pk, priority=2, tags='   first SECOND four   ')
+        response = self.client.post(create_url, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
+
+        dashblock = DashBlock.objects.get()
+        self.assertEquals(dashblock.priority, 2)
+        self.assertEquals(dashblock.dashblock_type, self.type_bar)
+        self.assertEquals(dashblock.tags, ' first second four ')
+
+        self.assertEquals(response.request['PATH_INFO'], reverse('dashblocks.dashblock_list'))
+        self.assertEquals(response.request['QUERY_STRING'], "type=%d" % self.type_bar.pk)
+
+        response = self.client.get(create_url + "?type=%d" % self.type_bar.pk, SERVER_NAME='uganda.ureport.io')
+        self.assertEquals(response.status_code, 200)
+        self.assertTrue('form' in response.context)
+        fields = response.context['form'].fields
+        self.assertEquals(len(fields), 4)
+        self.assertTrue('tags' in fields)
+        self.assertTrue('priority' in fields)
+        self.assertTrue('loc' in fields)
+        self.assertTrue('content' in fields)
+        self.assertTrue(response.context['type'])
+        self.assertEquals(response.context['type'], self.type_bar)
+        #self.assertEquals(fields['priority'].initial, 3)
+
+        response = self.client.get(create_url + "?type=%d" % self.type_foo.pk, SERVER_NAME='uganda.ureport.io')
+        self.assertEquals(response.status_code, 200)
+        self.assertTrue('form' in response.context)
+        fields = response.context['form'].fields
+        self.assertEquals(len(fields), 8)
+        self.assertTrue('title' in fields)
+        self.assertTrue('summary' in fields)
+        self.assertTrue('content' in fields)
+        self.assertTrue('image' in fields)
+        self.assertTrue('link' in fields)
+        self.assertTrue('tags' in fields)
+        self.assertTrue('priority' in fields)
+        self.assertTrue('loc' in fields)
+        self.assertFalse('video_id' in fields)
+        self.assertFalse('color' in fields)
+        self.assertFalse('gallery' in fields)
+        self.assertFalse('org' in fields)
+        self.assertFalse('dashblock_type' in fields)
+
+        self.assertTrue(response.context['type'])
+        self.assertEquals(response.context['type'], self.type_foo)
+
+        post_data = dict(title='kigali', content='kacyiru', tags=' Gasabo KACYIRU Umujyi   ', priority=0)
+        response = self.client.post(create_url + "?type=%d" % self.type_foo.pk, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
+        new_dashblock = DashBlock.objects.get(title='kigali')
+        self.assertEquals(new_dashblock.dashblock_type, self.type_foo)
+        self.assertEquals(new_dashblock.org, self.uganda)
+        self.assertEquals(new_dashblock.tags, ' gasabo kacyiru umujyi ')
+        self.assertEquals(new_dashblock.title, 'kigali')
+        self.assertEquals(new_dashblock.content, 'kacyiru')
+
+    def test_update_dashblock(self):
+        dashblock1 = DashBlock.objects.create(dashblock_type=self.type_foo,
+                                              org=self.uganda,
+                                              title='First',
+                                              content='First content',
+                                              summary='first summary',
+                                              created_by=self.admin,
+                                              modified_by=self.admin)
+
+        update_url = reverse('dashblocks.dashblock_update', args=[dashblock1.pk])
+
+        response = self.client.get(update_url, SERVER_NAME='uganda.ureport.io')
+        self.assertLoginRedirect(response)
+
+        self.login(self.admin)
+        response = self.client.get(update_url, SERVER_NAME='uganda.ureport.io')
+
+        self.assertEquals(response.status_code, 200)
+        self.assertTrue('form' in response.context)
+        fields = response.context['form'].fields
+        self.assertEquals(len(fields), 9)
+        self.assertTrue('is_active' in fields)
+        self.assertTrue('title' in fields)
+        self.assertTrue('summary' in fields)
+        self.assertTrue('content' in fields)
+        self.assertTrue('image' in fields)
+        self.assertTrue('link' in fields)
+        self.assertTrue('priority' in fields)
+        self.assertTrue('loc' in fields)
+        self.assertTrue('tags' in fields)
+        self.assertFalse('video_id' in fields)
+        self.assertFalse('color' in fields)
+        self.assertFalse('gallery' in fields)
+        self.assertFalse('org' in fields)
+        self.assertFalse('dashblock_type' in fields)
+
+
+
+        self.assertTrue(response.context['type'])
+        self.assertEquals(response.context['type'], self.type_foo)
+
+        response = self.client.post(update_url, dict(), SERVER_NAME='uganda.ureport.io')
+        self.assertTrue('form' in response.context)
+        errors = response.context['form'].errors
+
+        self.assertTrue('priority' in response.context['form'].errors)
+
+        post_data = dict(title='kigali', content='kacyiru', tags=' Gasabo KACYIRU Umujyi   ', priority=0)
+        response = self.client.post(update_url, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
+        self.assertFalse('form' in response.context)
+        updated_dashblock = DashBlock.objects.get(pk=dashblock1.pk)
+        self.assertEquals(updated_dashblock.dashblock_type, self.type_foo)
+        self.assertEquals(updated_dashblock.org, self.uganda)
+        self.assertEquals(updated_dashblock.tags, ' gasabo kacyiru umujyi ')
+        self.assertEquals(updated_dashblock.title, 'kigali')
+        self.assertEquals(updated_dashblock.content, 'kacyiru')
+
+        self.type_foo.has_tags = False
+        self.type_foo.save()
+
+        response = self.client.get(update_url, SERVER_NAME='uganda.ureport.io')
+
+        self.assertEquals(response.status_code, 200)
+        self.assertTrue('form' in response.context)
+        fields = response.context['form'].fields
+        self.assertEquals(len(fields), 8)
+        self.assertTrue('is_active' in fields)
+        self.assertTrue('title' in fields)
+        self.assertTrue('summary' in fields)
+        self.assertTrue('content' in fields)
+        self.assertTrue('image' in fields)
+        self.assertTrue('link' in fields)
+        self.assertTrue('priority' in fields)
+        self.assertTrue('loc' in fields)
+        self.assertFalse('dashblock_type' in fields)
+        self.assertFalse('video_id' in fields)
+        self.assertFalse('color' in fields)
+        self.assertFalse('gallery' in fields)
+        self.assertFalse('org' in fields)
+        self.assertFalse('tags' in fields)
+
+
+    def test_list_dashblock(self):
+        list_url = reverse('dashblocks.dashblock_list')
+
+        dashblock1 = DashBlock.objects.create(dashblock_type=self.type_foo,
+                                              org=self.uganda,
+                                              title='First',
+                                              content='First content',
+                                              summary='first summary',
+                                              created_by=self.admin,
+                                              modified_by=self.admin)
+
+
+        dashblock2 = DashBlock.objects.create(dashblock_type=self.type_bar,
+                                              org=self.uganda,
+                                              content='Bar content',
+                                              summary='bar summary here',
+                                              created_by=self.admin,
+                                              modified_by=self.admin)
+
+        dashblock3 = DashBlock.objects.create(dashblock_type=self.type_foo,
+                                              org=self.nigeria,
+                                              title='third',
+                                              content='third content',
+                                              summary='third summary',
+                                              created_by=self.admin,
+                                              modified_by=self.admin)
+
+        response = self.client.get(list_url, SERVER_NAME='uganda.ureport.io')
+        self.assertLoginRedirect(response)
+
+        self.login(self.admin)
+        response = self.client.get(list_url, SERVER_NAME='uganda.ureport.io')
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(len(response.context['object_list']), 2)
+        self.assertTrue(dashblock1 in response.context['object_list'])
+        self.assertTrue(dashblock2 in response.context['object_list'])
+        self.assertFalse(dashblock3 in response.context['object_list'])
+        self.assertEquals(len(response.context['fields']), 4)
+        self.assertTrue('tags' in response.context['fields'])
+        self.assertTrue('title' in response.context['fields'])
+        self.assertTrue('dashblock_type' in response.context['fields'])
+        self.assertTrue('priority' in response.context['fields'])
+
+        self.assertEquals(len(response.context['types']), 2)
+        self.assertTrue(self.type_foo in response.context['types'])
+        self.assertTrue(self.type_bar in response.context['types'])
+
+        response = self.client.get(list_url + "?type=%d" % self.type_bar.pk, SERVER_NAME='uganda.ureport.io')
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(len(response.context['object_list']), 1)
+        self.assertFalse(dashblock1 in response.context['object_list'])
+        self.assertTrue(dashblock2 in response.context['object_list'])
+        self.assertFalse(dashblock3 in response.context['object_list'])
+
+        self.assertTrue(unicode(dashblock2) in response.content)
+
+        self.assertEquals(len(response.context['fields']), 4)
+        self.assertTrue('tags' in response.context['fields'])
+        self.assertTrue('title' in response.context['fields'])
+        self.assertTrue('dashblock_type' in response.context['fields'])
+        self.assertTrue('priority' in response.context['fields'])
+        self.assertEquals(len(response.context['types']), 2)
+        self.assertTrue(self.type_foo in response.context['types'])
+        self.assertTrue(self.type_bar in response.context['types'])
+
+        self.type_bar.has_tags = False
+        self.type_bar.save()
+
+        response = self.client.get(list_url + "?type=%d" % self.type_bar.pk, SERVER_NAME='uganda.ureport.io')
+        self.assertEquals(len(response.context['fields']), 3)
+        self.assertFalse('tags' in response.context['fields'])
+        self.assertTrue('title' in response.context['fields'])
+        self.assertTrue('dashblock_type' in response.context['fields'])
+        self.assertTrue('priority' in response.context['fields'])
+
+
+        self.type_bar.is_active = False
+        self.type_bar.save()
+
+        response = self.client.get(list_url + "?type=%d" % self.type_bar.pk, SERVER_NAME='uganda.ureport.io')
+        self.assertEquals(response.status_code, 200)
+        self.assertFalse(response.context['object_list'])
+        self.assertFalse(dashblock1 in response.context['object_list'])
+        self.assertFalse(dashblock2 in response.context['object_list'])
+        self.assertFalse(dashblock3 in response.context['object_list'])
+        self.assertEquals(len(response.context['types']), 1)
+        self.assertTrue(self.type_foo in response.context['types'])
+        self.assertFalse(self.type_bar in response.context['types'])
+
+        response = self.client.get(list_url + "?slug=%s" % self.type_foo.slug, SERVER_NAME='uganda.ureport.io')
+        self.assertEquals(len(response.context['object_list']), 1)
+        self.assertTrue(dashblock1 in response.context['object_list'])
+        self.assertFalse(dashblock2 in response.context['object_list'])
+        self.assertFalse(dashblock3 in response.context['object_list'])
+        self.assertEquals(response.context['filtered_type'], self.type_foo)
+        self.assertEquals(len(response.context['types']), 1)
+        self.assertTrue(self.type_foo in response.context['types'])
+        self.assertFalse(self.type_bar in response.context['types'])
+
+
+    def test_dashblock_image(self):
+        dashblock1 = DashBlock.objects.create(dashblock_type=self.type_foo,
+                                              org=self.uganda,
+                                              title='First',
+                                              content='First content',
+                                              summary='first summary',
+                                              created_by=self.admin,
+                                              modified_by=self.admin)
+
+        create_url = reverse('dashblocks.dashblockimage_create') + "?dashblock=%d" % dashblock1.pk
+
+        response = self.client.get(create_url, SERVER_NAME='uganda.ureport.io')
+        self.assertLoginRedirect(response)
+
+        self.login(self.superuser)
+        response = self.client.get(create_url, SERVER_NAME='uganda.ureport.io')
+        self.assertTrue('form' in response.context)
+
+        response = self.client.post(create_url, dict(), SERVER_NAME='uganda.ureport.io')
+        self.assertTrue(response.context['form'].errors)
+
+        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "r")
+        post_data = dict(dashblock=dashblock1.pk, image=upload, caption='image caption')
+
+        response = self.client.post(create_url, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
+        dashblock_image = DashBlockImage.objects.get()
+
+        self.assertEquals(dashblock_image.dashblock, dashblock1)
+        self.assertEquals(dashblock_image.caption, 'image caption')
+
+        self.assertEquals(response.request['PATH_INFO'], reverse('dashblocks.dashblock_update', args=[dashblock1.pk]))
+
+        update_url = reverse('dashblocks.dashblockimage_update', args=[dashblock_image.pk])
+
+        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "r")
+        post_data = dict(dashblock=dashblock1.pk, image=upload, caption='image updated caption')
+        response = self.client.post(update_url, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
+
+        self.assertEquals(DashBlockImage.objects.count(), 1)
+        updated_block_image = DashBlockImage.objects.get(pk=dashblock_image.pk)
+        self.assertEquals(updated_block_image.caption, 'image updated caption')
+        self.assertEquals(response.request['PATH_INFO'], reverse('dashblocks.dashblock_update', args=[dashblock1.pk]))
+
+        list_url = reverse('dashblocks.dashblockimage_list')
+        response = self.client.get(list_url, SERVER_NAME='uganda.ureport.io')
+        self.assertEquals(len(response.context['object_list']), 1)
+        self.assertTrue(updated_block_image in response.context['object_list'])
 
         self.clear_uploads()

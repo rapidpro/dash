@@ -42,6 +42,10 @@ INSTALLED_APPS = (
     'django_nose',
 
     'guardian',
+
+    # thumbnail
+    'sorl.thumbnail',
+
     'smartmin',
     'smartmin.users',
 
@@ -55,7 +59,9 @@ INSTALLED_APPS = (
     #dash
     'dash.orgs',
     'dash.categories',
+    'dash.dashblocks',
     'dash.stories',
+
 
 )
 
@@ -169,6 +175,8 @@ STATICFILES_FINDERS = (
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
+    'hamlpy.template.loaders.HamlPyFilesystemLoader',
+    'hamlpy.template.loaders.HamlPyAppDirectoriesLoader',
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
 #     'django.template.loaders.eggs.Loader',
@@ -226,6 +234,7 @@ GROUP_PERMISSIONS = {
     "Administrators": (
         'categories.category.*',
         'categories.categoryimage.*',
+        'dashblocks.dashblock.*',
         'users.user_profile',
         'orgs.org_home',
         'orgs.org_edit',

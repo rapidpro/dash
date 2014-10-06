@@ -7,6 +7,7 @@ urlpatterns = patterns('',
     # url(r'^blog/', include('blog.urls')),
     url(r'^manage/', include('dash.orgs.urls')),
     url(r'^manage/', include('dash.stories.urls')),
+    url(r'^manage/', include('dash.dashblocks.urls')),
     url(r'^manage/', include('dash.categories.urls')),
     url(r'^users/', include('dash.users.urls')),
 

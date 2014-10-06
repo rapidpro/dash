@@ -8,3 +8,5 @@ xlutils
 Pillow
 mock
 requests
+hamlpy
+sorl-thumbnail==11.12.1b
