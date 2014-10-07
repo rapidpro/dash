@@ -18,7 +18,7 @@ setup(
                         'sorl-thumbnail==11.12.1b'],
     dependency_links = ['http://github.com/nyaruka/smartmin.git@to_django_1_7#egg=smartmin-dev',],
     description = "",
-    long_description = open('README.rst').read(),
+    long_description = open('README.md').read(),
     author = 'Nyaruka Team',
     author_email = 'code@nyaruka.com',
     url = 'http://www.nyaruka.com/#open',
