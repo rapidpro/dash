@@ -26,7 +26,7 @@ def populate_category_images(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('categories', '0002_categoryimage'),
+        ('categories', '0003_categoryimage'),
     ]
 
     operations = [

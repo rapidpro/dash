@@ -13,6 +13,7 @@ from smartmin.tests import SmartminTest
 from dash.api import API
 from dash.categories.models import Category, CategoryImage
 from dash.dashblocks.models import DashBlockType, DashBlock, DashBlockImage
+from dash.dashblocks.templatetags.dashblocks import load_qbs
 from dash.orgs.context_processors import GroupPermWrapper
 from dash.orgs.middleware import SetOrgMiddleware
 from dash.orgs.models import Org, OrgBackground, Invitation
@@ -60,6 +61,10 @@ class DashTest(SmartminTest):
         self.superuser = User.objects.create_superuser(username="super", email="super@user.com", password="super")
 
         self.admin = self.create_user("Administrator")
+
+        # Clear DashBlockType from old migrations
+        DashBlockType.objects.all().delete()
+
 
     def clear_uploads(self):
         import os
@@ -2492,3 +2497,81 @@ class DashBlockTest(DashTest):
         self.assertTrue(updated_block_image in response.context['object_list'])
 
         self.clear_uploads()
+
+    def test_template_tags(self):
+        dashblock1 = DashBlock.objects.create(dashblock_type=self.type_foo,
+                                              org=self.uganda,
+                                              title='First',
+                                              content='First content',
+                                              summary='first summary',
+                                              created_by=self.admin,
+                                              modified_by=self.admin)
+
+
+        dashblock2 = DashBlock.objects.create(dashblock_type=self.type_bar,
+                                              org=self.uganda,
+                                              content='Bar content',
+                                              summary='bar summary here',
+                                              created_by=self.admin,
+                                              modified_by=self.admin)
+
+        dashblock3 = DashBlock.objects.create(dashblock_type=self.type_foo,
+                                              org=self.nigeria,
+                                              title='third',
+                                              content='third content',
+                                              summary='third summary',
+                                              created_by=self.admin,
+                                              modified_by=self.admin)
+
+        context = dict()
+        self.assertEquals(load_qbs(context, None, ''), '')
+        self.assertFalse(context)
+
+        self.assertEquals(load_qbs(context, self.uganda, 'invalid_slug'),
+                          getattr(settings, 'DASHBLOCK_STRING_IF_INVALID', '<b><font color="red">DashBlockType with slug: %s not found</font></b>') % 'invalid_slug')
+        self.assertFalse(context)
+
+        self.assertEquals(load_qbs(context, self.uganda, 'foo'), '')
+        self.assertTrue(context)
+        self.assertTrue('foo' in context)
+        self.assertTrue(dashblock1 in context['foo'])
+        self.assertFalse(dashblock2 in context['foo'])
+        self.assertFalse(dashblock3 in context['foo'])
+
+        dashblock4 = DashBlock.objects.create(dashblock_type=self.type_foo,
+                                              org=self.uganda,
+                                              title='Fourth',
+                                              content='Fourth content',
+                                              summary='fourth summary',
+                                              created_by=self.admin,
+                                              modified_by=self.admin)
+
+        dashblock1.tags = ' kigali gasabo '
+        dashblock1.save()
+
+        dashblock4.tags = ' kigali kacyiru '
+        dashblock4.save()
+
+        self.assertEquals(load_qbs(context, self.uganda, 'foo'), '')
+        self.assertTrue(context)
+        self.assertTrue('foo' in context)
+        self.assertTrue(dashblock1 in context['foo'])
+        self.assertFalse(dashblock2 in context['foo'])
+        self.assertFalse(dashblock3 in context['foo'])
+        self.assertTrue(dashblock4 in context['foo'])
+
+        self.assertEquals(load_qbs(context, self.uganda, 'foo', 'kigali'), '')
+        self.assertTrue(context)
+        self.assertTrue('foo' in context)
+        self.assertTrue(dashblock1 in context['foo'])
+        self.assertFalse(dashblock2 in context['foo'])
+        self.assertFalse(dashblock3 in context['foo'])
+        self.assertTrue(dashblock4 in context['foo'])
+
+        self.assertEquals(load_qbs(context, self.uganda, 'foo', 'gasabo'), '')
+        self.assertTrue(context)
+        self.assertTrue('foo' in context)
+        self.assertTrue(dashblock1 in context['foo'])
+        self.assertFalse(dashblock2 in context['foo'])
+        self.assertFalse(dashblock3 in context['foo'])
+        self.assertFalse(dashblock4 in context['foo'])
