@@ -4,4 +4,4 @@
 
 {% trans "Click this link to join" %}
 {{org.name}}
-      https://{{ org.subdomain }}.ureport.in/org/join/{{invitation.secret}}/
+      {{ host }}/org/join/{{invitation.secret}}/

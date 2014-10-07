@@ -43,6 +43,9 @@ INSTALLED_APPS = (
 
     'guardian',
 
+    # compress our CSS and js
+    'compressor',
+
     # thumbnail
     'sorl.thumbnail',
 
@@ -244,15 +247,29 @@ GROUP_PERMISSIONS = {
 
     ),
     "Editors": (
-        'users.user_profile',
+        'categories.category.*',
+        'categories.categoryimage.*',
+        'dashblocks.dashblock.*',
+        'dashblocks.dashblocktype.*',
+        'news.newsitem.*',
+        'news.video.*',
         'orgs.org_home',
+        'orgs.org_profile',
+        'polls.poll.*',
+        'polls.pollcategory.*',
+        'polls.pollimage.*',
+        'polls.featuredresponse.*',
+        'stories.story.*',
+        'stories.storyimage.*',
+        'users.user_profile',
     ),
     "Viewers": [],
 }
 
 ANONYMOUS_USER_ID = -1
 LOGIN_URL = '/users/login/'
-LOGIN_REDIRECT_URL = "/"
+LOGIN_REDIRECT_URL = "/manage/org/choose/"
+LOGOUT_REDIRECT_URL = "/"
 
 #-----------------------------------------------------------------------------------
 # Django-Nose config

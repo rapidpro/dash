@@ -665,16 +665,15 @@ class OrgTest(DashTest):
         self.assertEquals(200, response.status_code)
 
         # we have 12 fields in the form including 9 checkboxes for the three users, an emails field a user group field and 'loc' field.
-        self.assertEquals(12, len(response.context['form'].fields))
+        self.assertEquals(9, len(response.context['form'].fields))
         self.assertTrue('emails' in response.context['form'].fields)
         self.assertTrue('user_group' in response.context['form'].fields)
         for user in [self.editor, self.user, self.admin]:
             self.assertTrue("administrators_%d" % user.pk in response.context['form'].fields)
             self.assertTrue("editors_%d" % user.pk in response.context['form'].fields)
-            self.assertTrue("viewers_%d" % user.pk in response.context['form'].fields)
 
         self.assertFalse(response.context['form'].fields['emails'].initial)
-        self.assertEquals('V', response.context['form'].fields['user_group'].initial)
+        self.assertEquals('E', response.context['form'].fields['user_group'].initial)
 
         post_data = dict()
 
@@ -769,7 +768,7 @@ class OrgTest(DashTest):
             mock.return_value = None
 
             response = self.client.get(editor_join_url, follow=True, SERVER_NAME="kenya.ureport.io")
-            self.assertEquals(response.request['PATH_INFO'], settings.LOGIN_REDIRECT_URL)
+            self.assertEquals(response.request['PATH_INFO'], '/')
 
         response = self.client.get(editor_join_url, SERVER_NAME="kenya.ureport.io")
         self.assertEquals(302, response.status_code)
@@ -810,7 +809,7 @@ class OrgTest(DashTest):
             mock.return_value = None
 
             response = self.client.get(admin_create_login_url, follow=True, SERVER_NAME="kenya.ureport.io")
-            self.assertEquals(response.request['PATH_INFO'], settings.LOGIN_REDIRECT_URL)
+            self.assertEquals(response.request['PATH_INFO'], '/')
 
         response = self.client.get(admin_create_login_url, SERVER_NAME="kenya.ureport.io")
         self.assertEquals(302, response.status_code)

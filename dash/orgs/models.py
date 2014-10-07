@@ -284,13 +284,13 @@ class Invitation(SmartModel):
         if not self.email:
             return
 
-
         subject = _("%s Invitation") % self.org.name
         template = "orgs/email/invitation_email"
         to_email = self.email
 
         context = dict(org=self.org, now=timezone.now(), invitation=self)
         context['subject'] = subject
+        context['host'] = settings.SITE_HOST_PATTERN % self.org.subdomain
 
         send_dash_email(to_email, subject, template, context)
 

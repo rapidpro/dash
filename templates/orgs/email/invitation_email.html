@@ -5,10 +5,10 @@
 {% block body %}
 
 <p>
-  {% blocktrans with org_name=org.name org_subdomain=org.subdomain secret=invitation.secret %}
+  {% blocktrans with org_name=org.name host=host secret=invitation.secret %}
       You've been invited to join {{ org_name }}.
       <br/>
-      To accept the invitation, <a href='https://{{ org_subdomain }}.report.in/org/join/{{secret}}/'>click here</a>.
+      To accept the invitation, <a href='{{ host }}/org/join/{{secret}}/'>click here</a>.
   {% endblocktrans %}
 </p>
 

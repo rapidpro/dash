@@ -3,6 +3,7 @@
 coverage
 django-nose
 django-celery
+django-compressor
 celery-with-redis
 xlutils
 Pillow

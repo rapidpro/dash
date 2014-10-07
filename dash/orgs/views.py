@@ -45,10 +45,7 @@ class OrgPermsMixin(object):
             return True
 
         if self.get_user().is_anonymous():
-            if Group.objects.get(name="Viewers").permissions.filter(content_type__app_label=app_label, codename=codename):
-                return True
-            else:
-                return False
+            return False
 
         if self.org:
             if self.get_user().get_org_group().permissions.filter(content_type__app_label=app_label, codename=codename):
@@ -296,8 +293,8 @@ class OrgCRUDL(SmartCRUDL):
 
         class InviteForm(forms.ModelForm):
             emails = forms.CharField(label=_("Invite people to your organization"), required=False)
-            user_group = forms.ChoiceField(choices=(('A', _("Administrators")), ('E', _("Editors")), ('V', _("Viewers"))),
-                                           required=True, initial='V', label=_("User group"))
+            user_group = forms.ChoiceField(choices=(('A', _("Administrators")), ('E', _("Editors"))),
+                                           required=True, initial='E', label=_("User group"))
 
             def clean_emails(self):
                 emails = self.cleaned_data['emails'].lower().strip()
@@ -318,7 +315,7 @@ class OrgCRUDL(SmartCRUDL):
         form_class = InviteForm
         success_url = "@orgs.org_home"
         success_message = ""
-        GROUP_LEVELS = ('administrators', 'editors', 'viewers')
+        GROUP_LEVELS = ('administrators', 'editors')
 
         def derive_title(self):
             return _("Manage %(name)s Accounts") % {'name':self.get_object().name}
@@ -344,8 +341,6 @@ class OrgCRUDL(SmartCRUDL):
                     assigned_users = self.get_object().get_org_admins()
                 if grp_level == 'editors':
                     assigned_users = self.get_object().get_org_editors()
-                if grp_level == 'viewers':
-                    assigned_users = self.get_object().get_org_viewers()
 
                 for obj in assigned_users:
                     key = "%s_%d" % (grp_level, obj.id)
@@ -405,8 +400,6 @@ class OrgCRUDL(SmartCRUDL):
                     self.get_object().administrators.add(user)
             for user in self.get_object().get_org_editors():
                 self.get_object().editors.remove(user)
-            for user in self.get_object().get_org_viewers():
-                self.get_object().viewers.remove(user)
 
             # now update the org accounts
             for field in self.form.fields:
@@ -420,8 +413,6 @@ class OrgCRUDL(SmartCRUDL):
                             self.get_object().administrators.add(user)
                         if user_type == 'editors':
                             self.get_object().editors.add(user)
-                        if user_type == 'viewers':
-                            self.get_object().viewers.add(user)
 
             # update our org users after we've removed them
             self.org_users = self.get_object().get_org_users()
@@ -457,7 +448,7 @@ class OrgCRUDL(SmartCRUDL):
             org = self.get_object()
             if not org:
                 messages.info(request, _("Your invitation link is invalid. Please contact your organization administrator."))
-                return HttpResponseRedirect(settings.LOGIN_REDIRECT_URL)
+                return HttpResponseRedirect('/')
 
             elif request.org != org:
 
@@ -485,8 +476,6 @@ class OrgCRUDL(SmartCRUDL):
                 obj.administrators.add(user)
             elif invitation.user_group == 'E':
                 obj.editors.add(user)
-            else:
-                obj.viewers.add(user)
 
             # make the invitation inactive
             invitation.is_active = False
@@ -542,7 +531,7 @@ class OrgCRUDL(SmartCRUDL):
             org = self.get_object()
             if not org:
                 messages.info(request, _("Your invitation link has expired. Please contact your organization administrator."))
-                return HttpResponseRedirect(settings.LOGIN_REDIRECT_URL)
+                return HttpResponseRedirect('/')
             elif request.org != org:
 
                 redirect_path = settings.SITE_HOST_PATTERN % org.subdomain + reverse('orgs.org_join', args=[secret])
@@ -564,8 +553,6 @@ class OrgCRUDL(SmartCRUDL):
                     org.administrators.add(self.request.user)
                 elif invitation.user_group == 'E':
                     org.editors.add(self.request.user)
-                else:
-                    org.viewers.add(self.request.user)
 
                 # make the invitation inactive
                 invitation.is_active = False
