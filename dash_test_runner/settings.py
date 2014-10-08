@@ -340,13 +340,6 @@ import os
 
 PROJECT_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)))
 RESOURCES_DIR = os.path.join(PROJECT_DIR, '../resources')
-
-LOCALE_PATHS = (os.path.join(PROJECT_DIR, '../locale'),)
-RESOURCES_DIR = os.path.join(PROJECT_DIR, '../resources')
-FIXTURE_DIRS = (os.path.join(PROJECT_DIR, '../fixtures'),)
 TESTFILES_DIR = os.path.join(PROJECT_DIR, '../testfiles')
-TEMPLATE_DIRS = (os.path.join(PROJECT_DIR, '../templates'),)
-STATICFILES_DIRS = (os.path.join(PROJECT_DIR, '../static'), os.path.join(PROJECT_DIR, '../media'), )
-STATIC_ROOT = os.path.join(PROJECT_DIR, '../sitestatic')
 MEDIA_ROOT = os.path.join(PROJECT_DIR, '../media')
 MEDIA_URL = "/media/"

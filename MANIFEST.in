@@ -1,5 +1,7 @@
 include README.rst
 include LICENSE
-recursive-include static *
-recursive-include templates *
+recursive-include dash/categories/templates *
+recursive-include dash/dashblocks/templates *
+recursive-include dash/orgs/templates *
+recursive-include dash/stories/templates *
 recursive-include testfiles *
