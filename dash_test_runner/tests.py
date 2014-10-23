@@ -265,6 +265,12 @@ class OrgTest(DashTest):
             self.assertEquals(self.org.get_most_active_regions(), ['LABEL_2', 'LABEL_3', 'LABEL_1'])
             mock.assert_called_once_with('Gender', dict(location='State'))
 
+        with patch('dash.api.API.get_contact_field_results') as mock:
+            mock.return_value = None
+
+            self.assertEquals(self.org.get_most_active_regions(), [])
+            mock.assert_called_once_with('Gender', dict(location='State'))
+
     def test_organize_categories_data(self):
 
         self.org.set_config('born_label', "Born")
