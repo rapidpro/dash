@@ -4,4 +4,4 @@
 
 {% trans "Click this link to join" %}
 {{org.name}}
-      {{ host }}/org/join/{{invitation.secret}}/
+      {{ host }}{% url 'orgs.org_join' invitation.secret %}

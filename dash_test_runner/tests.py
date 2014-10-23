@@ -1040,9 +1040,6 @@ class APITest(DashTest):
                                                               'Accept': 'application/json',
                                                               'Authorization': 'Token %s' % self.org.api_token})
 
-
-
-
         with patch('requests.get') as mock_request_get:
             mock_request_get.return_value = MockResponse(404, json.dumps(dict(error="Not Found")))
 
@@ -1053,6 +1050,15 @@ class APITest(DashTest):
                                                               'Accept': 'application/json',
                                                               'Authorization': 'Token %s' % self.org.api_token})
 
+        with patch('requests.get') as mock_request_get:
+            mock_request_get.return_value = MockResponse(200, 'invalid_json')
+
+            self.assertIsNone(self.api.get_group('group_name'))
+            mock_request_get.assert_called_once_with('%s/api/v1/groups.json' % settings.API_ENDPOINT,
+                                                     params={'name': 'group_name'},
+                                                     headers={'Content-type': 'application/json',
+                                                              'Accept': 'application/json',
+                                                              'Authorization': 'Token %s' % self.org.api_token})
 
     @patch('requests.models.Response', MockResponse)
     def test_get_ruleset_results(self):
@@ -1080,6 +1086,30 @@ class APITest(DashTest):
 
         with patch('requests.get') as mock_request_get:
             mock_request_get.return_value = MockResponse(404, json.dumps(dict(error="Not Found")))
+
+            self.assertIsNone(self.api.get_ruleset_results(101))
+            mock_request_get.assert_called_once_with('%s/api/v1/results.json?ruleset=101&segment=null' % settings.API_ENDPOINT,
+                                                     headers={'Content-type': 'application/json',
+                                                              'Accept': 'application/json',
+                                                              'Authorization': 'Token %s' % self.org.api_token})
+
+            self.assertIsNone(self.api.get_ruleset_results(101, dict(location='State')))
+            mock_request_get.assert_called_with('%s/api/v1/results.json?ruleset=101&segment=%s' % (settings.API_ENDPOINT, urllib.quote(unicode(json.dumps(dict(location='LGA'))).encode('utf8'))) ,
+                                                     headers={'Content-type': 'application/json',
+                                                              'Accept': 'application/json',
+                                                              'Authorization': 'Token %s' % self.org.api_token})
+
+            self.assertIsNone(self.api.get_ruleset_results(101, dict(location='District')))
+            mock_request_get.assert_called_with('%s/api/v1/results.json?ruleset=101&segment=%s' % (settings.API_ENDPOINT, urllib.quote(unicode(json.dumps(dict(location='Province'))).encode('utf8'))) ,
+                                                     headers={'Content-type': 'application/json',
+                                                              'Accept': 'application/json',
+                                                              'Authorization': 'Token %s' % self.org.api_token})
+
+            self.assertEquals(mock_request_get.call_count, 3)
+
+
+        with patch('requests.get') as mock_request_get:
+            mock_request_get.return_value = MockResponse(200, 'invalid_json')
 
             self.assertIsNone(self.api.get_ruleset_results(101))
             mock_request_get.assert_called_once_with('%s/api/v1/results.json?ruleset=101&segment=null' % settings.API_ENDPOINT,
@@ -1158,6 +1188,15 @@ class APITest(DashTest):
                                                               'Accept': 'application/json',
                                                               'Authorization': 'Token %s' % self.org.api_token})
 
+        with patch('requests.get') as mock_request_get:
+            mock_request_get.return_value = MockResponse(200, 'invalid_json')
+
+            self.assertIsNone(self.api.get_contact_field_results('contact_field_name'))
+            mock_request_get.assert_called_once_with('%s/api/v1/results.json?contact_field=contact_field_name&segment=null' % settings.API_ENDPOINT,
+                                                     headers={'Content-type': 'application/json',
+                                                              'Accept': 'application/json',
+                                                              'Authorization': 'Token %s' % self.org.api_token})
+
     @patch('requests.models.Response', MockResponse)
     def test_get_flows(self):
         with patch('requests.get') as mock_request_get:
@@ -1212,6 +1251,15 @@ class APITest(DashTest):
                                                                'Accept': 'application/json',
                                                                'Authorization': 'Token %s' % self.org.api_token})
 
+        with patch('requests.get') as mock_request_get:
+            mock_request_get.return_value = MockResponse(200, 'invalid_json')
+
+            self.assertEquals(self.api.get_flows(), [])
+
+            mock_request_get.assert_called_once_with('%s/api/v1/flows.json' % settings.API_ENDPOINT,
+                                                      headers={'Content-type': 'application/json',
+                                                               'Accept': 'application/json',
+                                                               'Authorization': 'Token %s' % self.org.api_token})
 
     @patch('requests.models.Response', MockResponse)
     def test_get_flow(self):
@@ -1338,6 +1386,25 @@ class APITest(DashTest):
                                                                          ])
 
             self.assertEquals(self.api.build_boundaries(), boundary_cached)
+
+
+        with patch('requests.get') as mock_request_get:
+            mock_request_get.side_effect = [MockResponse(200,
+                                                         'invalid_json'
+                                                         ),
+                                            MockResponse(200,
+                                                         self.read_json('boundaries_page_2')
+                                                         )]
+
+            boundary_cached = dict()
+            boundary_cached['geojson:%d' % self.org.id] = dict(type='FeatureCollection',
+                                                               features=[])
+
+            self.assertEquals(self.api.build_boundaries(), boundary_cached)
+            mock_request_get.assert_called_once_with('%s/api/v1/boundaries.json' % settings.API_ENDPOINT,
+                                                     headers={'Content-type': 'application/json',
+                                                     'Accept': 'application/json',
+                                                     'Authorization': 'Token %s' % self.org.api_token})
 
 
         with patch('requests.get') as mock_request_get:

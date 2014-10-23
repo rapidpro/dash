@@ -9,7 +9,6 @@ import requests
 import time
 
 
-# level constants
 COUNTRY = 0
 STATE = 1
 DISTRICT = 2
@@ -45,15 +44,20 @@ class API(object):
                                              'Accept': 'application/json',
                                              'Authorization': 'Token %s' % self.org.api_token})
 
-            result = response.json()
-            if response.status_code == 200 and 'results' in result and len(result['results']) > 0:
-                group = result['results'][0]
-                cache.set(cache_key, group, GROUP_CACHE_TIME)
+            try:
+                result = response.json()
+                if response.status_code == 200 and 'results' in result and len(result['results']) > 0:
+                    group = result['results'][0]
+                    cache.set(cache_key, group, GROUP_CACHE_TIME)
 
-                if settings.DEBUG: # pragma: no cover
-                    print "- got group %s in %f" % (name, time.time() - start)
+                    if settings.DEBUG: # pragma: no cover
+                        print "- got group %s in %f" % (name, time.time() - start)
 
-            else:
+                else:
+                    cache.delete(cache_key)
+                    if settings.DEBUG: # pragma: no cover
+                        print "- *** FAILED *** to get group %s" % name
+            except ValueError:
                 cache.delete(cache_key)
                 if settings.DEBUG: # pragma: no cover
                     print "- *** FAILED *** to get group %s" % name
@@ -102,16 +106,18 @@ class API(object):
                                     headers={'Content-type': 'application/json',
                                              'Accept': 'application/json',
                                              'Authorization': 'Token %s' % self.org.api_token})
+            try:
+                response_json = response.json()
+                if response.status_code == 200 and 'results' in response_json:
+                    for boundary in response_json['results']:
+                        boundaries.append(boundary)
 
-            response_json = response.json()
+                if 'next' in response_json:
+                    next = response_json['next']
+                else:
+                    next = None
 
-            if response.status_code == 200 and 'results' in response_json:
-                for boundary in response_json['results']:
-                    boundaries.append(boundary)
-
-            if 'next' in response_json:
-                next = response_json['next']
-            else:
+            except ValueError:
                 next = None
 
         # we now build our cached versions of level 1 (all states) and level 2 (all districts for each state) geojson
@@ -174,15 +180,21 @@ class API(object):
                                              'Accept': 'application/json',
                                              'Authorization': 'Token %s' % self.org.api_token})
 
-            response_json = response.json()
+            try:
+                response_json = response.json()
 
-            if response.status_code == 200 and 'results' in response_json:
-                results = response_json['results']
-                cache.set(cache_key, results, RESULT_CACHE_TIME)
+                if response.status_code == 200 and 'results' in response_json:
+                    results = response_json['results']
+                    cache.set(cache_key, results, RESULT_CACHE_TIME)
 
-                if settings.DEBUG: # pragma: no cover
-                    print "- got ruleset results for %d in %f" % (ruleset_id, time.time() - start)
-            else:
+                    if settings.DEBUG: # pragma: no cover
+                        print "- got ruleset results for %d in %f" % (ruleset_id, time.time() - start)
+                else:
+                    cache.delete(cache_key)
+                    if settings.DEBUG: # pragma: no cover
+                        print "- *** FAILED *** to get ruleset results for %d" % ruleset_id
+
+            except ValueError:
                 cache.delete(cache_key)
                 if settings.DEBUG: # pragma: no cover
                     print "- *** FAILED *** to get ruleset results for %d" % ruleset_id
@@ -212,21 +224,28 @@ class API(object):
                                              'Accept': 'application/json',
                                              'Authorization': 'Token %s' % self.org.api_token})
 
-            response_json = response.json()
+            try:
+                response_json = response.json()
 
-            if response.status_code == 200 and 'results' in response_json:
-                results = response_json['results']
-                cache.set(cache_key, results, CONTACT_RESULT_CACHE_TIME)
+                if response.status_code == 200 and 'results' in response_json:
+                    results = response_json['results']
+                    cache.set(cache_key, results, CONTACT_RESULT_CACHE_TIME)
 
-                if settings.DEBUG: # pragma: no cover
-                    print "- got contact field results for %s in %f" % (contact_field_label, time.time() - start)
+                    if settings.DEBUG: # pragma: no cover
+                        print "- got contact field results for %s in %f" % (contact_field_label, time.time() - start)
 
-            else:
+                else:
+                    cache.delete(cache_key)
+                    if settings.DEBUG: # pragma: no cover
+                        print "- *** FAILED *** to get contact field results for %s" % contact_field_label
+
+            except ValueError:
                 cache.delete(cache_key)
                 if settings.DEBUG: # pragma: no cover
                     print "- *** FAILED *** to get contact field results for %s" % contact_field_label
 
         return results
+
 
     def get_flow(self, flow_id):
         start = time.time()
@@ -264,26 +283,29 @@ class API(object):
                                                  'Accept': 'application/json',
                                                  'Authorization': 'Token %s' % self.org.api_token})
 
-                result = response.json()
+                try:
+                    result = response.json()
 
-                if response.status_code == 200 and 'results' in result:
+                    if response.status_code == 200 and 'results' in result:
 
-                    # we only include flows that have one or more rules
-                    for flow in result['results']:
-                        if len(flow['rulesets']) > 0:
-                            flows.append(flow)
+                        # we only include flows that have one or more rules
+                        for flow in result['results']:
+                            if len(flow['rulesets']) > 0:
+                                flows.append(flow)
 
-                if 'next' in result:
-                    next = result['next']
-                else:
+                    if 'next' in result:
+                        next = result['next']
+                    else:
+                        next = None
+                except ValueError:
                     next = None
+
 
             if flows:
                 # save to our cache for fifteen minutes
                 cache.set(cache_key, flows, RESULT_CACHE_TIME)
 
             else:
-                next = None
                 cache.delete(cache_key)
 
         if settings.DEBUG and flows: # pragma: no cover
