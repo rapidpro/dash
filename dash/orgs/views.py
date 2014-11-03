@@ -219,7 +219,7 @@ class OrgCRUDL(SmartCRUDL):
             return HttpResponseRedirect(settings.SITE_HOST_PATTERN % org.subdomain + self.get_success_url())
 
     class Home(InferOrgMixin, OrgPermsMixin, SmartReadView):
-        title = _("Your Account")
+        title = _("Your Organization")
         fields = ('name', 'subdomain', 'api_token')
 
         def get_api_token(self, obj):
@@ -230,7 +230,7 @@ class OrgCRUDL(SmartCRUDL):
 
 
     class Edit(InferOrgMixin, OrgPermsMixin, SmartUpdateView):
-        title = _("Your Account")
+        title = _("Your Organization")
         success_url = '@orgs.org_home'
         fields = ('name',)
 

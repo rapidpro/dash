@@ -25,6 +25,8 @@ RESULT_CACHE_TIME = getattr(settings, 'API_RESULT_CACHE_TIME', 60 * 15)
 # one hour to cache group results and breakdowns
 CONTACT_RESULT_CACHE_TIME = getattr(settings, 'API_CONTACT_RESULT_CACHE_TIME', 60 * 60)
 
+# one hour to cache contacts and breakdowns
+CONTACT_CACHE_TIME = getattr(settings, 'API_CONTACTS_CACHE_TIME', 60 * 60)
 
 class API(object):
 
@@ -64,6 +66,43 @@ class API(object):
 
         return group
 
+    def get_contacts(self, group=None):
+        cache_key = 'contacts:%d:%s' % (self.org.id, slugify(group))
+        #contacts = cache.get(cache_key)
+        contacts = []
+
+        next = '%s/api/v1/contacts.json' % settings.API_ENDPOINT
+        if not contacts:
+            contacts = []
+
+            while next:
+                response = requests.get(next,
+                                        params={'group': group},
+                                        headers={'Content-type': 'application/json',
+                                                 'Accept': 'application/json',
+                                                 'Authorization': 'Token %s' % self.org.api_token})
+
+                try:
+                    result = response.json()
+                    if response.status_code == 200:
+                        for contact in result['results']:
+                            contacts.append(contact)
+
+                        next = result['next']
+                    else:
+                        contacts = []
+                        cache.delete(cache_key)
+                        if settings.DEBUG: # pragma: no cover
+                            print "- *** FAILED *** to get contacts %s" % group
+                except ValueError:
+                    cache.delete(cache_key)
+                    if settings.DEBUG: # pragma: no cover
+                        print "- *** FAILED *** to get contacts %s" % group
+
+            if contacts:
+                cache.set(cache_key, contacts, CONTACT_CACHE_TIME)
+
+        return contacts
 
     def get_country_geojson(self):
         start = time.time()
@@ -260,6 +299,31 @@ class API(object):
             print "- got flow %d in %f" % (flow_id, time.time() - start)
 
         return flow
+
+    def get_flow_messages(self, flow, page=0, direction=None):
+        """
+        Returns the most recent messages for a given flow.
+        :param flow: The id of the flow to retrieve recent messages for
+        :param page: The page number to return (defaults to most recent, page 0)
+        :return:
+        """
+        try:
+            url = '%s/api/v1/messages.json' % settings.API_ENDPOINT
+            params = dict(flow=flow)
+            if direction:
+                params['direction'] = direction
+
+            response = requests.get(url,
+                                    params=params,
+                                    headers={'Content-type': 'application/json',
+                                    'Accept': 'application/json',
+                                    'Authorization': 'Token %s' % self.org.api_token})
+
+            result = response.json()
+            return result['results']
+
+        except Exception as e:
+            raise e
 
     def get_flows(self, filter=None):
         start = time.time()
