@@ -24,6 +24,8 @@ from django.utils import timezone
 from django.db.utils import IntegrityError
 from dash.stories.models import Story, StoryImage
 
+from dash.orgs.templatetags.dashorgs import dash_display_time, dash_national_phone
+
 
 class UserTest(SmartminTest):
     def setUp(self):
@@ -389,13 +391,14 @@ class OrgTest(DashTest):
 
         user_alice = User.objects.create_user("alicefox")
 
-        data = dict(name="kLab", subdomain="klab", administrators=[user_alice.pk])
+        data = dict(name="kLab", subdomain="klab", timezone="Africa/Kigali", administrators=[user_alice.pk])
         response = self.client.post(create_url, data, follow=True)
         self.assertTrue('form' not in response.context)
         self.assertTrue(Org.objects.filter(name="kLab"))
         org = Org.objects.get(name="kLab")
         self.assertEquals(User.objects.all().count(), 5)
         self.assertTrue(org.administrators.filter(username="alicefox"))
+        self.assertEquals(org.timezone, "Africa/Kigali")
 
 
     def test_org_update(self):
@@ -412,9 +415,9 @@ class OrgTest(DashTest):
         response = self.client.get(update_url)
         self.assertEquals(200, response.status_code)
         self.assertFalse(Org.objects.filter(name="Burundi"))
-        self.assertEquals(len(response.context['form'].fields), 8)
+        self.assertEquals(len(response.context['form'].fields), 9)
 
-        post_data = dict(name="Burundi", subdomain="burundi", is_active=True, male_label="male", female_label='female', administrators=self.admin.pk)
+        post_data = dict(name="Burundi", timezone="Africa/Bujumbura", subdomain="burundi", is_active=True, male_label="male", female_label='female', administrators=self.admin.pk)
         response = self.client.post(update_url, post_data)
         self.assertEquals(response.status_code, 302)
 
@@ -423,6 +426,7 @@ class OrgTest(DashTest):
         org = Org.objects.get(pk=self.org.pk)
         self.assertEquals(org.name, "Burundi")
         self.assertEquals(org.subdomain, "burundi")
+        self.assertEquals(org.timezone, "Africa/Bujumbura")
         self.assertEquals(response.request['PATH_INFO'], reverse('orgs.org_list'))
 
     def test_org_list(self):
@@ -440,7 +444,7 @@ class OrgTest(DashTest):
         self.assertEquals(response.status_code, 200)
         self.assertTrue(response.context['object_list'])
         self.assertTrue(self.org in response.context['object_list'])
-        self.assertEquals(len(response.context['fields']), 3)
+        self.assertEquals(len(response.context['fields']), 4)
 
     def test_org_choose(self):
         choose_url = reverse('orgs.org_choose')
@@ -885,7 +889,18 @@ class OrgTest(DashTest):
         self.assertFalse(Invitation.objects.get(pk=admin_invitation.pk).is_active)
         self.assertTrue(Invitation.objects.get(pk=viewer_invitation.pk).is_active)
 
+    def test_dashorgs_templatetags(self):
+        self.assertEquals(dash_display_time("2014-11-04T15:11:34Z", self.org), "Nov 04, 2014 15:11")
 
+        self.org.timezone = 'Africa/Kigali'
+        self.org.save()
+        self.assertEquals(dash_display_time("2014-11-04T15:11:34Z", self.org), "Nov 04, 2014 17:11")
+
+        self.assertEquals(dash_display_time("2014-11-04T15:11:34Z", self.org, '%A, %B %d, %Y'), "Tuesday, November 04, 2014")
+
+        self.assertEquals(dash_national_phone('+250788505050'), "0788 505 050")
+        self.assertEquals(dash_national_phone('250788505050'), "250788505050")
+        self.assertEquals(dash_national_phone('+93700325998'), "070 032 5998")
 
 class OrgBackgroundTest(DashTest):
 

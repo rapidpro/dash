@@ -36,6 +36,8 @@ class Org(SmartModel):
     subdomain = models.SlugField(verbose_name=_("Subdomain"), max_length=255, unique=True, error_messages=dict(unique=_("This subdomain is not available")),
                                  help_text=_("The subdomain for this UReport instance"))
 
+    timezone = models.CharField(verbose_name=_("Timezone"), max_length=64, default='UTC')
+
     api_token = models.CharField(max_length=128, null=True, blank=True,
                                  help_text=_("The API token for the RapidPro account this dashboard is tied to"))
 
