@@ -111,6 +111,9 @@ class Org(SmartModel):
             regions = self.get_contact_field_results(self.get_config('gender_label'), dict(location="State"))
             active_regions = dict()
 
+            if not regions:
+                return []
+
             for region in regions:
                 active_regions[region['label']] = region['set'] + region['unset']
 
