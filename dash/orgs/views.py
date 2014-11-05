@@ -13,7 +13,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from dash.orgs.models import Org, OrgBackground, Invitation
 
-
+from timezones.forms import TimeZoneField
 
 class OrgPermsMixin(object):
     """
@@ -111,7 +111,10 @@ class OrgForm(forms.ModelForm):
                                help_text=_("Your password, at least eight letters please"))
     name = forms.CharField(label=_("Organization"),
                            help_text=_("The name of this organization"))
+
     subdomain = forms.CharField(help_text=_("The subdomain of this organization"))
+
+    timezone = TimeZoneField(help_text=_("The timezone your organization is in"))
 
     administrators = forms.ModelMultipleChoiceField(queryset=User.objects.exclude(username="root").exclude(username="root2").exclude(pk__lt=0))
 
@@ -131,7 +134,7 @@ class OrgForm(forms.ModelForm):
         return password
 
     class Meta:
-        fields = ('is_active', 'first_name', 'last_name', 'email', 'password', 'name', 'subdomain', 'language', 'api_token', 'logo', 'administrators')
+        fields = ('is_active', 'first_name', 'last_name', 'email', 'password', 'name', 'subdomain', 'timezone', 'language', 'api_token', 'logo', 'administrators')
         model = Org
 
 
@@ -150,14 +153,14 @@ class OrgCRUDL(SmartCRUDL):
 
     class Create(SmartCreateView):
         form_class = OrgForm
-        fields = ('name', 'language', 'subdomain', 'administrators', 'api_token')
+        fields = ('name', 'language', 'subdomain', 'timezone', 'administrators', 'api_token')
 
     class Update(SmartUpdateView):
         form_class = OrgForm
-        fields = ('is_active', 'name', 'subdomain', 'language', 'api_token', 'logo', 'administrators')
+        fields = ('is_active', 'name', 'subdomain', 'timezone', 'language', 'api_token', 'logo', 'administrators')
 
     class List(SmartListView):
-        fields = ('name', 'created_on', 'modified_on')
+        fields = ('name', 'timezone', 'created_on', 'modified_on')
 
     class Choose(SmartFormView):
         class ChooseForm(forms.Form):

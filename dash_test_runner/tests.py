@@ -383,13 +383,14 @@ class OrgTest(DashTest):
 
         user_alice = User.objects.create_user("alicefox")
 
-        data = dict(name="kLab", subdomain="klab", administrators=[user_alice.pk])
+        data = dict(name="kLab", subdomain="klab", timezone="Africa/Kigali", administrators=[user_alice.pk])
         response = self.client.post(create_url, data, follow=True)
         self.assertTrue('form' not in response.context)
         self.assertTrue(Org.objects.filter(name="kLab"))
         org = Org.objects.get(name="kLab")
         self.assertEquals(User.objects.all().count(), 5)
         self.assertTrue(org.administrators.filter(username="alicefox"))
+        self.assertEquals(org.timezone, "Africa/Kigali")
 
 
     def test_org_update(self):
@@ -406,9 +407,9 @@ class OrgTest(DashTest):
         response = self.client.get(update_url)
         self.assertEquals(200, response.status_code)
         self.assertFalse(Org.objects.filter(name="Burundi"))
-        self.assertEquals(len(response.context['form'].fields), 8)
+        self.assertEquals(len(response.context['form'].fields), 9)
 
-        post_data = dict(name="Burundi", subdomain="burundi", is_active=True, male_label="male", female_label='female', administrators=self.admin.pk)
+        post_data = dict(name="Burundi", timezone="Africa/Bujumbura", subdomain="burundi", is_active=True, male_label="male", female_label='female', administrators=self.admin.pk)
         response = self.client.post(update_url, post_data)
         self.assertEquals(response.status_code, 302)
 
@@ -417,6 +418,7 @@ class OrgTest(DashTest):
         org = Org.objects.get(pk=self.org.pk)
         self.assertEquals(org.name, "Burundi")
         self.assertEquals(org.subdomain, "burundi")
+        self.assertEquals(org.timezone, "Africa/Bujumbura")
         self.assertEquals(response.request['PATH_INFO'], reverse('orgs.org_list'))
 
     def test_org_list(self):
@@ -434,7 +436,7 @@ class OrgTest(DashTest):
         self.assertEquals(response.status_code, 200)
         self.assertTrue(response.context['object_list'])
         self.assertTrue(self.org in response.context['object_list'])
-        self.assertEquals(len(response.context['fields']), 3)
+        self.assertEquals(len(response.context['fields']), 4)
 
     def test_org_choose(self):
         choose_url = reverse('orgs.org_choose')
