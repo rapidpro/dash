@@ -9,10 +9,11 @@ import math
 import pytz
 from smartmin.models import SmartModel
 from django.utils.translation import ugettext_lazy as _
+from django.utils import timezone
 from django.conf import settings
 from dash.api import API
 from dash.dash_email import send_dash_email
-
+import pytz
 
 class Org(SmartModel):
     name = models.CharField(verbose_name=_("Name"), max_length=128,
@@ -43,6 +44,16 @@ class Org(SmartModel):
 
     config = models.TextField(null=True, blank=True,
                               help_text=_("JSON blob used to store configuration information associated with this organization"))
+
+    def get_timezone(self):
+        tzinfo = getattr(self, '_tzinfo', None)
+
+        if not tzinfo:
+            # we need to build the pytz timezone object with a context of now
+            tzinfo = timezone.now().astimezone(pytz.timezone(self.timezone)).tzinfo
+            self._tzinfo = tzinfo
+
+        return tzinfo
 
     def get_config(self, name):
         config = getattr(self, '_config', None)

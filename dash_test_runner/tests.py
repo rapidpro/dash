@@ -24,7 +24,7 @@ from django.utils import timezone
 from django.db.utils import IntegrityError
 from dash.stories.models import Story, StoryImage
 
-from dash.orgs.templatetags.dashorgs import dash_display_time, dash_national_phone
+from dash.orgs.templatetags.dashorgs import display_time, national_phone
 
 
 class UserTest(SmartminTest):
@@ -890,17 +890,17 @@ class OrgTest(DashTest):
         self.assertTrue(Invitation.objects.get(pk=viewer_invitation.pk).is_active)
 
     def test_dashorgs_templatetags(self):
-        self.assertEquals(dash_display_time("2014-11-04T15:11:34Z", self.org), "Nov 04, 2014 15:11")
+        self.assertEquals(display_time("2014-11-04T15:11:34Z", self.org), "Nov 04, 2014 15:11")
 
         self.org.timezone = 'Africa/Kigali'
         self.org.save()
-        self.assertEquals(dash_display_time("2014-11-04T15:11:34Z", self.org), "Nov 04, 2014 17:11")
+        self.assertEquals(display_time("2014-11-04T15:11:34Z", self.org), "Nov 04, 2014 17:11")
 
-        self.assertEquals(dash_display_time("2014-11-04T15:11:34Z", self.org, '%A, %B %d, %Y'), "Tuesday, November 04, 2014")
+        self.assertEquals(display_time("2014-11-04T15:11:34Z", self.org, '%A, %B %d, %Y'), "Tuesday, November 04, 2014")
 
-        self.assertEquals(dash_national_phone('+250788505050'), "0788 505 050")
-        self.assertEquals(dash_national_phone('250788505050'), "250788505050")
-        self.assertEquals(dash_national_phone('+93700325998'), "070 032 5998")
+        self.assertEquals(national_phone('+250788505050'), "0788 505 050")
+        self.assertEquals(national_phone('250788505050'), "250788505050")
+        self.assertEquals(national_phone('+93700325998'), "070 032 5998")
 
 class OrgBackgroundTest(DashTest):
 
