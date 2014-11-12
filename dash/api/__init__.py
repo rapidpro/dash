@@ -25,8 +25,8 @@ RESULT_CACHE_TIME = getattr(settings, 'API_RESULT_CACHE_TIME', 60 * 15)
 # one hour to cache group results and breakdowns
 CONTACT_RESULT_CACHE_TIME = getattr(settings, 'API_CONTACT_RESULT_CACHE_TIME', 60 * 60)
 
-# one hour to cache contacts and breakdowns
-CONTACT_CACHE_TIME = getattr(settings, 'API_CONTACTS_CACHE_TIME', 60 * 60)
+# five minutes to cache contacts and breakdowns
+CONTACT_CACHE_TIME = getattr(settings, 'API_CONTACTS_CACHE_TIME', 60 * 5)
 
 class API(object):
 
@@ -68,7 +68,7 @@ class API(object):
 
     def get_contacts(self, group=None):
         cache_key = 'contacts:%d:%s' % (self.org.id, slugify(group))
-        #contacts = cache.get(cache_key)
+        contacts = cache.get(cache_key)
         contacts = []
 
         next = '%s/api/v1/contacts.json' % settings.API_ENDPOINT
