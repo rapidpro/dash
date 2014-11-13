@@ -45,6 +45,10 @@ class Org(SmartModel):
     config = models.TextField(null=True, blank=True,
                               help_text=_("JSON blob used to store configuration information associated with this organization"))
 
+    def set_timezone(self, timezone):
+        self.timezone = timezone
+        self._tzinfo = None
+
     def get_timezone(self):
         tzinfo = getattr(self, '_tzinfo', None)
 

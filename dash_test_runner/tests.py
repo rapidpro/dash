@@ -129,8 +129,25 @@ class SetOrgMiddlewareTest(DashTest):
 
     def test_process_request_with_org(self):
 
+        # uganda.ureport.io should map to uganda
         ug_org = self.create_org('uganda', self.admin)
         ug_dash_url = ug_org.subdomain + ".ureport.io"
+        self.request.get_host.return_value=ug_dash_url
+
+        response = self.middleware.process_request(self.request)
+        self.assertEqual(response, None)
+        self.assertEqual(self.request.org, ug_org)
+
+        # www.uganda.ureport.io should work too
+        ug_dash_url = 'www.UGANDA.ureport.io'
+        self.request.get_host.return_value=ug_dash_url
+
+        response = self.middleware.process_request(self.request)
+        self.assertEqual(response, None)
+        self.assertEqual(self.request.org, ug_org)
+
+        # as should uganda.localhost
+        ug_dash_url = ug_org.subdomain + ".localhost"
         self.request.get_host.return_value=ug_dash_url
 
         response = self.middleware.process_request(self.request)
@@ -892,7 +909,7 @@ class OrgTest(DashTest):
     def test_dashorgs_templatetags(self):
         self.assertEquals(display_time("2014-11-04T15:11:34Z", self.org), "Nov 04, 2014 15:11")
 
-        self.org.timezone = 'Africa/Kigali'
+        self.org.set_timezone('Africa/Kigali')
         self.org.save()
         self.assertEquals(display_time("2014-11-04T15:11:34Z", self.org), "Nov 04, 2014 17:11")
 

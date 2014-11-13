@@ -20,16 +20,25 @@ class SetOrgMiddleware(object):
 
         subdomain = None
 
-        # only consider first level subdomain
-        if len(host.split('.')) > 1:
-            subdomain = host.split('.')[0]
+        parts = host.split('.')
+
+        # at this point we might be something like 'uganda.localhost'
+        if parts > 1:
+            subdomain = parts[0]
+            parts = parts[1:]
+
+            # we keep stripping subdomains until we reach the 'root' subdomain
+            # that is one with only a domain and TLD remaining
+            # this deals with cases like 'www.uganda.ureport.in'
+            while len(parts) > 2:
+                subdomain = parts[0]
+                parts = parts[1:]
 
         org = None
         if subdomain:
-            orgs = Org.objects.filter(subdomain=subdomain)
+            orgs = Org.objects.filter(subdomain__iexact=subdomain)
             if orgs:
                 org = orgs[0]
-
 
         # no org and not org choosing page? display our chooser page
         if not org and request.path.find('/manage/org') != 0 and request.path.find('/users/') != 0 and request.path.find(settings.STATIC_URL) != 0:
