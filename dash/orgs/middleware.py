@@ -14,7 +14,7 @@ class SetOrgMiddleware(object):
 
         host = 'localhost'
         try:
-            host = request.get_host().lower()
+            host = request.get_host()
         except DisallowedHost:
             traceback.print_exc()
 
@@ -36,7 +36,7 @@ class SetOrgMiddleware(object):
 
         org = None
         if subdomain:
-            orgs = Org.objects.filter(subdomain=subdomain)
+            orgs = Org.objects.filter(subdomain__iexact=subdomain)
             if orgs:
                 org = orgs[0]
 

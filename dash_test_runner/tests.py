@@ -139,7 +139,7 @@ class SetOrgMiddlewareTest(DashTest):
         self.assertEqual(self.request.org, ug_org)
 
         # www.uganda.ureport.io should work too
-        ug_dash_url = 'www.' + ug_org.subdomain + ".ureport.io"
+        ug_dash_url = 'www.UGANDA.ureport.io'
         self.request.get_host.return_value=ug_dash_url
 
         response = self.middleware.process_request(self.request)
