@@ -154,6 +154,14 @@ class SetOrgMiddlewareTest(DashTest):
         self.assertEqual(response, None)
         self.assertEqual(self.request.org, ug_org)
 
+        # and a staging URL
+        ug_dash_url = ug_org.subdomain + ".staging.ureport.io"
+        self.request.get_host.return_value=ug_dash_url
+
+        response = self.middleware.process_request(self.request)
+        self.assertEqual(response, None)
+        self.assertEqual(self.request.org, ug_org)
+
         self.request.user = self.admin
         response = self.middleware.process_request(self.request)
         self.assertEqual(response, None)

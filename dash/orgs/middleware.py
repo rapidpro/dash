@@ -27,10 +27,9 @@ class SetOrgMiddleware(object):
             subdomain = parts[0]
             parts = parts[1:]
 
-            # we keep stripping subdomains until we reach the 'root' subdomain
-            # that is one with only a domain and TLD remaining
-            # this deals with cases like 'www.uganda.ureport.in'
-            while len(parts) > 2:
+            # we keep stripping subdomains if the subdomain is something
+            # like 'www' and there are more parts
+            while len(parts) > 2 and subdomain == 'www':
                 subdomain = parts[0]
                 parts = parts[1:]
 
