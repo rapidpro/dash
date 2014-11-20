@@ -304,9 +304,6 @@ CACHES = {
         }
     }
 }
-if 'test' in sys.argv:
-    CACHES['default'] = {'BACKEND': 'django.core.cache.backends.dummy.DummyCache',}
-
 
 ORG_CONFIG_FIELDS =[ dict(name='shortcode', field=dict(help_text=_("The shortcode that users will use to contact U-report locally"), required=True)),
                      dict(name='join_text', field=dict(help_text=_("The short text used to direct visitors to join U-report"), required=False)),

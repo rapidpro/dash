@@ -21,6 +21,7 @@ from django.core.exceptions import DisallowedHost
 
 from mock import patch, Mock
 from django.utils import timezone
+from django.core.cache import cache
 from django.db.utils import IntegrityError
 from dash.stories.models import Story, StoryImage
 
@@ -67,6 +68,10 @@ class DashTest(SmartminTest):
         # Clear DashBlockType from old migrations
         DashBlockType.objects.all().delete()
 
+    def clear_cache(self):
+        # hardcoded to localhost
+        r = redis.StrictRedis(host='localhost', db=1)
+        r.flushdb()
 
     def clear_uploads(self):
         import os
@@ -293,6 +298,7 @@ class OrgTest(DashTest):
             mock.assert_called_once_with('Gender', dict(location='State'))
 
         with patch('dash.api.API.get_contact_field_results') as mock:
+            self.clear_cache()
             mock.return_value = None
 
             self.assertEquals(self.org.get_most_active_regions(), [])
@@ -1038,6 +1044,10 @@ class MockResponse(object):
         self.content = content
         self.status_code = status_code
 
+    def raise_for_status(self):
+        if self.status_code != 200:
+            raise Exception("Server returned %s" % str(self.status_code))
+
     def json(self, **kwargs):
         return json.loads(self.content)
 
@@ -1052,9 +1062,13 @@ class APITest(DashTest):
 
         self.api = API(self.org)
 
+        # clear our cache
+        self.clear_cache()
+
     @patch('requests.models.Response', MockResponse)
     def test_get_group(self):
         with patch('requests.get') as mock_request_get:
+            self.clear_cache()
             mock_request_get.return_value = MockResponse(200, json.dumps(dict(results=["GROUP_DICT"])))
 
             self.assertEquals(self.api.get_group('group_name'), "GROUP_DICT")
@@ -1066,6 +1080,7 @@ class APITest(DashTest):
 
 
         with patch('requests.get') as mock_request_get:
+            self.clear_cache()
             mock_request_get.return_value = MockResponse(200, json.dumps(dict(results=[])))
 
             self.assertIsNone(self.api.get_group('group_name'))
@@ -1077,6 +1092,7 @@ class APITest(DashTest):
 
 
         with patch('requests.get') as mock_request_get:
+            self.clear_cache()
             mock_request_get.return_value = MockResponse(200, json.dumps(dict(no_results_key="")))
 
             self.assertIsNone(self.api.get_group('group_name'))
@@ -1087,6 +1103,7 @@ class APITest(DashTest):
                                                               'Authorization': 'Token %s' % self.org.api_token})
 
         with patch('requests.get') as mock_request_get:
+            self.clear_cache()
             mock_request_get.return_value = MockResponse(404, json.dumps(dict(error="Not Found")))
 
             self.assertIsNone(self.api.get_group('group_name'))
@@ -1097,6 +1114,7 @@ class APITest(DashTest):
                                                               'Authorization': 'Token %s' % self.org.api_token})
 
         with patch('requests.get') as mock_request_get:
+            self.clear_cache()
             mock_request_get.return_value = MockResponse(200, 'invalid_json')
 
             self.assertIsNone(self.api.get_group('group_name'))
@@ -1225,6 +1243,8 @@ class APITest(DashTest):
 
             self.assertEquals(mock_request_get.call_count, 3)
 
+        self.clear_cache()
+
         with patch('requests.get') as mock_request_get:
             mock_request_get.return_value = MockResponse(200, json.dumps(dict(no_results_key=["CONTACT_FIELD_DATA"])))
 
@@ -1278,6 +1298,8 @@ class APITest(DashTest):
             self.assertEquals(mock_request_get.call_count, 2)
 
         with patch('requests.get') as mock_request_get:
+            self.clear_cache()
+
             mock_request_get.side_effect = [MockResponse(200,
                                                          self.read_json('flows_missing_next_key')
                                                          ),
@@ -1298,9 +1320,10 @@ class APITest(DashTest):
                                                                'Authorization': 'Token %s' % self.org.api_token})
 
         with patch('requests.get') as mock_request_get:
+            self.clear_cache()
             mock_request_get.return_value = MockResponse(200, 'invalid_json')
 
-            self.assertEquals(self.api.get_flows(), [])
+            self.assertIsNone(self.api.get_flows())
 
             mock_request_get.assert_called_once_with('%s/api/v1/flows.json' % settings.API_ENDPOINT,
                                                       headers={'Content-type': 'application/json',
@@ -1335,6 +1358,8 @@ class APITest(DashTest):
 
 
         with patch('requests.get') as mock_request_get:
+            self.clear_cache()
+
             mock_request_get.side_effect = [MockResponse(404,
                                                          self.read_json('flows_page_1')
                                                          ),
@@ -1351,24 +1376,21 @@ class APITest(DashTest):
                                                        'Accept': 'application/json',
                                                        'Authorization': 'Token %s' % self.org.api_token})
 
-            mock_request_get.assert_any_call('NEXT_PAGE',
-                                             headers={'Content-type': 'application/json',
-                                                       'Accept': 'application/json',
-                                                       'Authorization': 'Token %s' % self.org.api_token})
-
-            self.assertEquals(mock_request_get.call_count, 2)
+            self.assertEquals(mock_request_get.call_count, 1)
 
         with patch('requests.get') as mock_request_get:
-            mock_request_get.side_effect = [MockResponse(404,
+            self.clear_cache()
+
+            mock_request_get.side_effect = [MockResponse(200,
                                                          self.read_json('flows_page_1')
                                                          ),
 
-                                            MockResponse(200,
+                                            MockResponse(404,
                                                          self.read_json('flows_page_2')
                                                          )
                                             ]
 
-            self.assertEquals(self.api.get_flow(5), dict(name="FLOW_5", rulesets=['FLOW_5_RULESET_DICT']))
+            self.assertIsNone(self.api.get_flow(5))
 
             mock_request_get.assert_any_call('%s/api/v1/flows.json?flow=5' % settings.API_ENDPOINT,
                                                       headers={'Content-type': 'application/json',
@@ -1385,6 +1407,7 @@ class APITest(DashTest):
     @patch('requests.models.Response', MockResponse)
     def test_build_boundaries(self):
         with patch('requests.get') as mock_request_get:
+            self.clear_cache()
             mock_request_get.side_effect = [MockResponse(200,
                                                          self.read_json('boundaries_page_1')
                                                          ),
@@ -1411,10 +1434,11 @@ class APITest(DashTest):
                                                                                                            id="B_BOUNDARY_4",
                                                                                                            level=2))])
 
-            self.assertEquals(self.api.build_boundaries(), boundary_cached)
+            self.assertEquals(self.api._build_boundaries(), boundary_cached)
 
 
         with patch('requests.get') as mock_request_get:
+            self.clear_cache()
             mock_request_get.side_effect = [MockResponse(200,
                                                          self.read_json('boundaries_missing_next_key')
                                                          ),
@@ -1431,10 +1455,11 @@ class APITest(DashTest):
                                                                                               level=1))
                                                                          ])
 
-            self.assertEquals(self.api.build_boundaries(), boundary_cached)
+            self.assertEquals(self.api._build_boundaries(), boundary_cached)
 
 
         with patch('requests.get') as mock_request_get:
+            self.clear_cache()
             mock_request_get.side_effect = [MockResponse(200,
                                                          'invalid_json'
                                                          ),
@@ -1446,7 +1471,7 @@ class APITest(DashTest):
             boundary_cached['geojson:%d' % self.org.id] = dict(type='FeatureCollection',
                                                                features=[])
 
-            self.assertEquals(self.api.build_boundaries(), boundary_cached)
+            self.assertRaises(ValueError, lambda: self.api._build_boundaries())
             mock_request_get.assert_called_once_with('%s/api/v1/boundaries.json' % settings.API_ENDPOINT,
                                                      headers={'Content-type': 'application/json',
                                                      'Accept': 'application/json',
@@ -1454,6 +1479,7 @@ class APITest(DashTest):
 
 
         with patch('requests.get') as mock_request_get:
+            self.clear_cache()
             mock_request_get.side_effect = [MockResponse(200,
                                                          self.read_json('boundaries_page_1')
                                                          ),
@@ -1483,6 +1509,8 @@ class APITest(DashTest):
             self.assertEquals(self.api.get_country_geojson(), boundary_cached['geojson:%d' % self.org.id])
 
         with patch('requests.get') as mock_request_get:
+            self.clear_cache()
+
             mock_request_get.side_effect = [MockResponse(200,
                                                          self.read_json('boundaries_page_1')
                                                          ),
@@ -1510,6 +1538,7 @@ class APITest(DashTest):
                                                                                                            level=2))])
 
             self.assertEquals(self.api.get_state_geojson('B_BOUNDARY_2'), boundary_cached['geojson:%d:B_BOUNDARY_2' % self.org.id])
+
 
 class CategoryTest(DashTest):
 
