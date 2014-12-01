@@ -9,6 +9,7 @@ from django.core import mail
 from django.core.urlresolvers import reverse
 from django.http import HttpRequest
 import pytz
+import redis
 from smartmin.tests import SmartminTest
 from dash.api import API
 from dash.categories.models import Category, CategoryImage
