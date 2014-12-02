@@ -173,7 +173,7 @@ class API(object):
                 return fallback_value
 
         # 3) acquire our lock and calculate our value
-        with r.lock(lock_key, 120):
+        with r.lock(lock_key, 240):
             # check for a cached value again, it's possible we were waiting in line
             cached_value = cache.get(key)
             if cached_value is not None:
@@ -199,7 +199,9 @@ class API(object):
 
             # populate our value as well as our fallback
             cache.set(key, calculated, timeout)
-            cache.set(fallback_key, calculated)
+
+            # fallback never expires
+            cache.set(fallback_key, calculated, timeout=None)
 
             # return our calculated value
             return calculated
@@ -296,13 +298,13 @@ class API(object):
 
         # save our cached geojson to redis
         cache.set('geojson:%d' % self.org.id, to_geojson(states), BOUNDARY_CACHE_TIME)
-        cache.set('fallback:geojson:%d' % self.org.id, to_geojson(states))
+        cache.set('fallback:geojson:%d' % self.org.id, to_geojson(states), timeout=None)
 
         cached['geojson:%d' % self.org.id] = to_geojson(states)
 
         for state_id in districts_by_state.keys():
             cache.set('geojson:%d:%s' % (self.org.id, state_id), to_geojson(districts_by_state[state_id]), BOUNDARY_CACHE_TIME)
-            cache.set('fallback:geojson:%d:%s' % (self.org.id, state_id), to_geojson(districts_by_state[state_id]))
+            cache.set('fallback:geojson:%d:%s' % (self.org.id, state_id), to_geojson(districts_by_state[state_id]), timeout=None)
 
             cached['geojson:%d:%s' % (self.org.id, state_id)] = to_geojson(districts_by_state[state_id])
 
@@ -316,6 +318,8 @@ class API(object):
 
         url = '%s/api/v1/results.json?ruleset=%d&segment=%s' % (settings.API_ENDPOINT, ruleset_id,
                                                                 urllib.quote(unicode(json.dumps(segment)).encode('utf8')))
+        print url
+
         response = requests.get(url,
                                 headers={'Content-type': 'application/json',
                                          'Accept': 'application/json',
@@ -334,7 +338,12 @@ class API(object):
     def _fetch_contact_field_results(self, contact_field_label, segment=None):
         start = time.time()
 
-        response = requests.get('%s/api/v1/results.json?contact_field=%s&segment=%s' % (settings.API_ENDPOINT, contact_field_label, urllib.quote(unicode(json.dumps(segment)).encode('utf8'))),
+        url = '%s/api/v1/results.json?contact_field=%s&segment=%s' % (settings.API_ENDPOINT,
+                                                                      contact_field_label,
+                                                                      urllib.quote(unicode(json.dumps(segment)).encode('utf8')))
+        print url
+
+        response = requests.get(url,
                                 headers={'Content-type': 'application/json',
                                          'Accept': 'application/json',
                                          'Authorization': 'Token %s' % self.org.api_token})
