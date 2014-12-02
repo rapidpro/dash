@@ -138,7 +138,7 @@ class Org(SmartModel):
             tuples.sort(key=lambda t: t[1], reverse=True)
 
             active_regions = [k for k, v in tuples]
-            cache.set(cache_key, active_regions, 3600)
+            cache.set(cache_key, active_regions, 3600 * 24)
 
         return active_regions
 
