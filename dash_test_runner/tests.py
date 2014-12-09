@@ -1,31 +1,30 @@
 from __future__ import unicode_literals
 
-from datetime import datetime
 import json
-import urllib
-from django.conf import settings
-from django.contrib.auth.models import User, Group
-from django.core import mail
-from django.core.urlresolvers import reverse
-from django.http import HttpRequest
 import pytz
-from smartmin.tests import SmartminTest
+import redis
+import urllib
+
 from dash.api import API
 from dash.categories.models import Category, CategoryImage
 from dash.dashblocks.models import DashBlockType, DashBlock, DashBlockImage
 from dash.dashblocks.templatetags.dashblocks import load_qbs
-from dash.orgs.context_processors import GroupPermWrapper
 from dash.orgs.middleware import SetOrgMiddleware
 from dash.orgs.models import Org, OrgBackground, Invitation
-from django.core.exceptions import DisallowedHost
-
-from mock import patch, Mock
-from django.utils import timezone
-from django.core.cache import cache
-from django.db.utils import IntegrityError
-from dash.stories.models import Story, StoryImage
-
 from dash.orgs.templatetags.dashorgs import display_time, national_phone
+from dash.orgs.context_processors import GroupPermWrapper
+from dash.stories.models import Story, StoryImage
+from datetime import datetime
+from django.conf import settings
+from django.contrib.auth.models import User, Group
+from django.core import mail
+from django.core.exceptions import DisallowedHost
+from django.core.urlresolvers import reverse
+from django.db.utils import IntegrityError
+from django.http import HttpRequest
+from django.utils import timezone
+from mock import patch, Mock
+from smartmin.tests import SmartminTest
 
 
 class UserTest(SmartminTest):
@@ -55,7 +54,6 @@ class UserTest(SmartminTest):
         self.assertEquals(new_admin.username, 'washington@nyaruka.com')
         self.assertEquals(new_admin.email, 'washington@nyaruka.com')
         self.assertFalse(User.objects.filter(username='denzel@nyaruka.com'))
-
 
 
 class DashTest(SmartminTest):
