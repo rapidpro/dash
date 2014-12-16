@@ -1,19 +1,21 @@
+from __future__ import unicode_literals
+
 import re
+
 from django import forms
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.core.validators import validate_email
 from django.http import HttpResponseRedirect
-from smartmin.views import SmartCRUDL, SmartCreateView, SmartReadView, SmartUpdateView, SmartListView, SmartFormView
 from django.utils.translation import ugettext_lazy as _
-
-from dash.orgs.models import Org, OrgBackground, Invitation
-
+from smartmin.views import SmartCRUDL, SmartCreateView, SmartReadView, SmartUpdateView, SmartListView, SmartFormView
 from timezones.forms import TimeZoneField
+from .models import Org, OrgBackground, Invitation
+
 
 class OrgPermsMixin(object):
     """
@@ -174,7 +176,6 @@ class OrgCRUDL(SmartCRUDL):
             organization = forms.ModelChoiceField(queryset=Org.objects.filter(id__lte=-1) ,empty_label=None)
 
         form_class = ChooseForm
-        success_url = '@orgs.org_home'
         fields = ('organization',)
         title = _("Select your Organization")
 
@@ -221,6 +222,9 @@ class OrgCRUDL(SmartCRUDL):
 
             return HttpResponseRedirect(settings.SITE_HOST_PATTERN % org.subdomain + self.get_success_url())
 
+        def get_success_url(self):
+            return getattr(settings, 'SITE_USER_HOME', reverse('orgs.org_home'))
+
     class Home(InferOrgMixin, OrgPermsMixin, SmartReadView):
         title = _("Your Organization")
         fields = ('name', 'subdomain', 'api_token')
@@ -230,7 +234,6 @@ class OrgCRUDL(SmartCRUDL):
                 return "*" * 32 + obj.api_token[32:]
             else:
                 return _("Not Set")
-
 
     class Edit(InferOrgMixin, OrgPermsMixin, SmartUpdateView):
         title = _("Your Organization")
@@ -314,9 +317,8 @@ class OrgCRUDL(SmartCRUDL):
                 model = Invitation
                 fields = ('emails', 'user_group')
 
-
         form_class = InviteForm
-        success_url = "@orgs.org_home"
+        success_url = '@orgs.org_home'
         success_message = ""
         GROUP_LEVELS = ('administrators', 'editors')
 
@@ -432,16 +434,12 @@ class OrgCRUDL(SmartCRUDL):
 
             return context
 
-
-
-
     class CreateLogin(SmartUpdateView):
         title = ""
         form_class = OrgForm
         permission = None
         fields = ('first_name', 'last_name', 'email', 'password')
         success_message = ''
-        success_url = '@orgs.org_home'
         submit_button_name = _("Create")
         permission = False
 
@@ -515,6 +513,9 @@ class OrgCRUDL(SmartCRUDL):
 
             return context
 
+        def get_success_url(self):
+            return getattr(settings, 'SITE_USER_HOME', reverse('orgs.org_home'))
+
     class Join(SmartUpdateView):
         class JoinForm(forms.ModelForm):
 
@@ -524,7 +525,6 @@ class OrgCRUDL(SmartCRUDL):
 
         success_message = ''
         form_class = JoinForm
-        success_url = "@orgs.org_home"
         submit_button_name = _("Join")
         permission = False
 
@@ -588,7 +588,8 @@ class OrgCRUDL(SmartCRUDL):
             context['org'] = self.get_object()
             return context
 
-
+        def get_success_url(self):
+            return getattr(settings, 'SITE_USER_HOME', reverse('orgs.org_home'))
 
 
 class OrgBackgroundCRUDL(SmartCRUDL):

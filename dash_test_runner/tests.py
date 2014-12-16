@@ -212,6 +212,7 @@ class OrgContextProcessorTestcase(DashTest):
         self.assertFalse(editors_wrapper["orgs"]["org_edit"])
         self.assertTrue(editors_wrapper["orgs"]["org_home"])
 
+
 class OrgTest(DashTest):
 
     def setUp(self):
@@ -561,6 +562,10 @@ class OrgTest(DashTest):
         self.assertEquals(self.nigeria, response.context['org'])
         self.assertEquals(response.request['PATH_INFO'], reverse('orgs.org_home'))
 
+        # test overriding the user home page
+        with self.settings(SITE_USER_HOME='/example/home'):
+            response = self.client.post(choose_url, post_data, follow=True)
+            self.assertEquals(response.request['PATH_INFO'], '/example/home')
 
     def test_org_home(self):
         home_url = reverse('orgs.org_home')
@@ -585,7 +590,6 @@ class OrgTest(DashTest):
         self.assertEquals(response.context['org'], self.org)
         self.assertFalse('Not Set' in response.content)
         self.assertTrue('*' * 32 in response.content)
-
 
     def test_org_edit(self):
 
@@ -682,8 +686,6 @@ class OrgTest(DashTest):
 
             invitation.email = None
             self.assertIsNone(invitation.send_email())
-
-
 
     def test_manage_accounts(self):
         manage_accounts_url = reverse('orgs.org_manage_accounts')
@@ -812,7 +814,6 @@ class OrgTest(DashTest):
         response = self.client.get(editor_join_url, SERVER_NAME="kenya.ureport.io")
         self.assertEquals(302, response.status_code)
 
-
         response = self.client.get(editor_join_url, follow=True, SERVER_NAME="kenya.ureport.io")
         self.assertEquals(200, response.status_code)
         self.assertEquals(response.wsgi_request.org, self.org)
@@ -831,6 +832,15 @@ class OrgTest(DashTest):
 
         self.assertTrue(self.invited_editor in self.org.editors.all())
         self.assertFalse(Invitation.objects.get(pk=editor_invitation.pk).is_active)
+
+        # test overriding the user home page
+        with self.settings(SITE_USER_HOME='/example/home'):
+            invitation = Invitation.objects.create(org=self.org, user_group="E", email="norkans7@gmail.com",
+                                                   created_by=self.admin, modified_by=self.admin)
+            join_url = reverse('orgs.org_join', args=[invitation.secret])
+            post_data = dict()
+            response = self.client.post(join_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
+            self.assertEquals(response.request['PATH_INFO'], '/example/home')
 
     def test_create_login(self):
         admin_invitation = Invitation.objects.create(org=self.org,
