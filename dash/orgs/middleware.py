@@ -1,7 +1,7 @@
 import traceback
 from django.conf import settings
 from django.template.response import TemplateResponse
-from django.utils import translation
+from django.utils import translation, timezone
 from django.core.exceptions import DisallowedHost
 from dash.orgs.models import Org
 
@@ -64,6 +64,10 @@ class SetOrgMiddleware(object):
                 language = org.language
 
             translation.activate(language)
+
+            # activate timezone for this org
+            if org and org.timezone:
+                timezone.activate(org.timezone)
 
             request.org = org
 
