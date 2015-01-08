@@ -7,11 +7,52 @@ from dash.orgs.models import Org
 
 
 class SetOrgMiddleware(object):
-
-
+    """
+    Sets the org on the request, based on the subdomain
+    """
     def process_request(self, request):
-        user = request.user
+        subdomain = self.get_subdomain(request)
 
+        if subdomain:
+            request.org = Org.objects.filter(subdomain__iexact=subdomain).first()
+        else:
+            request.org = None
+
+        if not request.user.is_anonymous():
+            request.user.set_org(request.org)
+
+        if not request.org:
+            # only some pages can be viewed without an org
+            patterns = getattr(settings, 'SITE_ALLOW_NO_ORG', ('/manage/org', '/users/', settings.STATIC_URL))
+            allow_for_path = False
+            for pattern in patterns:
+                if request.path.startswith(pattern):
+                    allow_for_path = True
+                    break
+
+            if not allow_for_path:
+                all_orgs = Org.objects.filter(is_active=True)
+
+                # populate a 'host' attribute on each org so we can link off to them
+                for org in all_orgs:
+                    org.host = settings.SITE_HOST_PATTERN % org.subdomain
+
+                return TemplateResponse(request, settings.SITE_CHOOSER_TEMPLATE, dict(orgs=all_orgs))
+
+        else:
+            # activate the default language for this org
+            language = settings.DEFAULT_LANGUAGE
+            if request.org.language:
+                language = request.org.language
+
+            translation.activate(language)
+
+            # activate timezone for this org
+            if request.org.timezone:
+                timezone.activate(request.org.timezone)
+
+    @staticmethod
+    def get_subdomain(request):
         host = 'localhost'
         try:
             host = request.get_host()
@@ -33,41 +74,6 @@ class SetOrgMiddleware(object):
                 subdomain = parts[0]
                 parts = parts[1:]
 
-        org = None
-        if subdomain:
-            orgs = Org.objects.filter(subdomain__iexact=subdomain)
-            if orgs:
-                org = orgs[0]
+        return subdomain
 
-        # no org and not org choosing page? display our chooser page
-        if not org and request.path.find('/manage/org') != 0 and request.path.find('/users/') != 0 and request.path.find(settings.STATIC_URL) != 0:
-            orgs = Org.objects.filter(is_active=True)
-
-            if not user.is_anonymous():
-                user.set_org(org)
-
-            request.org = org
-
-            # populate a 'host' attribute on each org so we can link off to them
-            for org in orgs:
-                org.host = settings.SITE_HOST_PATTERN % org.subdomain
-
-            return TemplateResponse(request, settings.SITE_CHOOSER_TEMPLATE, dict(orgs=orgs))
-
-        else:
-            if not user.is_anonymous():
-                user.set_org(org)
-
-            # activate the default language for this org
-            language = settings.DEFAULT_LANGUAGE
-            if org and org.language:
-                language = org.language
-
-            translation.activate(language)
-
-            # activate timezone for this org
-            if org and org.timezone:
-                timezone.activate(org.timezone)
-
-            request.org = org
 
