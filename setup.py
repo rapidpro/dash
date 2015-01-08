@@ -5,7 +5,7 @@ setup(
     version = '0.0.1',
     licence = 'BSD',
     install_requires = ['django==1.7.1',
-                        'smartmin==1.7.0',
+                        'smartmin',
                         'coverage',
                         'django-nose',
                         'django-celery',
