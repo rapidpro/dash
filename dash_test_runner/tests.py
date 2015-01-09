@@ -19,7 +19,7 @@ from django.conf import settings
 from django.contrib.auth.models import User, Group
 from django.core import mail
 from django.core.exceptions import DisallowedHost
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, ResolverMatch
 from django.db.utils import IntegrityError
 from django.http import HttpRequest
 from django.utils import timezone
@@ -113,89 +113,97 @@ class DashTest(SmartminTest):
         handle.close()
         return contents
 
+
 class SetOrgMiddlewareTest(DashTest):
 
     def setUp(self):
         super(SetOrgMiddlewareTest, self).setUp()
 
         self.middleware = SetOrgMiddleware()
+
+    def mock_view(self, request):
+        return MockResponse(204)
+
+    def simulate_process(self, host, url_name):
+        """
+        Simulates the application of org middleware
+        """
         self.request = Mock(spec=HttpRequest)
-        self.request.user = User.objects.get(pk=-1)
+        self.request.get_host.return_value = host
+        self.request.user = self.admin
         self.request.path = '/'
-        self.request.get_host.return_value="ureport.io"
         self.request.META = dict(HTTP_HOST=None)
 
-    def test_process_request_without_org(self):
         response = self.middleware.process_request(self.request)
+        if response:
+            return response
+
+        self.request.resolver_match = ResolverMatch(self.mock_view, [], {}, url_name)
+
+        return self.middleware.process_view(self.request, self.mock_view, [], {})
+
+    def test_process(self):
+        # check white-listed URL with no orgs
+        response = self.simulate_process('ureport.io', 'orgs.org_create')
+        self.assertIsNone(response)
+        self.assertIsNone(self.request.org)
+        self.assertIsNone(self.request.user.get_org())
+
+        # check non-white-listed URL with no orgs
+        response = self.simulate_process('ureport.io', 'dash.test_test')
         self.assertEqual(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
         self.assertFalse(response.context_data['orgs'])
+        self.assertIsNone(self.request.org)
+        self.assertIsNone(self.request.user.get_org())
 
-    def test_process_request_with_org(self):
-
-        # uganda.ureport.io should map to uganda
+        # create some orgs..
         ug_org = self.create_org('uganda', self.admin)
-        ug_dash_url = ug_org.subdomain + ".ureport.io"
-        self.request.get_host.return_value=ug_dash_url
+        rw_org = self.create_org('rwanda', self.admin)
 
-        response = self.middleware.process_request(self.request)
-        self.assertEqual(response, None)
-        self.assertEqual(self.request.org, ug_org)
+        # now orgs should be listed in choose page
+        response = self.simulate_process('ureport.io', 'dash.test_test')
+        self.assertEqual(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
+        self.assertEqual(len(response.context_data['orgs']), 2)
+        self.assertEqual(response.context_data['orgs'][0], rw_org)
+        self.assertEqual(response.context_data['orgs'][1], ug_org)
+        self.assertIsNone(self.request.org)
+        self.assertIsNone(self.request.user.get_org())
 
-        # www.uganda.ureport.io should work too
-        ug_dash_url = 'www.UGANDA.ureport.io'
-        self.request.get_host.return_value=ug_dash_url
+        # white-listing this URL name prevents choose response
+        with self.settings(SITE_ALLOW_NO_ORG=('dash.test_test',)):
+            response = self.simulate_process('ureport.io', 'dash.test_test')
+            self.assertIsNone(response)
+            self.assertIsNone(self.request.org)
+            self.assertIsNone(self.request.user.get_org())
 
-        response = self.middleware.process_request(self.request)
-        self.assertEqual(response, None)
-        self.assertEqual(self.request.org, ug_org)
+        # check requests to valid host names based on the Ug org's subdomain
+        for host in ('uganda.ureport.io', 'www.UGANDA.ureport.io', 'uganda.staging.ureport.io', 'uganda.localhost'):
 
-        # as should uganda.localhost
-        ug_dash_url = ug_org.subdomain + ".localhost"
-        self.request.get_host.return_value=ug_dash_url
+            # check white-listed URL
+            response = self.simulate_process(host, 'orgs.org_create')
+            self.assertIsNone(response)
+            self.assertEqual(self.request.org, ug_org)
+            self.assertEqual(self.request.user.get_org(), ug_org)
 
-        response = self.middleware.process_request(self.request)
-        self.assertEqual(response, None)
-        self.assertEqual(self.request.org, ug_org)
-
-        # and a staging URL
-        ug_dash_url = ug_org.subdomain + ".staging.ureport.io"
-        self.request.get_host.return_value=ug_dash_url
-
-        response = self.middleware.process_request(self.request)
-        self.assertEqual(response, None)
-        self.assertEqual(self.request.org, ug_org)
-
-        self.request.user = self.admin
-        response = self.middleware.process_request(self.request)
-        self.assertEqual(response, None)
-        self.assertEqual(self.request.org, ug_org)
-        self.assertEquals(self.request.user.get_org(), ug_org)
+            # check non-white-listed URL
+            response = self.simulate_process(host, 'dash.test_test')
+            self.assertIsNone(response)
+            self.assertEqual(self.request.org, ug_org)
+            self.assertEqual(self.request.user.get_org(), ug_org)
 
         # test invalid subdomain
-        wrong_subdomain_url = "blabla.ureport.io"
-        self.request.get_host.return_value=wrong_subdomain_url
-        response = self.middleware.process_request(self.request)
+        response = self.simulate_process('blabla.ureport.io', 'dash.test_test')
+        self.assertIsNone(self.request.org)
+        self.assertIsNone(self.request.user.get_org())
         self.assertEqual(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
-        self.assertEquals(len(response.context_data['orgs']), 1)
-        self.assertEquals(response.context_data['orgs'][0], ug_org)
-        self.assertEqual(self.request.org, None)
-        self.assertEquals(self.request.user.get_org(), None)
 
-        rw_org = self.create_org('rwanda', self.admin)
-        wrong_subdomain_url = "blabla.ureport.io"
-        self.request.get_host.return_value=wrong_subdomain_url
-        response = self.middleware.process_request(self.request)
-        self.assertEqual(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
-        self.assertEquals(len(response.context_data['orgs']), 2)
-        self.assertTrue(rw_org in response.context_data['orgs'])
-        self.assertTrue(ug_org in response.context_data['orgs'])
-
+        # test disallowed host exception
         self.request.get_host.side_effect = DisallowedHost
-        response = self.middleware.process_request(self.request)
+
+        response = self.simulate_process('xxx.ureport.io', 'dash.test_test')
+        self.assertIsNone(self.request.org)
+        self.assertIsNone(self.request.user.get_org())
         self.assertEqual(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
-        self.assertEquals(len(response.context_data['orgs']), 2)
-        self.assertTrue(rw_org in response.context_data['orgs'])
-        self.assertTrue(ug_org in response.context_data['orgs'])
 
 
 class OrgContextProcessorTestcase(DashTest):
