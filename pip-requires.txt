@@ -1,5 +1,5 @@
--e git+https://github.com/nyaruka/smartmin.git@to_django_1_7#egg=smartmin-dev
--e git+https://github.com/django/django.git@stable/1.7.x#egg=django
+-e git+https://github.com/nyaruka/smartmin.git#egg=smartmin-dev
+Django==1.7.2
 coverage
 django-nose
 django-celery
@@ -10,7 +10,7 @@ Pillow
 mock
 requests
 hamlpy
-sorl-thumbnail==11.12.1b
+sorl-thumbnail==12.1c
 django-timezones
--e git+https://github.com/nyaruka/python-phonenumbers.git@dev#egg=phonenumbers-dev
+phonenumbers
 django-redis
