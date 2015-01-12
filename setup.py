@@ -4,7 +4,7 @@ setup(
     name = 'dash',
     version = '0.0.1',
     licence = 'BSD',
-    install_requires = ['django==1.7.1',
+    install_requires = ['django==1.7.2',
                         'smartmin',
                         'coverage',
                         'django-nose',

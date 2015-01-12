@@ -1,5 +1,5 @@
 -e git+https://github.com/nyaruka/smartmin.git#egg=smartmin-dev
-Django==1.7.1
+Django==1.7.2
 coverage
 django-nose
 django-celery
