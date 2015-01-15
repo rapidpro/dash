@@ -1,19 +1,22 @@
+from __future__ import absolute_import, unicode_literals
+
 import json
-from datetime import timedelta, datetime
+import math
+import pytz
 import random
+
+from dash.api import API
+from dash.dash_email import send_dash_email
+from datetime import timedelta, datetime
 from django.contrib.auth.models import User, Group
 from django.core.cache import cache
 from django.db import models
 from django.utils import timezone
-import math
-import pytz
-from smartmin.models import SmartModel
 from django.utils.translation import ugettext_lazy as _
-from django.utils import timezone
 from django.conf import settings
-from dash.api import API
-from dash.dash_email import send_dash_email
-import pytz
+from smartmin.models import SmartModel
+from temba import TembaClient
+
 
 class Org(SmartModel):
     name = models.CharField(verbose_name=_("Name"), max_length=128,
@@ -113,6 +116,12 @@ class Org(SmartModel):
             org_user = user
             org_user.set_org(self)
             return org_user
+
+    def get_temba_client(self):
+        host = getattr(settings, 'SITE_API_HOST', None)
+        if not host:
+            host = '%s/api/v1' % settings.API_ENDPOINT  # UReport sites use this
+        return TembaClient(host, self.api_token)
 
     def get_api(self):
         return API(self)
