@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import datetime
 import pytz
+import random
 
 ISO8601_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
@@ -46,3 +47,11 @@ def union(*args):
         result |= set(l)
 
     return list(result)
+
+
+def random_string(length):
+    """
+    Generates a random alphanumeric string
+    """
+    letters = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"  # avoid things that could be mistaken ex: 'I' and '1'
+    return ''.join([random.choice(letters) for _ in range(length)])

@@ -6,7 +6,7 @@ import pytz
 from django.test import TestCase
 from temba.types import Contact as TembaContact
 from .temba import temba_merge_contacts
-from . import format_iso8601, parse_iso8601, intersection, union
+from . import format_iso8601, parse_iso8601, intersection, union, random_string
 
 
 class InitTest(TestCase):
@@ -31,6 +31,11 @@ class InitTest(TestCase):
         self.assertEqual(union(), [])
         self.assertEqual(union([1]), [1])
         self.assertEqual(sorted(union([1, 2, 3], [2, 3, 4])), [1, 2, 3, 4])
+
+    def test_random_string(self):
+        rs = random_string(1000)
+        self.assertEquals(1000, len(rs))
+        self.assertFalse('1' in rs or 'I' in rs or '0' in rs or 'O' in rs)
 
 
 class TembaTest(TestCase):
