@@ -25,6 +25,7 @@ from django.http import HttpRequest
 from django.utils import timezone
 from mock import patch, Mock
 from smartmin.tests import SmartminTest
+from temba import TembaClient
 
 
 class UserTest(SmartminTest):
@@ -233,7 +234,6 @@ class OrgTest(DashTest):
 
         self.assertEquals(self.org.__unicode__(), 'uganda')
 
-
         self.assertIsNone(Org.get_org(None))
         self.assertEquals(Org.get_org(self.admin), self.org)
         self.assertIsNone(Org.get_org(user))
@@ -243,6 +243,17 @@ class OrgTest(DashTest):
         self.assertEquals(new_user.email, "email@example.com")
         self.assertEquals(new_user.username, "email@example.com")
         self.assertTrue(new_user.check_password("secretpassword"))
+
+        client = self.org.get_temba_client()
+        self.assertIsInstance(client, TembaClient)
+        self.assertEqual(client.root_url, 'http://localhost:8001/api/v1')
+        self.assertEqual(client.token, self.org.api_token)
+
+        with self.settings(SITE_API_HOST='rapidpro.io'):
+            client = self.org.get_temba_client()
+            self.assertIsInstance(client, TembaClient)
+            self.assertEqual(client.root_url, 'https://rapidpro.io/api/v1')
+            self.assertEqual(client.token, self.org.api_token)
 
         api = self.org.get_api()
         self.assertIsInstance(api, API)

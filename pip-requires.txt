@@ -1,4 +1,5 @@
 -e git+https://github.com/nyaruka/smartmin.git#egg=smartmin-dev
+-e git+https://github.com/rapidpro/rapidpro-python#egg=rapidpro-python
 Django==1.7.2
 coverage
 django-nose
