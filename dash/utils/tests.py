@@ -3,9 +3,10 @@ from __future__ import absolute_import, unicode_literals
 import datetime
 import pytz
 
+from django.utils import timezone
 from django.test import TestCase
 from temba.types import Contact as TembaContact
-from .temba import temba_merge_contacts
+from .temba import temba_compare_contacts, temba_merge_contacts
 from . import format_iso8601, parse_iso8601, intersection, union, random_string
 
 
@@ -39,6 +40,35 @@ class InitTest(TestCase):
 
 
 class TembaTest(TestCase):
+    def test_compare_contacts(self):
+        # no differences
+        first = TembaContact.create(uuid='000-001', name="Ann", urns=['tel:1234'], groups=['000-001'],
+                                    fields=dict(chat_name="ann"), language='eng', modified_on=timezone.now())
+        second = TembaContact.create(uuid='000-001', name="Ann", urns=['tel:1234'], groups=['000-001'],
+                                     fields=dict(chat_name="ann"), language='eng', modified_on=timezone.now())
+        self.assertFalse(temba_compare_contacts(first, second))
+        self.assertFalse(temba_compare_contacts(second, first))
+
+        # different name
+        second = TembaContact.create(uuid='000-001', name="Annie", urns=['tel:1234'], groups=['000-001'],
+                                     fields=dict(chat_name="ann"), language='eng', modified_on=timezone.now())
+        self.assertTrue(temba_compare_contacts(first, second))
+
+        # different URNs
+        second = TembaContact.create(uuid='000-001', name="Ann", urns=['tel:1234', 'twitter:ann'], groups=['000-001'],
+                                     fields=dict(chat_name="ann"), language='eng', modified_on=timezone.now())
+        self.assertTrue(temba_compare_contacts(first, second))
+
+        # different group
+        second = TembaContact.create(uuid='000-001', name="Ann", urns=['tel:1234'], groups=['000-002'],
+                                     fields=dict(chat_name="ann"), language='eng', modified_on=timezone.now())
+        self.assertTrue(temba_compare_contacts(first, second))
+
+        # different field
+        second = TembaContact.create(uuid='000-001', name="Ann", urns=['tel:1234'], groups=['000-001'],
+                                     fields=dict(chat_name="annie"), language='eng', modified_on=timezone.now())
+        self.assertTrue(temba_compare_contacts(first, second))
+
     def test_merge_contacts(self):
         contact1 = TembaContact.create(uuid="000-001", name="Bob",
                                        urns=['tel:123', 'email:bob@bob.com'],

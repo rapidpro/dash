@@ -4,6 +4,16 @@ from temba.types import Contact as TembaContact
 from . import union
 
 
+def temba_compare_contacts(first, second):
+    """
+    Compares two Temba contacts to determine if there are differences
+    """
+    if first.uuid != second.uuid:  # pragma: no cover
+        raise ValueError("Can't compare contacts with different UUIDs")
+
+    return first.name != second.name or sorted(first.urns) != sorted(second.urns) or first.fields != second.fields or sorted(first.groups) != sorted(second.groups)
+
+
 def temba_merge_contacts(first, second, primary_groups):
     """
     Merges two Temba contacts, with priority given to the first contact
