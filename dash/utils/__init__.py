@@ -28,11 +28,7 @@ def intersection(*args):
     if not args:
         return []
 
-    result = set(args[0])
-    for l in args[1:]:
-        result &= set(l)
-
-    return list(result)
+    return list(set(args[0]).intersection(*args[1:]))
 
 
 def union(*args):
@@ -42,11 +38,7 @@ def union(*args):
     if not args:
         return []
 
-    result = set(args[0])
-    for l in args[1:]:
-        result |= set(l)
-
-    return list(result)
+    return list(set(args[0]).union(*args[1:]))
 
 
 def random_string(length):
