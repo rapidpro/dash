@@ -73,15 +73,17 @@ class TembaTest(TestCase):
         contact1 = TembaContact.create(uuid="000-001", name="Bob",
                                        urns=['tel:123', 'email:bob@bob.com'],
                                        fields=dict(chat_name="bob", age=23),
-                                       groups=['000-001', '000-008'])
+                                       groups=['000-001', '000-002', '000-010'])
         contact2 = TembaContact.create(uuid="000-001", name="Bobby",
                                        urns=['tel:234', 'twitter:bob'],
                                        fields=dict(chat_name="bobz", state='IN'),
-                                       groups=['000-002', '000-003', '000-009'])
+                                       groups=['000-003', '000-009', '000-011'])
 
-        merged = temba_merge_contacts(contact1, contact2, primary_groups=['000-001', '000-002', '000-003'])
+        merged = temba_merge_contacts(contact1, contact2, mutex_group_sets=(('000-001', '000-002', '000-003'),
+                                                                            ('000-008', '000-009'),
+                                                                            ('000-098', '000-099')))
         self.assertEqual(merged.uuid, '000-001')
         self.assertEqual(merged.name, "Bob")
         self.assertEqual(sorted(merged.urns), ['email:bob@bob.com', 'tel:123', 'twitter:bob'])
         self.assertEqual(merged.fields, dict(chat_name="bob", age=23, state='IN'))
-        self.assertEqual(sorted(merged.groups), ['000-001', '000-008', '000-009'])
+        self.assertEqual(sorted(merged.groups), ['000-001', '000-009', '000-010', '000-011'])
