@@ -42,6 +42,9 @@ def sync_push_contact(org, contact, change_type, mutex_group_sets):
         if temba_compare_contacts(remote_contact, local_contact):
             merged_contact = temba_merge_contacts(local_contact, remote_contact, mutex_group_sets)
 
+            # fetched contacts may have fields with null values but we can't push these so we remove them
+            merged_contact.fields = {k: v for k, v in merged_contact.fields.iteritems() if v is not None}
+
             client.update_contact(merged_contact.uuid,
                                   merged_contact.name,
                                   merged_contact.urns,
