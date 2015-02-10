@@ -5,7 +5,7 @@ import logging
 from collections import defaultdict
 from enum import Enum
 from temba.types import Contact as TembaContact
-from . import union, intersection
+from . import union, intersection, filter_dict
 
 
 logger = logging.getLogger(__name__)
@@ -52,7 +52,7 @@ def sync_push_contact(org, contact, change_type, mutex_group_sets):
         client.delete_contact(contact.uuid)
 
 
-def sync_pull_contacts(org, primary_groups, contact_class):
+def sync_pull_contacts(org, primary_groups, contact_class, contact_fields=None):
     """
     Pulls contacts from RapidPro and syncs with local contacts. Contact class must define a classmethod called
     kwargs_from_temba which generates field kwargs from a fetched temba contact.
@@ -96,7 +96,7 @@ def sync_pull_contacts(org, primary_groups, contact_class):
             if incoming.uuid in existing_by_uuid:
                 existing = existing_by_uuid[incoming.uuid]
 
-                if temba_compare_contacts(incoming, existing.as_temba()) or not existing.is_active:
+                if temba_compare_contacts(incoming, existing.as_temba(), contact_fields) or not existing.is_active:
                     kwargs = contact_class.kwargs_from_temba(org, incoming)
                     for field, value in kwargs.iteritems():
                         setattr(existing, field, value)
@@ -120,14 +120,28 @@ def sync_pull_contacts(org, primary_groups, contact_class):
     return created_uuids, updated_uuids, deleted_uuids
 
 
-def temba_compare_contacts(first, second):
+def temba_compare_contacts(first, second, fields=None):
     """
     Compares two Temba contacts to determine if there are differences
     """
     if first.uuid != second.uuid:  # pragma: no cover
         raise ValueError("Can't compare contacts with different UUIDs")
 
-    return first.name != second.name or sorted(first.urns) != sorted(second.urns) or first.fields != second.fields or sorted(first.groups) != sorted(second.groups)
+    if first.name != second.name:
+        return True
+
+    if sorted(first.urns) != sorted(second.urns):
+        return True
+
+    if sorted(first.groups) != sorted(second.groups):
+        return True
+
+    if fields is None and (first.fields != second.fields):
+        return True
+    if fields and (filter_dict(first.fields, fields) != filter_dict(second.fields, fields)):
+        return True
+
+    return False
 
 
 def temba_merge_contacts(first, second, mutex_group_sets):

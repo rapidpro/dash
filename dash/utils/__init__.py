@@ -29,3 +29,10 @@ def random_string(length):
     """
     letters = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"  # avoid things that could be mistaken ex: 'I' and '1'
     return ''.join([random.choice(letters) for _ in range(length)])
+
+
+def filter_dict(d, keys):
+    """
+    Creates a new dict from an existing dict that only has the given keys
+    """
+    return {k: v for k, v in d.iteritems() if k in keys}

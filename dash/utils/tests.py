@@ -3,7 +3,7 @@ from __future__ import absolute_import, unicode_literals
 from django.utils import timezone
 from django.test import TestCase
 from temba.types import Contact as TembaContact
-from . import intersection, union, random_string
+from . import intersection, union, random_string, filter_dict
 from .sync import temba_compare_contacts, temba_merge_contacts
 
 
@@ -20,8 +20,13 @@ class InitTest(TestCase):
 
     def test_random_string(self):
         rs = random_string(1000)
-        self.assertEquals(1000, len(rs))
+        self.assertEqual(1000, len(rs))
         self.assertFalse('1' in rs or 'I' in rs or '0' in rs or 'O' in rs)
+
+    def test_filter_dict(self):
+        d = {'a': 123, 'b': 'xyz', 'c': 456}
+        self.assertEqual(filter_dict(d, ()), {})
+        self.assertEqual(filter_dict(d, ('a', 'c')), {'a': 123, 'c': 456})
 
 
 class SyncTest(TestCase):
@@ -53,6 +58,14 @@ class SyncTest(TestCase):
         second = TembaContact.create(uuid='000-001', name="Ann", urns=['tel:1234'], groups=['000-001'],
                                      fields=dict(chat_name="annie"), language='eng', modified_on=timezone.now())
         self.assertTrue(temba_compare_contacts(first, second))
+
+        # additional field
+        second = TembaContact.create(uuid='000-001', name="Ann", urns=['tel:1234'], groups=['000-001'],
+                                     fields=dict(chat_name="ann", age=18), language='eng', modified_on=timezone.now())
+        self.assertTrue(temba_compare_contacts(first, second))
+        self.assertTrue(temba_compare_contacts(first, second, None))
+        self.assertFalse(temba_compare_contacts(first, second, ()))
+        self.assertFalse(temba_compare_contacts(first, second, ('chat_name',)))
 
     def test_temba_merge_contacts(self):
         contact1 = TembaContact.create(uuid="000-001", name="Bob",
