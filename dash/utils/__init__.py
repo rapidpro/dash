@@ -36,3 +36,16 @@ def filter_dict(d, keys):
     Creates a new dict from an existing dict that only has the given keys
     """
     return {k: v for k, v in d.iteritems() if k in keys}
+
+
+def get_obj_cacheable(obj, obj_attr, calculate):
+    """
+    Gets the result of a method call, using the given object and attribute name as a cache
+    """
+    if hasattr(obj, obj_attr):
+        return getattr(obj, obj_attr)
+
+    calculated = calculate()
+    setattr(obj, obj_attr, calculated)
+
+    return calculated

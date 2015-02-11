@@ -3,7 +3,7 @@ from __future__ import absolute_import, unicode_literals
 from django.utils import timezone
 from django.test import TestCase
 from temba.types import Contact as TembaContact
-from . import intersection, union, random_string, filter_dict
+from . import intersection, union, random_string, filter_dict, get_obj_cacheable
 from .sync import temba_compare_contacts, temba_merge_contacts
 
 
@@ -27,6 +27,14 @@ class InitTest(TestCase):
         d = {'a': 123, 'b': 'xyz', 'c': 456}
         self.assertEqual(filter_dict(d, ()), {})
         self.assertEqual(filter_dict(d, ('a', 'c')), {'a': 123, 'c': 456})
+
+    def test_get_obj_cacheable(self):
+        def calculate():
+            return "CALCULATED"
+
+        self.assertEqual(get_obj_cacheable(self, '_test_value', calculate), "CALCULATED")
+        self._test_value = "CACHED"
+        self.assertEqual(get_obj_cacheable(self, '_test_value', calculate), "CACHED")
 
 
 class SyncTest(TestCase):
