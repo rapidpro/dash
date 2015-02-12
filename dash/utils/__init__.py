@@ -1,6 +1,12 @@
 from __future__ import absolute_import, unicode_literals
 
+import calendar
+import datetime
+import json
+import pytz
 import random
+
+from django.core.cache import cache
 
 
 def intersection(*args):
@@ -49,3 +55,33 @@ def get_obj_cacheable(obj, obj_attr, calculate):
     setattr(obj, obj_attr, calculated)
 
     return calculated
+
+
+def get_sys_cacheable(key, ttl, calculate, as_json=True):
+    """
+    Gets the result of a method call, using the given key and TTL as a cache
+    """
+    cached = cache.get(key)
+    if cached:
+        return json.loads(cached) if as_json else cached
+
+    calculated = calculate()
+    cache.set(key, json.dumps(calculated) if as_json else calculated, ttl)
+
+    return calculated
+
+
+def datetime_to_ms(dt):
+    """
+    Converts a datetime to a millisecond accuracy timestamp
+    """
+    seconds = calendar.timegm(dt.utctimetuple())
+    return seconds * 1000 + dt.microsecond / 1000
+
+
+def ms_to_datetime(ms):
+    """
+    Converts a millisecond accuracy timestamp to a datetime
+    """
+    dt = datetime.datetime.utcfromtimestamp(ms/1000)
+    return dt.replace(microsecond=(ms % 1000) * 1000).replace(tzinfo=pytz.utc)

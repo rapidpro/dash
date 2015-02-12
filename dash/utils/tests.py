@@ -1,9 +1,10 @@
 from __future__ import absolute_import, unicode_literals
 
+from django.core.cache import cache
 from django.utils import timezone
 from django.test import TestCase
 from temba.types import Contact as TembaContact
-from . import intersection, union, random_string, filter_dict, get_obj_cacheable
+from . import intersection, union, random_string, filter_dict, get_obj_cacheable, get_sys_cacheable
 from .sync import temba_compare_contacts, temba_merge_contacts
 
 
@@ -35,6 +36,21 @@ class InitTest(TestCase):
         self.assertEqual(get_obj_cacheable(self, '_test_value', calculate), "CALCULATED")
         self._test_value = "CACHED"
         self.assertEqual(get_obj_cacheable(self, '_test_value', calculate), "CACHED")
+
+    def test_get_sys_cacheable(self):
+        def calculate1():
+            return "CALCULATED"
+
+        self.assertEqual(get_sys_cacheable('test_key:1', 60, calculate1, as_json=False), "CALCULATED")
+        cache.set('test_key:1', "CACHED", 60)
+        self.assertEqual(get_sys_cacheable('test_key:1', 60, calculate1, as_json=False), "CACHED")
+
+        def calculate2():
+            return dict(a=123, b="abc")
+
+        self.assertEqual(get_sys_cacheable('test_key:2', 60, calculate2, as_json=True), dict(a=123, b="abc"))
+        cache.set('test_key:2', '{"a":234,"b":"xyz"}', 60)
+        self.assertEqual(get_sys_cacheable('test_key:2', 60, calculate2, as_json=True), dict(a=234, b="xyz"))
 
 
 class SyncTest(TestCase):
