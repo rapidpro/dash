@@ -45,6 +45,10 @@ class InitTest(TestCase):
         cache.set('test_key:1', "CACHED", 60)
         self.assertEqual(get_sys_cacheable('test_key:1', 60, calculate1, as_json=False), "CACHED")
 
+        # falsey values shouldn't trigger re-calculation
+        cache.set('test_key:1', 0, 60)
+        self.assertEqual(get_sys_cacheable('test_key:1', 60, calculate1, as_json=False), 0)
+
         def calculate2():
             return dict(a=123, b="abc")
 

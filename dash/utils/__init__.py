@@ -62,7 +62,7 @@ def get_sys_cacheable(key, ttl, calculate, as_json=True):
     Gets the result of a method call, using the given key and TTL as a cache
     """
     cached = cache.get(key)
-    if cached:
+    if cached is not None:
         return json.loads(cached) if as_json else cached
 
     calculated = calculate()
