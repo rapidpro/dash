@@ -16,3 +16,4 @@ django-timezones
 phonenumbers
 django-redis
 enum34
+python-dateutil

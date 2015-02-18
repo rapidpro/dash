@@ -7,6 +7,8 @@ import pytz
 import random
 
 from django.core.cache import cache
+from django.utils import timezone
+from dateutil.relativedelta import relativedelta
 
 
 def intersection(*args):
@@ -85,3 +87,15 @@ def ms_to_datetime(ms):
     """
     dt = datetime.datetime.utcfromtimestamp(ms/1000)
     return dt.replace(microsecond=(ms % 1000) * 1000).replace(tzinfo=pytz.utc)
+
+
+def get_month_range(d=None):
+    """
+    Gets the start (inclusive) and end (exclusive) datetimes of the current month in the same timezone as the given date
+    """
+    if not d:
+        d = timezone.now()
+
+    start = d.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    end = start + relativedelta(months=1)
+    return start, end

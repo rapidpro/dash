@@ -1,12 +1,14 @@
 from __future__ import absolute_import, unicode_literals
 
 import json
+import pytz
 
+from datetime import datetime
 from django.core.cache import cache
 from django.utils import timezone
 from django.test import TestCase
 from temba.types import Contact as TembaContact
-from . import intersection, union, random_string, filter_dict, get_cacheable, get_obj_cacheable
+from . import intersection, union, random_string, filter_dict, get_cacheable, get_obj_cacheable, get_month_range
 from .sync import temba_compare_contacts, temba_merge_contacts
 
 
@@ -57,6 +59,11 @@ class InitTest(TestCase):
         self.assertEqual(get_obj_cacheable(self, '_test_value', calculate), "CALCULATED")
         self._test_value = "CACHED"
         self.assertEqual(get_obj_cacheable(self, '_test_value', calculate), "CACHED")
+
+    def test_get_month_range(self):
+        self.assertEqual(get_month_range(datetime(2014, 2, 10, 12, 30, 0, 0, pytz.timezone("Africa/Kigali"))),
+                         (datetime(2014, 2, 1, 0, 0, 0, 0, pytz.timezone("Africa/Kigali")),
+                          datetime(2014, 3, 1, 0, 0, 0, 0, pytz.timezone("Africa/Kigali"))))
 
 
 class SyncTest(TestCase):
