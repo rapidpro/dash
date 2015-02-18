@@ -44,29 +44,29 @@ def filter_dict(d, keys):
     return {k: v for k, v in d.iteritems() if k in keys}
 
 
-def get_obj_cacheable(obj, obj_attr, calculate):
+def get_cacheable(cache_key, cache_ttl, calculate):
     """
-    Gets the result of a method call, using the given object and attribute name as a cache
+    Gets the result of a method call, using the given key and TTL as a cache
     """
-    if hasattr(obj, obj_attr):
-        return getattr(obj, obj_attr)
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return json.loads(cached)
 
     calculated = calculate()
-    setattr(obj, obj_attr, calculated)
+    cache.set(cache_key, json.dumps(calculated), cache_ttl)
 
     return calculated
 
 
-def get_sys_cacheable(key, ttl, calculate, as_json=True):
+def get_obj_cacheable(obj, attr_name, calculate):
     """
-    Gets the result of a method call, using the given key and TTL as a cache
+    Gets the result of a method call, using the given object and attribute name as a cache
     """
-    cached = cache.get(key)
-    if cached is not None:
-        return json.loads(cached) if as_json else cached
+    if hasattr(obj, attr_name):
+        return getattr(obj, attr_name)
 
     calculated = calculate()
-    cache.set(key, json.dumps(calculated) if as_json else calculated, ttl)
+    setattr(obj, attr_name, calculated)
 
     return calculated
 
