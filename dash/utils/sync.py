@@ -73,12 +73,13 @@ def sync_pull_contacts(org, contact_class, contact_fields=None):
     created_uuids = []
     updated_uuids = []
     deleted_uuids = []
-    errored_uuids = []
+    failed_uuids = []
 
     for incoming in incoming_contacts:
         # ignore contacts with no URN
         if not incoming.urns:
             logger.warning("Ignoring contact %s with no URN" % incoming.uuid)
+            failed_uuids.append(incoming.uuid)
             continue
 
         if incoming.uuid in existing_by_uuid:
@@ -88,7 +89,7 @@ def sync_pull_contacts(org, contact_class, contact_fields=None):
                 try:
                     kwargs = contact_class.kwargs_from_temba(org, incoming)
                 except ValueError:
-                    errored_uuids.append(incoming.uuid)
+                    failed_uuids.append(incoming.uuid)
                     continue
 
                 for field, value in kwargs.iteritems():
@@ -102,7 +103,7 @@ def sync_pull_contacts(org, contact_class, contact_fields=None):
             try:
                 kwargs = contact_class.kwargs_from_temba(org, incoming)
             except ValueError:
-                errored_uuids.append(incoming.uuid)
+                failed_uuids.append(incoming.uuid)
                 continue
 
             contact_class.objects.create(**kwargs)
@@ -117,7 +118,7 @@ def sync_pull_contacts(org, contact_class, contact_fields=None):
 
     existing_contacts.filter(uuid__in=deleted_uuids).update(is_active=False)
 
-    return created_uuids, updated_uuids, deleted_uuids, errored_uuids
+    return created_uuids, updated_uuids, deleted_uuids, failed_uuids
 
 
 def temba_compare_contacts(first, second, fields=None):
