@@ -68,10 +68,12 @@ def sync_pull_contacts(org, contact_class, contact_fields=None):
     existing_contacts = contact_class.objects.filter(org=org)
     existing_by_uuid = {contact.uuid: contact for contact in existing_contacts}
 
-    incoming_uuids = set()
+    synced_uuids = set()
+
     created_uuids = []
     updated_uuids = []
     deleted_uuids = []
+    errored_uuids = []
 
     for incoming in incoming_contacts:
         # ignore contacts with no URN
@@ -79,16 +81,14 @@ def sync_pull_contacts(org, contact_class, contact_fields=None):
             logger.warning("Ignoring contact %s with no URN" % incoming.uuid)
             continue
 
-        incoming_uuids.add(incoming.uuid)
-
         if incoming.uuid in existing_by_uuid:
             existing = existing_by_uuid[incoming.uuid]
 
             if temba_compare_contacts(incoming, existing.as_temba(), contact_fields) or not existing.is_active:
                 try:
                     kwargs = contact_class.kwargs_from_temba(org, incoming)
-                except ValueError, e:
-                    logger.error(e)
+                except ValueError:
+                    errored_uuids.append(incoming.uuid)
                     continue
 
                 for field, value in kwargs.iteritems():
@@ -101,21 +101,23 @@ def sync_pull_contacts(org, contact_class, contact_fields=None):
         else:
             try:
                 kwargs = contact_class.kwargs_from_temba(org, incoming)
-            except ValueError, e:
-                logger.error(e)
+            except ValueError:
+                errored_uuids.append(incoming.uuid)
                 continue
 
             contact_class.objects.create(**kwargs)
             created_uuids.append(kwargs['uuid'])
 
-    # any existing contact not in the incoming set, is now deleted if not already deleted
+        synced_uuids.add(incoming.uuid)
+
+    # any existing contact not in the synched set, is now deleted if not already deleted
     for existing_uuid, existing in existing_by_uuid.iteritems():
-        if existing_uuid not in incoming_uuids and existing.is_active:
+        if existing_uuid not in synced_uuids and existing.is_active:
             deleted_uuids.append(existing_uuid)
 
     existing_contacts.filter(uuid__in=deleted_uuids).update(is_active=False)
 
-    return created_uuids, updated_uuids, deleted_uuids
+    return created_uuids, updated_uuids, deleted_uuids, errored_uuids
 
 
 def temba_compare_contacts(first, second, fields=None):
