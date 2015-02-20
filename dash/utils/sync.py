@@ -55,10 +55,15 @@ def sync_push_contact(org, contact, change_type, mutex_group_sets):
         client.delete_contact(contact.uuid)
 
 
-def sync_pull_contacts(org, contact_class, contact_fields=None):
+def sync_pull_contacts(org, contact_class, fields=None, groups=None):
     """
-    Pulls all contacts from RapidPro and syncs with local contacts. Contact class must define a classmethod called
+    Pulls all contacts from RapidPro and syncs with local contacts. Contact class must define a class method called
     kwargs_from_temba which generates field kwargs from a fetched temba contact.
+    :param org: the org
+    :param contact_class: the contact class type
+    :param fields: the contact field keys used - used to determine if local contact differs
+    :param groups: the contact group UUIDs used - used to determine if local contact differs
+    :return: tuple containing list of UUIDs for created, updated, deleted and failed contacts
     """
     # get all remote contacts
     client = org.get_temba_client()
@@ -85,7 +90,8 @@ def sync_pull_contacts(org, contact_class, contact_fields=None):
         if incoming.uuid in existing_by_uuid:
             existing = existing_by_uuid[incoming.uuid]
 
-            if temba_compare_contacts(incoming, existing.as_temba(), contact_fields) or not existing.is_active:
+            has_changes = temba_compare_contacts(incoming, existing.as_temba(), fields, groups)
+            if has_changes or not existing.is_active:
                 try:
                     kwargs = contact_class.kwargs_from_temba(org, incoming)
                 except ValueError:
@@ -121,7 +127,7 @@ def sync_pull_contacts(org, contact_class, contact_fields=None):
     return created_uuids, updated_uuids, deleted_uuids, failed_uuids
 
 
-def temba_compare_contacts(first, second, fields=None):
+def temba_compare_contacts(first, second, fields=None, groups=None):
     """
     Compares two Temba contacts to determine if there are differences
     """
@@ -134,7 +140,9 @@ def temba_compare_contacts(first, second, fields=None):
     if sorted(first.urns) != sorted(second.urns):
         return True
 
-    if sorted(first.groups) != sorted(second.groups):
+    if groups is None and (sorted(first.groups) != sorted(second.groups)):
+        return True
+    if groups and (sorted(intersection(first.groups, groups)) != sorted(intersection(second.groups, groups))):
         return True
 
     if fields is None and (first.fields != second.fields):
