@@ -90,8 +90,9 @@ def sync_pull_contacts(org, contact_class, fields=None, groups=None):
         if incoming.uuid in existing_by_uuid:
             existing = existing_by_uuid[incoming.uuid]
 
-            has_changes = temba_compare_contacts(incoming, existing.as_temba(), fields, groups)
-            if has_changes or not existing.is_active:
+            diff = temba_compare_contacts(incoming, existing.as_temba(), fields, groups)
+
+            if diff or not existing.is_active:
                 try:
                     kwargs = contact_class.kwargs_from_temba(org, incoming)
                 except ValueError:
@@ -129,28 +130,28 @@ def sync_pull_contacts(org, contact_class, fields=None, groups=None):
 
 def temba_compare_contacts(first, second, fields=None, groups=None):
     """
-    Compares two Temba contacts to determine if there are differences
+    Compares two Temba contacts to determine if there are differences. Returns first difference found.
     """
     if first.uuid != second.uuid:  # pragma: no cover
         raise ValueError("Can't compare contacts with different UUIDs")
 
     if first.name != second.name:
-        return True
+        return 'name'
 
     if sorted(first.urns) != sorted(second.urns):
-        return True
+        return 'urns'
 
     if groups is None and (sorted(first.groups) != sorted(second.groups)):
-        return True
+        return 'groups'
     if groups and (sorted(intersection(first.groups, groups)) != sorted(intersection(second.groups, groups))):
-        return True
+        return 'groups'
 
     if fields is None and (first.fields != second.fields):
-        return True
+        return 'fields'
     if fields and (filter_dict(first.fields, fields) != filter_dict(second.fields, fields)):
-        return True
+        return 'fields'
 
-    return False
+    return None
 
 
 def temba_merge_contacts(first, second, mutex_group_sets):

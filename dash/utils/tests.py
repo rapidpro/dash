@@ -73,41 +73,41 @@ class SyncTest(TestCase):
                                     fields=dict(chat_name="ann"), language='eng', modified_on=timezone.now())
         second = TembaContact.create(uuid='000-001', name="Ann", urns=['tel:1234'], groups=['000-001'],
                                      fields=dict(chat_name="ann"), language='eng', modified_on=timezone.now())
-        self.assertFalse(temba_compare_contacts(first, second))
-        self.assertFalse(temba_compare_contacts(second, first))
+        self.assertIsNone(temba_compare_contacts(first, second))
+        self.assertIsNone(temba_compare_contacts(second, first))
 
         # different name
         second = TembaContact.create(uuid='000-001', name="Annie", urns=['tel:1234'], groups=['000-001'],
                                      fields=dict(chat_name="ann"), language='eng', modified_on=timezone.now())
-        self.assertTrue(temba_compare_contacts(first, second))
+        self.assertEqual(temba_compare_contacts(first, second), 'name')
 
         # different URNs
         second = TembaContact.create(uuid='000-001', name="Ann", urns=['tel:1234', 'twitter:ann'], groups=['000-001'],
                                      fields=dict(chat_name="ann"), language='eng', modified_on=timezone.now())
-        self.assertTrue(temba_compare_contacts(first, second))
+        self.assertEqual(temba_compare_contacts(first, second), 'urns')
 
         # different group
         second = TembaContact.create(uuid='000-001', name="Ann", urns=['tel:1234'], groups=['000-002'],
                                      fields=dict(chat_name="ann"), language='eng', modified_on=timezone.now())
-        self.assertTrue(temba_compare_contacts(first, second))
-        self.assertTrue(temba_compare_contacts(first, second, groups=('000-001', '000-002')))
-        self.assertFalse(temba_compare_contacts(first, second, groups=()))
-        self.assertFalse(temba_compare_contacts(first, second, groups=('000-003', '000-004')))
+        self.assertEqual(temba_compare_contacts(first, second), 'groups')
+        self.assertEqual(temba_compare_contacts(first, second, groups=('000-001', '000-002')), 'groups')
+        self.assertIsNone(temba_compare_contacts(first, second, groups=()))
+        self.assertIsNone(temba_compare_contacts(first, second, groups=('000-003', '000-004')))
 
         # different field
         second = TembaContact.create(uuid='000-001', name="Ann", urns=['tel:1234'], groups=['000-001'],
                                      fields=dict(chat_name="annie"), language='eng', modified_on=timezone.now())
-        self.assertTrue(temba_compare_contacts(first, second))
-        self.assertTrue(temba_compare_contacts(first, second, fields=('chat_name', 'gender')))
-        self.assertFalse(temba_compare_contacts(first, second, fields=()))
-        self.assertFalse(temba_compare_contacts(first, second, fields=('age', 'gender')))
+        self.assertEqual(temba_compare_contacts(first, second), 'fields')
+        self.assertEqual(temba_compare_contacts(first, second, fields=('chat_name', 'gender')), 'fields')
+        self.assertIsNone(temba_compare_contacts(first, second, fields=()))
+        self.assertIsNone(temba_compare_contacts(first, second, fields=('age', 'gender')))
 
         # additional field
         second = TembaContact.create(uuid='000-001', name="Ann", urns=['tel:1234'], groups=['000-001'],
                                      fields=dict(chat_name="ann", age=18), language='eng', modified_on=timezone.now())
-        self.assertTrue(temba_compare_contacts(first, second))
-        self.assertFalse(temba_compare_contacts(first, second, fields=()))
-        self.assertFalse(temba_compare_contacts(first, second, fields=('chat_name',)))
+        self.assertEqual(temba_compare_contacts(first, second), 'fields')
+        self.assertIsNone(temba_compare_contacts(first, second, fields=()))
+        self.assertIsNone(temba_compare_contacts(first, second, fields=('chat_name',)))
 
     def test_temba_merge_contacts(self):
         contact1 = TembaContact.create(uuid="000-001", name="Bob",
