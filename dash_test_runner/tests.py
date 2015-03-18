@@ -634,7 +634,7 @@ class OrgTest(DashTest):
             response = self.client.get(edit_url, SERVER_NAME="uganda.ureport.io")
             self.assertEquals(response.status_code, 200)
             self.assertTrue(response.context['form'])
-            self.assertEquals(len(response.context['form'].fields), 10)
+            self.assertEquals(len(response.context['form'].fields), 11)
 
             # featured state is currently disabled; adjust the following lines
             self.assertTrue('featured_state' not in response.context['form'].fields) # this make sure the featured state are disabled
