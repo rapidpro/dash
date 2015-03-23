@@ -262,7 +262,7 @@ class OrgCRUDL(SmartCRUDL):
                     if config_field['name'] == 'featured_state':
                         choices = [(feature['properties']['id'], feature['properties']['name']) for feature in self.org.get_api().get_country_geojson()['features']]
                         form.fields[config_field['name']] = forms.ChoiceField(choices=choices, **config_field['field'])
-                    elif config_field['name'] == 'show_jobs':
+                    elif config_field['name'] == 'has_jobs':
                         form.fields[config_field['name']] = forms.BooleanField(**config_field['field'])
                     else:
                         form.fields[config_field['name']] = forms.CharField(**config_field['field'])
