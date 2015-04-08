@@ -185,7 +185,10 @@ class Org(SmartModel):
 
             for elt in api_data[0]['categories']:
                 time_str =  elt['label']
-                parsed_time = tz.localize(datetime.strptime(time_str, '%d-%m-%Y %H:%M'))
+                try:
+                    parsed_time = tz.localize(datetime.strptime(time_str, '%d-%m-%Y %H:%M'))
+                except ValueError:
+                    parsed_time = tz.localize(datetime.strptime(time_str, '%Y-%m-%dT%H:%M:%SZ'))
 
                 # this is in the range we care about
                 if parsed_time > six_months_ago:
