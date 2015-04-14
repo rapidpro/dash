@@ -136,7 +136,7 @@ class OrgForm(forms.ModelForm):
         return password
 
     class Meta:
-        fields = ('is_active', 'first_name', 'last_name', 'email', 'password', 'name', 'subdomain', 'timezone', 'language', 'api_token', 'logo', 'administrators')
+        fields = ('is_active', 'first_name', 'last_name', 'email', 'password', 'name', 'subdomain', 'timezone', 'language', 'api_token', 'logo', 'flag', 'administrators')
         model = Org
 
 
@@ -155,11 +155,11 @@ class OrgCRUDL(SmartCRUDL):
 
     class Create(SmartCreateView):
         form_class = OrgForm
-        fields = ('name', 'language', 'subdomain', 'timezone', 'administrators', 'api_token')
+        fields = ('name', 'language', 'subdomain', 'timezone', 'administrators', 'flag', 'api_token')
 
     class Update(SmartUpdateView):
         form_class = OrgForm
-        fields = ('is_active', 'name', 'subdomain', 'timezone', 'language', 'api_token', 'logo', 'administrators')
+        fields = ('is_active', 'name', 'subdomain', 'timezone', 'language', 'api_token', 'logo', 'flag', 'administrators')
 
     class List(SmartListView):
         fields = ('name', 'timezone', 'created_on', 'modified_on')

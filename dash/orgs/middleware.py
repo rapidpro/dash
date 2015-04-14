@@ -45,7 +45,7 @@ class SetOrgMiddleware(object):
         subdomain = self.get_subdomain(request)
 
         if subdomain:
-            org = Org.objects.filter(subdomain__iexact=subdomain).first()
+            org = Org.objects.filter(subdomain__iexact=subdomain, is_active=True).first()
         else:
             org = None
 
@@ -77,11 +77,17 @@ class SetOrgMiddleware(object):
             if not url_name in whitelist:
                 all_orgs = Org.objects.filter(is_active=True).order_by('name')
 
-                # populate a 'host' attribute on each org so we can link off to them
+                linked_sites = getattr(settings, 'PREVIOUS_ORG_SITES', [])
+                # populate a ureport site for each org so we can link off to them
                 for org in all_orgs:
-                    org.host = settings.SITE_HOST_PATTERN % org.subdomain
+                    host = settings.SITE_HOST_PATTERN % org.subdomain
+                    org.host = host
+                    if org.get_config('is_on_landing_page'):
+                        linked_sites.append(dict(name=org.name, host=host, flag=org.flag.url, is_static=False))
 
-                return TemplateResponse(request, settings.SITE_CHOOSER_TEMPLATE, dict(orgs=all_orgs))
+                linked_sites_sorted = sorted(linked_sites, key=lambda k: k['name'])
+                return TemplateResponse(request, settings.SITE_CHOOSER_TEMPLATE, dict(orgs=all_orgs,
+                                                                                      linked_sites=linked_sites_sorted))
 
     @staticmethod
     def get_subdomain(request):

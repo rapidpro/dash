@@ -64,7 +64,7 @@ INSTALLED_APPS = (
     'dash.categories',
     'dash.dashblocks',
     'dash.stories',
-
+    'dash.utils',
 
 )
 

@@ -154,8 +154,20 @@ class SetOrgMiddlewareTest(DashTest):
         response = self.simulate_process('ureport.io', 'dash.test_test')
         self.assertEqual(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
         self.assertFalse(response.context_data['orgs'])
+        self.assertFalse(response.context_data['linked_sites'])
         self.assertIsNone(self.request.org)
         self.assertIsNone(self.request.user.get_org())
+
+        with self.settings(PREVIOUS_ORG_SITES=[dict(name="Indonesia",
+                                                    host="http://www.ureportindonesia.com/",
+                                                    flag="flag_id.png",
+                                                    is_static=True),
+                                                    ]):
+            response = self.simulate_process('ureport.io', 'dash.test_test')
+            self.assertEqual(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
+            self.assertFalse(response.context_data['orgs'])
+            self.assertTrue(response.context_data['linked_sites'])
+            self.assertEquals(response.context_data['linked_sites'][0]['name'], "Indonesia")
 
         # create some orgs..
         ug_org = self.create_org('uganda', self.admin)
@@ -202,6 +214,14 @@ class SetOrgMiddlewareTest(DashTest):
         self.request.get_host.side_effect = DisallowedHost
 
         response = self.simulate_process('xxx.ureport.io', 'dash.test_test')
+        self.assertIsNone(self.request.org)
+        self.assertIsNone(self.request.user.get_org())
+        self.assertEqual(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
+
+        rw_org.is_active = False
+        rw_org.save()
+
+        response = self.simulate_process('rwanda.ureport.io', 'dash.test_test')
         self.assertIsNone(self.request.org)
         self.assertIsNone(self.request.user.get_org())
         self.assertEqual(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
