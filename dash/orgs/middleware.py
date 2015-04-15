@@ -1,6 +1,8 @@
 from __future__ import absolute_import, unicode_literals
 
 import traceback
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
 
 from dash.orgs.models import Org
 from django.conf import settings
@@ -26,6 +28,7 @@ ALLOW_NO_ORG = (
     'orgs.org_list',
     'orgs.org_update',
     'orgs.org_choose',
+    'orgs.org_chooser',
     'orgs.org_home',
     'orgs.org_edit',
     'orgs.org_manage_accounts',
@@ -75,19 +78,7 @@ class SetOrgMiddleware(object):
             whitelist = ALLOW_NO_ORG + getattr(settings, 'SITE_ALLOW_NO_ORG', ())
 
             if not url_name in whitelist:
-                all_orgs = Org.objects.filter(is_active=True).order_by('name')
-
-                linked_sites = getattr(settings, 'PREVIOUS_ORG_SITES', [])
-                # populate a ureport site for each org so we can link off to them
-                for org in all_orgs:
-                    host = settings.SITE_HOST_PATTERN % org.subdomain
-                    org.host = host
-                    if org.get_config('is_on_landing_page'):
-                        linked_sites.append(dict(name=org.name, host=host, flag=org.flag.url, is_static=False))
-
-                linked_sites_sorted = sorted(linked_sites, key=lambda k: k['name'])
-                return TemplateResponse(request, settings.SITE_CHOOSER_TEMPLATE, dict(orgs=all_orgs,
-                                                                                      linked_sites=linked_sites_sorted))
+                return HttpResponseRedirect(reverse(getattr(settings, 'SITE_CHOOSER_VIEW_NAME', 'orgs.org_chooser')))
 
     @staticmethod
     def get_subdomain(request):

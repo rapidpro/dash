@@ -152,22 +152,10 @@ class SetOrgMiddlewareTest(DashTest):
 
         # check non-white-listed URL with no orgs
         response = self.simulate_process('ureport.io', 'dash.test_test')
-        self.assertEqual(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
-        self.assertFalse(response.context_data['orgs'])
-        self.assertFalse(response.context_data['linked_sites'])
+        self.assertEquals(response.status_code, 302)
+        self.assertEquals(response.url, reverse(settings.SITE_CHOOSER_VIEW_NAME))
         self.assertIsNone(self.request.org)
         self.assertIsNone(self.request.user.get_org())
-
-        with self.settings(PREVIOUS_ORG_SITES=[dict(name="Indonesia",
-                                                    host="http://www.ureportindonesia.com/",
-                                                    flag="flag_id.png",
-                                                    is_static=True),
-                                                    ]):
-            response = self.simulate_process('ureport.io', 'dash.test_test')
-            self.assertEqual(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
-            self.assertFalse(response.context_data['orgs'])
-            self.assertTrue(response.context_data['linked_sites'])
-            self.assertEquals(response.context_data['linked_sites'][0]['name'], "Indonesia")
 
         # create some orgs..
         ug_org = self.create_org('uganda', self.admin)
@@ -175,10 +163,8 @@ class SetOrgMiddlewareTest(DashTest):
 
         # now orgs should be listed in choose page
         response = self.simulate_process('ureport.io', 'dash.test_test')
-        self.assertEqual(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
-        self.assertEqual(len(response.context_data['orgs']), 2)
-        self.assertEqual(response.context_data['orgs'][0], rw_org)
-        self.assertEqual(response.context_data['orgs'][1], ug_org)
+        self.assertEquals(response.status_code, 302)
+        self.assertEquals(response.url, reverse(settings.SITE_CHOOSER_VIEW_NAME))
         self.assertIsNone(self.request.org)
         self.assertIsNone(self.request.user.get_org())
 
@@ -208,7 +194,8 @@ class SetOrgMiddlewareTest(DashTest):
         response = self.simulate_process('blabla.ureport.io', 'dash.test_test')
         self.assertIsNone(self.request.org)
         self.assertIsNone(self.request.user.get_org())
-        self.assertEqual(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
+        self.assertEquals(response.status_code, 302)
+        self.assertEquals(response.url, reverse(settings.SITE_CHOOSER_VIEW_NAME))
 
         # test disallowed host exception
         self.request.get_host.side_effect = DisallowedHost
@@ -216,7 +203,8 @@ class SetOrgMiddlewareTest(DashTest):
         response = self.simulate_process('xxx.ureport.io', 'dash.test_test')
         self.assertIsNone(self.request.org)
         self.assertIsNone(self.request.user.get_org())
-        self.assertEqual(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
+        self.assertEquals(response.status_code, 302)
+        self.assertEquals(response.url, reverse(settings.SITE_CHOOSER_VIEW_NAME))
 
         rw_org.is_active = False
         rw_org.save()
@@ -224,7 +212,8 @@ class SetOrgMiddlewareTest(DashTest):
         response = self.simulate_process('rwanda.ureport.io', 'dash.test_test')
         self.assertIsNone(self.request.org)
         self.assertIsNone(self.request.user.get_org())
-        self.assertEqual(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
+        self.assertEquals(response.status_code, 302)
+        self.assertEquals(response.url, reverse(settings.SITE_CHOOSER_VIEW_NAME))
 
 
 class OrgContextProcessorTestcase(DashTest):
@@ -492,7 +481,7 @@ class OrgTest(DashTest):
         response = self.client.get(update_url)
         self.assertEquals(200, response.status_code)
         self.assertFalse(Org.objects.filter(name="Burundi"))
-        self.assertEquals(len(response.context['form'].fields), 9)
+        self.assertEquals(len(response.context['form'].fields), 10)
 
         post_data = dict(name="Burundi", timezone="Africa/Bujumbura", subdomain="burundi", is_active=True, male_label="male", female_label='female', administrators=self.admin.pk)
         response = self.client.post(update_url, post_data)
@@ -1903,16 +1892,18 @@ class StoryTest(DashTest):
         create_url = reverse('stories.story_create')
 
         response = self.client.get(create_url)
-        self.assertEquals(response.status_code, 200)
-        self.assertEquals(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
+        self.assertEquals(response.status_code, 302)
+        response = self.client.get(create_url, follow=True)
+        self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_VIEW_NAME))
         self.assertEquals(len(response.context['orgs']), 2)
         self.assertTrue(self.uganda in response.context['orgs'])
         self.assertTrue(self.nigeria in response.context['orgs'])
 
         self.login(self.admin)
         response = self.client.get(create_url)
-        self.assertEquals(response.status_code, 200)
-        self.assertEquals(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
+        self.assertEquals(response.status_code, 302)
+        response = self.client.get(create_url, follow=True)
+        self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_VIEW_NAME))
         self.assertEquals(len(response.context['orgs']), 2)
         self.assertTrue(self.uganda in response.context['orgs'])
         self.assertTrue(self.nigeria in response.context['orgs'])
@@ -1973,15 +1964,17 @@ class StoryTest(DashTest):
         update_url_nigeria = reverse('stories.story_update', args=[story2.pk])
 
         response = self.client.get(update_url_uganda)
-        self.assertEquals(response.status_code, 200)
-        self.assertEquals(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
+        self.assertEquals(response.status_code, 302)
+        response = self.client.get(update_url_uganda, follow=True)
+        self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_VIEW_NAME))
         self.assertEquals(len(response.context['orgs']), 2)
         self.assertTrue(self.uganda in response.context['orgs'])
         self.assertTrue(self.nigeria in response.context['orgs'])
 
         response = self.client.get(update_url_nigeria)
-        self.assertEquals(response.status_code, 200)
-        self.assertEquals(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
+        self.assertEquals(response.status_code, 302)
+        response = self.client.get(update_url_nigeria, follow=True)
+        self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_VIEW_NAME))
         self.assertEquals(len(response.context['orgs']), 2)
         self.assertTrue(self.uganda in response.context['orgs'])
         self.assertTrue(self.nigeria in response.context['orgs'])
@@ -1994,15 +1987,17 @@ class StoryTest(DashTest):
 
         self.login(self.admin)
         response = self.client.get(update_url_uganda)
-        self.assertEquals(response.status_code, 200)
-        self.assertEquals(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
+        self.assertEquals(response.status_code, 302)
+        response = self.client.get(update_url_uganda, follow=True)
+        self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_VIEW_NAME))
         self.assertEquals(len(response.context['orgs']), 2)
         self.assertTrue(self.uganda in response.context['orgs'])
         self.assertTrue(self.nigeria in response.context['orgs'])
 
         response = self.client.get(update_url_nigeria)
-        self.assertEquals(response.status_code, 200)
-        self.assertEquals(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
+        self.assertEquals(response.status_code, 302)
+        response = self.client.get(update_url_nigeria, follow=True)
+        self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_VIEW_NAME))
         self.assertEquals(len(response.context['orgs']), 2)
         self.assertTrue(self.uganda in response.context['orgs'])
         self.assertTrue(self.nigeria in response.context['orgs'])
@@ -2067,16 +2062,18 @@ class StoryTest(DashTest):
         list_url = reverse('stories.story_list')
 
         response = self.client.get(list_url)
-        self.assertEquals(response.status_code, 200)
-        self.assertEquals(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
+        self.assertEquals(response.status_code, 302)
+        response = self.client.get(list_url, follow=True)
+        self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_VIEW_NAME))
         self.assertEquals(len(response.context['orgs']), 2)
         self.assertTrue(self.uganda in response.context['orgs'])
         self.assertTrue(self.nigeria in response.context['orgs'])
 
         self.login(self.admin)
         response = self.client.get(list_url)
-        self.assertEquals(response.status_code, 200)
-        self.assertEquals(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
+        self.assertEquals(response.status_code, 302)
+        response = self.client.get(list_url, follow=True)
+        self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_VIEW_NAME))
         self.assertEquals(len(response.context['orgs']), 2)
         self.assertTrue(self.uganda in response.context['orgs'])
         self.assertTrue(self.nigeria in response.context['orgs'])
@@ -2110,15 +2107,17 @@ class StoryTest(DashTest):
 
 
         response = self.client.get(images_url_uganda)
-        self.assertEquals(response.status_code, 200)
-        self.assertEquals(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
+        self.assertEquals(response.status_code, 302)
+        response = self.client.get(images_url_uganda, follow=True)
+        self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_VIEW_NAME))
         self.assertEquals(len(response.context['orgs']), 2)
         self.assertTrue(self.uganda in response.context['orgs'])
         self.assertTrue(self.nigeria in response.context['orgs'])
 
         response = self.client.get(images_url_nigeria)
-        self.assertEquals(response.status_code, 200)
-        self.assertEquals(response.template_name, settings.SITE_CHOOSER_TEMPLATE)
+        self.assertEquals(response.status_code, 302)
+        response = self.client.get(images_url_nigeria, follow=True)
+        self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_VIEW_NAME))
         self.assertEquals(len(response.context['orgs']), 2)
         self.assertTrue(self.uganda in response.context['orgs'])
         self.assertTrue(self.nigeria in response.context['orgs'])

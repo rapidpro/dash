@@ -12,7 +12,8 @@ from django.core.urlresolvers import reverse
 from django.core.validators import validate_email
 from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext_lazy as _
-from smartmin.views import SmartCRUDL, SmartCreateView, SmartReadView, SmartUpdateView, SmartListView, SmartFormView
+from smartmin.views import SmartCRUDL, SmartCreateView, SmartReadView, SmartUpdateView, SmartListView, SmartFormView, \
+    SmartTemplateView
 from timezones.forms import TimeZoneField
 from .models import Org, OrgBackground, Invitation
 
@@ -150,8 +151,22 @@ class InferOrgMixin(object):
 
 
 class OrgCRUDL(SmartCRUDL):
-    actions = ('create', 'list', 'update', 'choose', 'home', 'edit', 'manage_accounts', 'create_login', 'join')
+    actions = ('create', 'list', 'update', 'choose', 'home', 'edit', 'manage_accounts', 'create_login', 'join',
+               'chooser')
     model = Org
+
+    class Chooser(SmartTemplateView):
+        permission = False
+        template_name = getattr(settings, 'SITE_CHOOSER_TEMPLATE', 'orgs/org_chooser.html')
+
+        def get_context_data(self, **kwargs):
+            all_orgs = Org.objects.filter(is_active=True).order_by('name')
+
+            # populate a 'host' attribute on each org so we can link off to them
+            for org in all_orgs:
+                org.host = settings.SITE_HOST_PATTERN % org.subdomain
+
+            return dict(orgs=all_orgs)
 
     class Create(SmartCreateView):
         form_class = OrgForm
