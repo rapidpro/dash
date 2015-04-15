@@ -106,7 +106,6 @@ class DashTest(SmartminTest):
         self.assertEquals(Org.objects.filter(subdomain=subdomain).count(), 1)
         return Org.objects.get(subdomain=subdomain)
 
-
     def read_json(self, filename):
         from django.conf import settings
         handle = open('%s/test_api/%s.json' % (settings.TESTFILES_DIR, filename))
@@ -466,7 +465,6 @@ class OrgTest(DashTest):
         self.assertTrue(org.administrators.filter(username="alicefox"))
         self.assertEquals(org.timezone, "Africa/Kigali")
 
-
     def test_org_update(self):
         update_url = reverse("orgs.org_update", args=[self.org.pk])
 
@@ -702,6 +700,32 @@ class OrgTest(DashTest):
             self.assertEquals(form.initial['shortcode'], "224433")
             self.assertEquals(form.initial['name'], "Rwanda")
 
+    def test_org_chooser(self):
+        chooser_url = reverse('orgs.org_chooser')
+
+        response = self.client.get(chooser_url)
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(len(response.context['orgs']), 1)
+        self.assertTrue(self.org in response.context['orgs'])
+        self.assertEquals(response.context['orgs'][0].host, "http://uganda.localhost:8000")
+
+        self.org2 = self.create_org('nigeria', self.admin)
+
+        response = self.client.get(chooser_url)
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(len(response.context['orgs']), 2)
+        self.assertTrue(self.org in response.context['orgs'])
+        self.assertTrue(self.org2 in response.context['orgs'])
+
+        self.org2.is_active = False
+        self.org2.save()
+
+        response = self.client.get(chooser_url)
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(len(response.context['orgs']), 1)
+        self.assertTrue(self.org in response.context['orgs'])
+        self.assertFalse(self.org2 in response.context['orgs'])
+
     def test_invitation_model(self):
         invitation = Invitation.objects.create(org=self.org,
                                                user_group="V",
@@ -735,7 +759,6 @@ class OrgTest(DashTest):
 
         self.org.editors.add(self.editor)
         self.org.administrators.add(self.user)
-
 
         response = self.client.get(manage_accounts_url, SERVER_NAME="uganda.ureport.io")
 
@@ -809,7 +832,6 @@ class OrgTest(DashTest):
         self.assertEquals('E', new_invite.user_group)
         self.assertEquals(2, len(mail.outbox))
         self.assertTrue(new_invite.is_active)
-
 
         # post many emails to the form
         post_data['emails'] = "norbert@nyaruka.com,code@nyaruka.com"
@@ -915,7 +937,6 @@ class OrgTest(DashTest):
         self.assertTrue('last_name' in response.context['form'].fields)
         self.assertTrue('email' in response.context['form'].fields)
         self.assertTrue('password' in response.context['form'].fields)
-
 
         post_data = dict()
         post_data['first_name'] = "Norbert"
@@ -1521,7 +1542,6 @@ class APITest(DashTest):
                                                      'Accept': 'application/json',
                                                      'Authorization': 'Token %s' % self.org.api_token})
 
-
         with patch('requests.get') as mock_request_get:
             self.clear_cache()
             mock_request_get.side_effect = [MockResponse(200,
@@ -1605,7 +1625,6 @@ class CategoryTest(DashTest):
                                     org=self.uganda,
                                     created_by=self.admin,
                                     modified_by=self.admin)
-
 
     def test_category_get_first_image(self):
         category1 = Category.objects.create(name='category 1',
@@ -1736,7 +1755,6 @@ class CategoryTest(DashTest):
         self.assertEquals(response.request['PATH_INFO'], reverse('categories.category_list'))
         category = Category.objects.get(pk=uganda_health.pk)
         self.assertEquals(category.name, "Sanitation")
-
 
     def test_create_category_image(self):
         uganda_health = Category.objects.create(name="Health", org=self.uganda, created_by=self.admin, modified_by=self.admin)
@@ -1895,18 +1913,12 @@ class StoryTest(DashTest):
         self.assertEquals(response.status_code, 302)
         response = self.client.get(create_url, follow=True)
         self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_VIEW_NAME))
-        self.assertEquals(len(response.context['orgs']), 2)
-        self.assertTrue(self.uganda in response.context['orgs'])
-        self.assertTrue(self.nigeria in response.context['orgs'])
 
         self.login(self.admin)
         response = self.client.get(create_url)
         self.assertEquals(response.status_code, 302)
         response = self.client.get(create_url, follow=True)
         self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_VIEW_NAME))
-        self.assertEquals(len(response.context['orgs']), 2)
-        self.assertTrue(self.uganda in response.context['orgs'])
-        self.assertTrue(self.nigeria in response.context['orgs'])
 
         response = self.client.get(create_url, SERVER_NAME='uganda.ureport.io')
         self.assertEquals(response.status_code, 200)
@@ -1967,17 +1979,11 @@ class StoryTest(DashTest):
         self.assertEquals(response.status_code, 302)
         response = self.client.get(update_url_uganda, follow=True)
         self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_VIEW_NAME))
-        self.assertEquals(len(response.context['orgs']), 2)
-        self.assertTrue(self.uganda in response.context['orgs'])
-        self.assertTrue(self.nigeria in response.context['orgs'])
 
         response = self.client.get(update_url_nigeria)
         self.assertEquals(response.status_code, 302)
         response = self.client.get(update_url_nigeria, follow=True)
         self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_VIEW_NAME))
-        self.assertEquals(len(response.context['orgs']), 2)
-        self.assertTrue(self.uganda in response.context['orgs'])
-        self.assertTrue(self.nigeria in response.context['orgs'])
 
         response = self.client.get(update_url_uganda, SERVER_NAME='uganda.ureport.io')
         self.assertLoginRedirect(response)
@@ -1990,18 +1996,11 @@ class StoryTest(DashTest):
         self.assertEquals(response.status_code, 302)
         response = self.client.get(update_url_uganda, follow=True)
         self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_VIEW_NAME))
-        self.assertEquals(len(response.context['orgs']), 2)
-        self.assertTrue(self.uganda in response.context['orgs'])
-        self.assertTrue(self.nigeria in response.context['orgs'])
 
         response = self.client.get(update_url_nigeria)
         self.assertEquals(response.status_code, 302)
         response = self.client.get(update_url_nigeria, follow=True)
         self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_VIEW_NAME))
-        self.assertEquals(len(response.context['orgs']), 2)
-        self.assertTrue(self.uganda in response.context['orgs'])
-        self.assertTrue(self.nigeria in response.context['orgs'])
-
 
         response = self.client.get(update_url_nigeria, SERVER_NAME='uganda.ureport.io')
         self.assertLoginRedirect(response)
@@ -2065,18 +2064,12 @@ class StoryTest(DashTest):
         self.assertEquals(response.status_code, 302)
         response = self.client.get(list_url, follow=True)
         self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_VIEW_NAME))
-        self.assertEquals(len(response.context['orgs']), 2)
-        self.assertTrue(self.uganda in response.context['orgs'])
-        self.assertTrue(self.nigeria in response.context['orgs'])
 
         self.login(self.admin)
         response = self.client.get(list_url)
         self.assertEquals(response.status_code, 302)
         response = self.client.get(list_url, follow=True)
         self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_VIEW_NAME))
-        self.assertEquals(len(response.context['orgs']), 2)
-        self.assertTrue(self.uganda in response.context['orgs'])
-        self.assertTrue(self.nigeria in response.context['orgs'])
 
         response = self.client.get(list_url, SERVER_NAME='uganda.ureport.io')
         self.assertEquals(response.status_code, 200)
@@ -2085,7 +2078,6 @@ class StoryTest(DashTest):
         self.assertFalse(story2 in response.context['object_list'])
 
         self.assertTrue(reverse('stories.story_images', args=[story1.pk]) in response.content)
-
 
     def test_images_story(self):
         story1 = Story.objects.create(title='foo',
@@ -2110,17 +2102,11 @@ class StoryTest(DashTest):
         self.assertEquals(response.status_code, 302)
         response = self.client.get(images_url_uganda, follow=True)
         self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_VIEW_NAME))
-        self.assertEquals(len(response.context['orgs']), 2)
-        self.assertTrue(self.uganda in response.context['orgs'])
-        self.assertTrue(self.nigeria in response.context['orgs'])
 
         response = self.client.get(images_url_nigeria)
         self.assertEquals(response.status_code, 302)
         response = self.client.get(images_url_nigeria, follow=True)
         self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_VIEW_NAME))
-        self.assertEquals(len(response.context['orgs']), 2)
-        self.assertTrue(self.uganda in response.context['orgs'])
-        self.assertTrue(self.nigeria in response.context['orgs'])
 
         response = self.client.get(images_url_uganda, SERVER_NAME='uganda.ureport.io')
         self.assertLoginRedirect(response)
@@ -2166,7 +2152,6 @@ class DashBlockTypeTest(DashTest):
         super(DashBlockTypeTest, self).setUp()
         self.uganda = self.create_org('uganda', self.admin)
         self.nigeria = self.create_org('nigeria', self.admin)
-
 
     def test_create_dashblocktype(self):
         create_url = reverse('dashblocks.dashblocktype_create')
@@ -2497,8 +2482,6 @@ class DashBlockTest(DashTest):
         self.assertFalse('org' in fields)
         self.assertFalse('dashblock_type' in fields)
 
-
-
         self.assertTrue(response.context['type'])
         self.assertEquals(response.context['type'], self.type_foo)
 
@@ -2641,7 +2624,6 @@ class DashBlockTest(DashTest):
         self.assertEquals(len(response.context['types']), 1)
         self.assertTrue(self.type_foo in response.context['types'])
         self.assertFalse(self.type_bar in response.context['types'])
-
 
     def test_dashblock_image(self):
         dashblock1 = DashBlock.objects.create(dashblock_type=self.type_foo,
