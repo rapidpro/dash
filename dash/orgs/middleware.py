@@ -77,6 +77,11 @@ class SetOrgMiddleware(object):
             url_name = request.resolver_match.url_name
             whitelist = ALLOW_NO_ORG + getattr(settings, 'SITE_ALLOW_NO_ORG', ())
 
+            # make sure the chooser view is whitelisted
+            chooser_view = getattr(settings, 'SITE_CHOOSER_VIEW_NAME', None)
+            if chooser_view:
+                whitelist += (chooser_view,)
+
             if not url_name in whitelist:
                 return HttpResponseRedirect(reverse(getattr(settings, 'SITE_CHOOSER_VIEW_NAME', 'orgs.org_chooser')))
 

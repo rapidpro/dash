@@ -214,6 +214,11 @@ class SetOrgMiddlewareTest(DashTest):
         self.assertEquals(response.status_code, 302)
         self.assertEquals(response.url, reverse(settings.SITE_CHOOSER_VIEW_NAME))
 
+        with self.settings(SITE_CHOOSER_VIEW_NAME='dash.test_chooser'):
+            response = self.simulate_process('ureport.io', 'dash.test_chooser')
+            self.assertIsNone(response)
+            self.assertIsNone(self.request.org)
+            self.assertIsNone(self.request.user.get_org())
 
 class OrgContextProcessorTestcase(DashTest):
     def test_group_perms_wrapper(self):
