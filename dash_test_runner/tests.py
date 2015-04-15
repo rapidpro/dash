@@ -152,7 +152,7 @@ class SetOrgMiddlewareTest(DashTest):
         # check non-white-listed URL with no orgs
         response = self.simulate_process('ureport.io', 'dash.test_test')
         self.assertEquals(response.status_code, 302)
-        self.assertEquals(response.url, reverse(settings.SITE_CHOOSER_VIEW_NAME))
+        self.assertEquals(response.url, reverse(settings.SITE_CHOOSER_URL_NAME))
         self.assertIsNone(self.request.org)
         self.assertIsNone(self.request.user.get_org())
 
@@ -163,7 +163,7 @@ class SetOrgMiddlewareTest(DashTest):
         # now orgs should be listed in choose page
         response = self.simulate_process('ureport.io', 'dash.test_test')
         self.assertEquals(response.status_code, 302)
-        self.assertEquals(response.url, reverse(settings.SITE_CHOOSER_VIEW_NAME))
+        self.assertEquals(response.url, reverse(settings.SITE_CHOOSER_URL_NAME))
         self.assertIsNone(self.request.org)
         self.assertIsNone(self.request.user.get_org())
 
@@ -194,7 +194,7 @@ class SetOrgMiddlewareTest(DashTest):
         self.assertIsNone(self.request.org)
         self.assertIsNone(self.request.user.get_org())
         self.assertEquals(response.status_code, 302)
-        self.assertEquals(response.url, reverse(settings.SITE_CHOOSER_VIEW_NAME))
+        self.assertEquals(response.url, reverse(settings.SITE_CHOOSER_URL_NAME))
 
         # test disallowed host exception
         self.request.get_host.side_effect = DisallowedHost
@@ -203,7 +203,7 @@ class SetOrgMiddlewareTest(DashTest):
         self.assertIsNone(self.request.org)
         self.assertIsNone(self.request.user.get_org())
         self.assertEquals(response.status_code, 302)
-        self.assertEquals(response.url, reverse(settings.SITE_CHOOSER_VIEW_NAME))
+        self.assertEquals(response.url, reverse(settings.SITE_CHOOSER_URL_NAME))
 
         rw_org.is_active = False
         rw_org.save()
@@ -212,9 +212,9 @@ class SetOrgMiddlewareTest(DashTest):
         self.assertIsNone(self.request.org)
         self.assertIsNone(self.request.user.get_org())
         self.assertEquals(response.status_code, 302)
-        self.assertEquals(response.url, reverse(settings.SITE_CHOOSER_VIEW_NAME))
+        self.assertEquals(response.url, reverse(settings.SITE_CHOOSER_URL_NAME))
 
-        with self.settings(SITE_CHOOSER_VIEW_NAME='dash.test_chooser'):
+        with self.settings(SITE_CHOOSER_URL_NAME='dash.test_chooser'):
             response = self.simulate_process('ureport.io', 'dash.test_chooser')
             self.assertIsNone(response)
             self.assertIsNone(self.request.org)
@@ -484,7 +484,7 @@ class OrgTest(DashTest):
         response = self.client.get(update_url)
         self.assertEquals(200, response.status_code)
         self.assertFalse(Org.objects.filter(name="Burundi"))
-        self.assertEquals(len(response.context['form'].fields), 10)
+        self.assertEquals(len(response.context['form'].fields), 9)
 
         post_data = dict(name="Burundi", timezone="Africa/Bujumbura", subdomain="burundi", is_active=True, male_label="male", female_label='female', administrators=self.admin.pk)
         response = self.client.post(update_url, post_data)
@@ -1917,13 +1917,13 @@ class StoryTest(DashTest):
         response = self.client.get(create_url)
         self.assertEquals(response.status_code, 302)
         response = self.client.get(create_url, follow=True)
-        self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_VIEW_NAME))
+        self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_URL_NAME))
 
         self.login(self.admin)
         response = self.client.get(create_url)
         self.assertEquals(response.status_code, 302)
         response = self.client.get(create_url, follow=True)
-        self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_VIEW_NAME))
+        self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_URL_NAME))
 
         response = self.client.get(create_url, SERVER_NAME='uganda.ureport.io')
         self.assertEquals(response.status_code, 200)
@@ -1983,12 +1983,12 @@ class StoryTest(DashTest):
         response = self.client.get(update_url_uganda)
         self.assertEquals(response.status_code, 302)
         response = self.client.get(update_url_uganda, follow=True)
-        self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_VIEW_NAME))
+        self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_URL_NAME))
 
         response = self.client.get(update_url_nigeria)
         self.assertEquals(response.status_code, 302)
         response = self.client.get(update_url_nigeria, follow=True)
-        self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_VIEW_NAME))
+        self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_URL_NAME))
 
         response = self.client.get(update_url_uganda, SERVER_NAME='uganda.ureport.io')
         self.assertLoginRedirect(response)
@@ -2000,12 +2000,12 @@ class StoryTest(DashTest):
         response = self.client.get(update_url_uganda)
         self.assertEquals(response.status_code, 302)
         response = self.client.get(update_url_uganda, follow=True)
-        self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_VIEW_NAME))
+        self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_URL_NAME))
 
         response = self.client.get(update_url_nigeria)
         self.assertEquals(response.status_code, 302)
         response = self.client.get(update_url_nigeria, follow=True)
-        self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_VIEW_NAME))
+        self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_URL_NAME))
 
         response = self.client.get(update_url_nigeria, SERVER_NAME='uganda.ureport.io')
         self.assertLoginRedirect(response)
@@ -2068,13 +2068,13 @@ class StoryTest(DashTest):
         response = self.client.get(list_url)
         self.assertEquals(response.status_code, 302)
         response = self.client.get(list_url, follow=True)
-        self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_VIEW_NAME))
+        self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_URL_NAME))
 
         self.login(self.admin)
         response = self.client.get(list_url)
         self.assertEquals(response.status_code, 302)
         response = self.client.get(list_url, follow=True)
-        self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_VIEW_NAME))
+        self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_URL_NAME))
 
         response = self.client.get(list_url, SERVER_NAME='uganda.ureport.io')
         self.assertEquals(response.status_code, 200)
@@ -2106,12 +2106,12 @@ class StoryTest(DashTest):
         response = self.client.get(images_url_uganda)
         self.assertEquals(response.status_code, 302)
         response = self.client.get(images_url_uganda, follow=True)
-        self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_VIEW_NAME))
+        self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_URL_NAME))
 
         response = self.client.get(images_url_nigeria)
         self.assertEquals(response.status_code, 302)
         response = self.client.get(images_url_nigeria, follow=True)
-        self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_VIEW_NAME))
+        self.assertEquals(response.request['PATH_INFO'], reverse(settings.SITE_CHOOSER_URL_NAME))
 
         response = self.client.get(images_url_uganda, SERVER_NAME='uganda.ureport.io')
         self.assertLoginRedirect(response)

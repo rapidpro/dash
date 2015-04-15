@@ -25,9 +25,6 @@ class Org(SmartModel):
     logo = models.ImageField(upload_to='logos', null=True, blank=True,
                              help_text=_("The logo that should be used for this organization"))
 
-    flag = models.ImageField(upload_to='flags', null=True, blank=True,
-                             help_text=_("The flag logo that should be used for this organization on the landing page"))
-
     administrators = models.ManyToManyField(User, verbose_name=_("Administrators"), related_name="org_admins",
                                             help_text=_("The administrators in your organization"))
 

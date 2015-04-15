@@ -28,7 +28,6 @@ ALLOW_NO_ORG = (
     'orgs.org_list',
     'orgs.org_update',
     'orgs.org_choose',
-    'orgs.org_chooser',
     'orgs.org_home',
     'orgs.org_edit',
     'orgs.org_manage_accounts',
@@ -78,12 +77,11 @@ class SetOrgMiddleware(object):
             whitelist = ALLOW_NO_ORG + getattr(settings, 'SITE_ALLOW_NO_ORG', ())
 
             # make sure the chooser view is whitelisted
-            chooser_view = getattr(settings, 'SITE_CHOOSER_VIEW_NAME', None)
-            if chooser_view:
-                whitelist += (chooser_view,)
+            chooser_view = getattr(settings, 'SITE_CHOOSER_URL_NAME', 'orgs.org_chooser')
+            whitelist += (chooser_view,)
 
             if not url_name in whitelist:
-                return HttpResponseRedirect(reverse(getattr(settings, 'SITE_CHOOSER_VIEW_NAME', 'orgs.org_chooser')))
+                return HttpResponseRedirect(reverse(chooser_view))
 
     @staticmethod
     def get_subdomain(request):
