@@ -124,14 +124,14 @@ class SetOrgMiddlewareTest(DashTest):
     def mock_view(self, request):
         return MockResponse(204)
 
-    def simulate_process(self, host, url_name):
+    def simulate_process(self, host, url_name, path='/'):
         """
         Simulates the application of org middleware
         """
         self.request = Mock(spec=HttpRequest)
         self.request.get_host.return_value = host
         self.request.user = self.admin
-        self.request.path = '/'
+        self.request.path = path
         self.request.META = dict(HTTP_HOST=None)
 
         response = self.middleware.process_request(self.request)
@@ -143,6 +143,17 @@ class SetOrgMiddlewareTest(DashTest):
         return self.middleware.process_view(self.request, self.mock_view, [], {})
 
     def test_process(self):
+        # media url and static url are always whitelisted
+        response = self.simulate_process('ureport.io', '', '/media/image.jpg')
+        self.assertIsNone(response)
+        self.assertIsNone(self.request.org)
+        self.assertIsNone(self.request.user.get_org())
+
+        response = self.simulate_process('ureport.io', '', '/static/css/style.css')
+        self.assertIsNone(response)
+        self.assertIsNone(self.request.org)
+        self.assertIsNone(self.request.user.get_org())
+
         # check white-listed URL with no orgs
         response = self.simulate_process('ureport.io', 'orgs.org_create')
         self.assertIsNone(response)
