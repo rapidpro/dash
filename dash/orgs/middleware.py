@@ -1,6 +1,8 @@
 from __future__ import absolute_import, unicode_literals
 
 import traceback
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
 
 from dash.orgs.models import Org
 from django.conf import settings
@@ -45,7 +47,7 @@ class SetOrgMiddleware(object):
         subdomain = self.get_subdomain(request)
 
         if subdomain:
-            org = Org.objects.filter(subdomain__iexact=subdomain).first()
+            org = Org.objects.filter(subdomain__iexact=subdomain, is_active=True).first()
         else:
             org = None
 
@@ -74,14 +76,12 @@ class SetOrgMiddleware(object):
             url_name = request.resolver_match.url_name
             whitelist = ALLOW_NO_ORG + getattr(settings, 'SITE_ALLOW_NO_ORG', ())
 
+            # make sure the chooser view is whitelisted
+            chooser_view = getattr(settings, 'SITE_CHOOSER_URL_NAME', 'orgs.org_chooser')
+            whitelist += (chooser_view,)
+
             if not url_name in whitelist:
-                all_orgs = Org.objects.filter(is_active=True).order_by('name')
-
-                # populate a 'host' attribute on each org so we can link off to them
-                for org in all_orgs:
-                    org.host = settings.SITE_HOST_PATTERN % org.subdomain
-
-                return TemplateResponse(request, settings.SITE_CHOOSER_TEMPLATE, dict(orgs=all_orgs))
+                return HttpResponseRedirect(reverse(chooser_view))
 
     @staticmethod
     def get_subdomain(request):
