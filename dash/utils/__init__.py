@@ -99,3 +99,11 @@ def get_month_range(d=None):
     start = d.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     end = start + relativedelta(months=1)
     return start, end
+
+
+def chunks(data, size):
+    """
+    Yield successive chunks from the given slice-able collection
+    """
+    for i in xrange(0, len(data), size):
+        yield data[i:(i + size)]
