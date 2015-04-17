@@ -72,6 +72,14 @@ class SetOrgMiddleware(object):
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         if not request.org:
+            # serve static files
+            media_url = getattr(settings, 'MEDIA_URL', None)
+            static_url = getattr(settings, 'STATIC_URL', None)
+            path = request.path
+
+            if (media_url and path.startswith(media_url)) or (static_url and path.startswith(static_url)):
+                return None
+
             # only some pages can be viewed without an org
             url_name = request.resolver_match.url_name
             whitelist = ALLOW_NO_ORG + getattr(settings, 'SITE_ALLOW_NO_ORG', ())
