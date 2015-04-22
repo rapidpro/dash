@@ -418,9 +418,12 @@ class OrgTest(DashTest):
                                                 {'count': 0, 'label': '08/25/14'}, {'count': 0, 'label': '09/01/14'},
                                                 {'count': 0, 'label': '09/08/14'}, {'count': 0, 'label': '09/15/14'},
                                                 {'count': 0, 'label': '09/22/14'}])])
+            with self.assertRaises(ValueError):
+                self.org.organize_categories_data('registration',
+                                                  [dict(categories=[dict(label='26-9-2013 21:30', count=20)])])
 
             self.assertEquals(self.org.organize_categories_data('registration',
-                                                                [dict(categories=[dict(label='26-9-2013 21:30',
+                                                                [dict(categories=[dict(label='2013-09-26T21:30:00Z',
                                                                                        count=20)])]),
                               [dict(categories=[{'count': 0, 'label': '03/24/14'}, {'count': 0, 'label': '03/31/14'},
                                                 {'count': 0, 'label': '04/07/14'}, {'count': 0, 'label': '04/14/14'},
@@ -438,7 +441,7 @@ class OrgTest(DashTest):
                                                 {'count': 0, 'label': '09/22/14'}])])
 
             self.assertEquals(self.org.organize_categories_data('registration',
-                                                                [dict(categories=[dict(label='31-3-2014 21:30',
+                                                                [dict(categories=[dict(label='2014-03-31T21:30:00Z',
                                                                                        count=20)])]),
                               [dict(categories=[{'count': 0, 'label': '03/24/14'}, {'count': 20, 'label': '03/31/14'},
                                                 {'count': 0, 'label': '04/07/14'}, {'count': 0, 'label': '04/14/14'},
@@ -456,9 +459,9 @@ class OrgTest(DashTest):
                                                 {'count': 0, 'label': '09/22/14'}])])
 
             self.assertEquals(self.org.organize_categories_data('registration',
-                                                                [dict(categories=[dict(label='31-3-2014 21:30',
+                                                                [dict(categories=[dict(label='2014-03-31T21:30:00Z',
                                                                                        count=20),
-                                                                                  dict(label='3-4-2014 20:54',
+                                                                                  dict(label='2014-04-03T20:54:00Z',
                                                                                        count=15)])]),
                               [dict(categories=[{'count': 0, 'label': '03/24/14'}, {'count': 35, 'label': '03/31/14'},
                                                 {'count': 0, 'label': '04/07/14'}, {'count': 0, 'label': '04/14/14'},
@@ -476,11 +479,11 @@ class OrgTest(DashTest):
                                                 {'count': 0, 'label': '09/22/14'}])])
 
             self.assertEquals(self.org.organize_categories_data('registration',
-                                                                [dict(categories=[dict(label='31-3-2014 21:30',
+                                                                [dict(categories=[dict(label='2014-03-31T21:30:00Z',
                                                                                        count=20),
-                                                                                  dict(label='3-4-2014 20:54',
+                                                                                  dict(label='2014-04-03T20:54:00Z',
                                                                                        count=15),
-                                                                                  dict(label='8-4-2014 18:43',
+                                                                                  dict(label='2014-04-08T18:43:00Z',
                                                                                        count=10)])]),
                               [dict(categories=[{'count': 0, 'label': '03/24/14'}, {'count': 35, 'label': '03/31/14'},
                                                 {'count': 10, 'label': '04/07/14'}, {'count': 0, 'label': '04/14/14'},
@@ -498,11 +501,11 @@ class OrgTest(DashTest):
                                                 {'count': 0, 'label': '09/22/14'}])])
 
             self.assertEquals(self.org.organize_categories_data('registration',
-                                                                [dict(categories=[dict(label='31-3-2014 21:30',
+                                                                [dict(categories=[dict(label='2014-03-31T21:30:00Z',
                                                                                        count=20),
-                                                                 dict(label='3-4-2014 20:54',  count=15),
-                                                                 dict(label='8-4-2014 18:43', count=10),
-                                                                 dict(label='10-10-2014 12:54', count=100)])]),
+                                                                 dict(label='2014-04-03T20:54:00Z',  count=15),
+                                                                 dict(label='2014-04-08T18:43:00Z', count=10),
+                                                                 dict(label='2014-10-10T12:54:00Z', count=100)])]),
                               [dict(categories=[{'count': 0, 'label': '03/24/14'}, {'count': 35, 'label': '03/31/14'},
                                                 {'count': 10, 'label': '04/07/14'}, {'count': 0, 'label': '04/14/14'},
                                                 {'count': 0, 'label': '04/21/14'}, {'count': 0, 'label': '04/28/14'},
