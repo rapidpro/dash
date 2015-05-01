@@ -1,19 +1,19 @@
 -e git+https://github.com/nyaruka/smartmin.git#egg=smartmin-dev
 -e git+https://github.com/rapidpro/rapidpro-python#egg=rapidpro-python
-Django==1.7.2
+celery-with-redis
 coverage
-django-nose
+django==1.7.2
 django-celery
 django-compressor
-celery-with-redis
-xlutils
-Pillow
-mock
-requests
-hamlpy
-sorl-thumbnail==12.1c
+django-nose
+django-redis==3.8.4
 django-timezones
-phonenumbers
-django-redis
 enum34
+hamlpy
+mock
+Pillow
+phonenumbers
 python-dateutil
+requests
+sorl-thumbnail==12.1c
+xlutils
