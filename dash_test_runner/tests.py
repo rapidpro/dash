@@ -5,6 +5,7 @@ import pytz
 import redis
 import urllib
 
+from dash.api import API
 from dash.categories.models import Category, CategoryImage
 from dash.dashblocks.models import DashBlockType, DashBlock, DashBlockImage
 from dash.dashblocks.templatetags.dashblocks import load_qbs

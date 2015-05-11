@@ -5,6 +5,7 @@ import math
 import pytz
 import random
 
+from dash.api import API
 from dash.dash_email import send_dash_email
 from dash.utils import temba_client_flow_results_serializer
 from datetime import timedelta, datetime
@@ -122,6 +123,9 @@ class Org(SmartModel):
         if not host:
             host = '%s/api/v1' % settings.API_ENDPOINT  # UReport sites use this
         return TembaClient(host, self.api_token)
+
+    def get_api(self):
+        return API(self)
 
     def get_client_contact_field_results(self, contact_field, segment):
         temba_client = self.get_temba_client()
