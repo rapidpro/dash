@@ -1,4 +1,4 @@
--e git+https://github.com/nyaruka/smartmin.git#egg=smartmin-dev
+-e git+https://github.com/nyaruka/smartmin.git@django18#egg=smartmin-dev
 -e git+https://github.com/rapidpro/rapidpro-python#egg=rapidpro-python
 celery-with-redis
 coverage

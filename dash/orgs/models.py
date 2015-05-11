@@ -5,8 +5,8 @@ import math
 import pytz
 import random
 
-from dash.api import API
 from dash.dash_email import send_dash_email
+from dash.utils import temba_client_flow_results_serializer
 from datetime import timedelta, datetime
 from django.contrib.auth.models import User, Group
 from django.core.cache import cache
@@ -123,11 +123,13 @@ class Org(SmartModel):
             host = '%s/api/v1' % settings.API_ENDPOINT  # UReport sites use this
         return TembaClient(host, self.api_token)
 
-    def get_api(self):
-        return API(self)
+    def get_client_contact_field_results(self, contact_field, segment):
+        temba_client = self.get_temba_client()
+        return temba_client.get_flow_results(contact_field=contact_field, segment=segment)
 
     def get_contact_field_results(self, contact_field, segment):
-        return self.get_api().get_contact_field_results(contact_field, segment)
+        clients_results = self.get_client_contact_field_results(contact_field=contact_field, segment=segment)
+        return temba_client_flow_results_serializer(clients_results)
 
     def get_most_active_regions(self):
         cache_key = 'most_active_regions:%d' % self.id

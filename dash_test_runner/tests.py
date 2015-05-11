@@ -5,7 +5,6 @@ import pytz
 import redis
 import urllib
 
-from dash.api import API
 from dash.categories.models import Category, CategoryImage
 from dash.dashblocks.models import DashBlockType, DashBlock, DashBlockImage
 from dash.dashblocks.templatetags.dashblocks import load_qbs
@@ -333,7 +332,7 @@ class OrgTest(DashTest):
     def test_get_most_active_regions(self):
         self.org.set_config('gender_label', 'Gender')
 
-        with patch('dash.api.API.get_contact_field_results') as mock:
+        with patch('dash.orgs.models.Org.get_contact_field_results') as mock:
             mock.return_value = [dict(label='LABEL_1', set=15, unset=5),
                                  dict(label='LABEL_2', set=100, unset=200),
                                  dict(label='LABEL_3', set=50, unset=30)]
@@ -341,7 +340,7 @@ class OrgTest(DashTest):
             self.assertEquals(self.org.get_most_active_regions(), ['LABEL_2', 'LABEL_3', 'LABEL_1'])
             mock.assert_called_once_with('Gender', dict(location='State'))
 
-        with patch('dash.api.API.get_contact_field_results') as mock:
+        with patch('dash.orgs.models.Org.get_contact_field_results') as mock:
             self.clear_cache()
             mock.return_value = None
 
@@ -777,10 +776,8 @@ class OrgTest(DashTest):
 
     def test_org_edit(self):
 
-        with patch('dash.orgs.models.API') as mock:
-            mock.return_value.get_country_geojson.return_value = dict(type="FeatureCollection",
-                                                                      features=[
-                                                                          dict(type='Feature',
+        with patch('dash.utils.get_country_geojson') as mock:
+            mock.return_value = dict(type="FeatureCollection", features=[ dict(type='Feature',
                                                                                properties=dict(id="R3713501",
                                                                                                level=1,
                                                                                                name="Abia"),
@@ -788,7 +785,7 @@ class OrgTest(DashTest):
                                                                                              coordinates=[[[[7, 5]]]]
                                                                                              )
                                                                                )
-                                                                      ])
+                                                                               ])
 
             edit_url = reverse("orgs.org_edit")
 

@@ -3,12 +3,19 @@ from __future__ import absolute_import, unicode_literals
 import calendar
 import datetime
 import json
+from django.conf import settings
 import pytz
 import random
 
 from django.core.cache import cache
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
+
+STATE = 1
+DISTRICT = 2
+
+# we cache boundary data for a month at a time
+BOUNDARY_CACHE_TIME = getattr(settings, 'API_BOUNDARY_CACHE_TIME', 60 * 60 * 24 * 30)
 
 
 def intersection(*args):
@@ -107,3 +114,75 @@ def chunks(data, size):
     """
     for i in xrange(0, len(data), size):
         yield data[i:(i + size)]
+
+def temba_client_flow_results_serializer(client_results):
+    json_results = []
+    for flow_result in client_results:
+        flow_result_json = dict()
+        flow_result_json['set'] = flow_result.set
+        flow_result_json['unset'] = flow_result.unset
+        flow_result_json['open_ended'] = flow_result.open_ended
+        flow_result_json['label'] = flow_result.label
+        flow_result_json['categories'] = [ dict(label=category.label, count=category.count) for category in flow_result.categories]
+        if flow_result.boundary:
+            flow_result_json['boundary'] = flow_result.boundary
+
+        json_results.append(flow_result_json)
+
+    return json_results
+
+
+def build_boundaries(org):
+    start = datetime.time.time()
+
+    temba_client = org.get_temba_client()
+    client_boundaries = temba_client.get_boundaries()
+
+    # we now build our cached versions of level 1 (all states) and level 2 (all districts for each state) geojson
+    states = []
+    districts_by_state = dict()
+    for boundary in client_boundaries:
+        if boundary['level'] == STATE:
+            states.append(boundary)
+        elif boundary['level'] == DISTRICT:
+            osm_id = boundary['parent']
+            if not osm_id in districts_by_state:
+                districts_by_state[osm_id] = []
+
+            districts = districts_by_state[osm_id]
+            districts.append(boundary)
+
+    # mini function to convert a list of boundary objects to geojson
+    def to_geojson(boundary_list):
+        features = [dict(type='Feature', geometry=b['geometry'],
+                         properties=dict(name=b['name'], id=b['boundary'], level=b['level'])) for b in boundary_list]
+        return dict(type='FeatureCollection', features=features)
+
+    cached = dict()
+
+    # save our cached geojson to redis
+    cache.set('geojson:%d' % org.id, to_geojson(states), BOUNDARY_CACHE_TIME)
+    cache.set('fallback:geojson:%d' % org.id, to_geojson(states), timeout=None)
+
+    cached['geojson:%d' % org.id] = to_geojson(states)
+
+    for state_id in districts_by_state.keys():
+        cache.set('geojson:%d:%s' % (org.id, state_id), to_geojson(districts_by_state[state_id]), BOUNDARY_CACHE_TIME)
+        cache.set('fallback:geojson:%d:%s' % (org.id, state_id), to_geojson(districts_by_state[state_id]), timeout=None)
+
+        cached['geojson:%d:%s' % (org.id, state_id)] = to_geojson(districts_by_state[state_id])
+
+    if settings.DEBUG: # pragma: no cover
+        print "- built boundaries in %f" % (datetime.time.time() - start)
+
+    return cached
+
+
+def get_country_geojson(org):
+    boundaries = build_boundaries()
+    return boundaries['geojson:%d'] % org.id
+
+
+def get_state_geojson(org, state_id):
+    boundaries = build_boundaries()
+    return boundaries['geojson:%d:%s' % (org.id, state_id)]
