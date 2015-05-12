@@ -133,7 +133,6 @@ def temba_client_flow_results_serializer(client_results):
 
 
 def build_boundaries(org):
-    start = datetime.time.time()
 
     temba_client = org.get_temba_client()
     client_boundaries = temba_client.get_boundaries()
@@ -142,10 +141,10 @@ def build_boundaries(org):
     states = []
     districts_by_state = dict()
     for boundary in client_boundaries:
-        if boundary['level'] == STATE:
+        if boundary.level == STATE:
             states.append(boundary)
-        elif boundary['level'] == DISTRICT:
-            osm_id = boundary['parent']
+        elif boundary.level == DISTRICT:
+            osm_id = boundary.parent
             if not osm_id in districts_by_state:
                 districts_by_state[osm_id] = []
 
@@ -154,8 +153,8 @@ def build_boundaries(org):
 
     # mini function to convert a list of boundary objects to geojson
     def to_geojson(boundary_list):
-        features = [dict(type='Feature', geometry=b['geometry'],
-                         properties=dict(name=b['name'], id=b['boundary'], level=b['level'])) for b in boundary_list]
+        features = [dict(type='Feature', geometry=dict(type=b.geometry.type, coordinates=b.geometry.coordinates),
+                         properties=dict(name=b.name, id=b.boundary, level=b.level)) for b in boundary_list]
         return dict(type='FeatureCollection', features=features)
 
     cached = dict()
@@ -172,17 +171,15 @@ def build_boundaries(org):
 
         cached['geojson:%d:%s' % (org.id, state_id)] = to_geojson(districts_by_state[state_id])
 
-    if settings.DEBUG: # pragma: no cover
-        print "- built boundaries in %f" % (datetime.time.time() - start)
 
     return cached
 
 
 def get_country_geojson(org):
-    boundaries = build_boundaries()
-    return boundaries['geojson:%d'] % org.id
+    boundaries = build_boundaries(org)
+    return boundaries['geojson:%d' % org.id]
 
 
 def get_state_geojson(org, state_id):
-    boundaries = build_boundaries()
+    boundaries = build_boundaries(org)
     return boundaries['geojson:%d:%s' % (org.id, state_id)]
