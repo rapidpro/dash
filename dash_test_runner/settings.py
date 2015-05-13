@@ -296,6 +296,9 @@ SITE_HOST_PATTERN = 'http://%s.localhost:8000'
 SITE_CHOOSER_TEMPLATE = 'orgs/org_chooser.html'
 SITE_CHOOSER_URL_NAME = 'orgs.org_chooser'
 
+# dash
+DASH_IGNORED_SUBDOMAINS = ('www',)
+
 CACHES = {
     'default': {
         'BACKEND': 'redis_cache.cache.RedisCache',
