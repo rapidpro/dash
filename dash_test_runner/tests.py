@@ -197,6 +197,13 @@ class SetOrgMiddlewareTest(DashTest):
             self.assertEqual(self.request.org, ug_org)
             self.assertEqual(self.request.user.get_org(), ug_org)
 
+        with self.settings(DASH_IGNORED_SUBDOMAINS=('uganda', 'www')):
+            response = self.simulate_process('uganda.ureport.io', 'dash.test_test')
+            self.assertIsNone(self.request.org)
+            self.assertIsNone(self.request.user.get_org())
+            self.assertEquals(response.status_code, 302)
+            self.assertEquals(response.url, reverse(settings.SITE_CHOOSER_URL_NAME))
+
         # test invalid subdomain
         response = self.simulate_process('blabla.ureport.io', 'dash.test_test')
         self.assertIsNone(self.request.org)
