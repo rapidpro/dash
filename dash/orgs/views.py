@@ -51,7 +51,8 @@ class OrgPermsMixin(object):
             return False
 
         if self.org:
-            if self.get_user().get_org_group().permissions.filter(content_type__app_label=app_label, codename=codename):
+            org_group = self.get_user().get_org_group()
+            if org_group and org_group.permissions.filter(content_type__app_label=app_label, codename=codename):
                 return True
 
         return False
