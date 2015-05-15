@@ -108,10 +108,15 @@ class SetOrgMiddleware(object):
             subdomain = parts[0]
             parts = parts[1:]
 
+            ignored_subdomains = getattr(settings, 'DASH_IGNORED_SUBDOMAINS', ('www',))
+
             # we keep stripping subdomains if the subdomain is something
             # like 'www' and there are more parts
-            while len(parts) > 2 and subdomain == 'www':
+            while len(parts) > 2 and subdomain.lower() in ignored_subdomains:
                 subdomain = parts[0]
                 parts = parts[1:]
+
+            if subdomain.lower() in ignored_subdomains:
+                subdomain = None
 
         return subdomain
