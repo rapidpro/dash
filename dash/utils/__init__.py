@@ -115,7 +115,11 @@ def chunks(data, size):
     for i in xrange(0, len(data), size):
         yield data[i:(i + size)]
 
+
 def temba_client_flow_results_serializer(client_results):
+    if not client_results:
+        return client_results
+
     json_results = []
     for flow_result in client_results:
         flow_result_json = dict()
