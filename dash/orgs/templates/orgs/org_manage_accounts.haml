@@ -76,10 +76,10 @@
 
   :javascript
     $(function() {
-      // initialize the glyph checkboxes
+      // initialize the table cell checkboxes
       var boxes = $("td.check");
       boxes.each(function() {
-        var list_input = $(this).children().children("input[type='checkbox']");
+        var list_input = $(this).children("input[type='checkbox']");
         if (list_input[0].checked) {
           $(this).addClass("checked");
         } else {
@@ -89,11 +89,11 @@
     });
 
     $(function() {
-      // update the glyph checkbox on click
+      // update the cells checkbox on click
 
-      $("td.check .glyph").on('click', function(){
+      $("td.check input[type='checkbox']").on('click', function(){
         var cell = $(this).parent("td.check");
-        var ipt = cell.find("input[type='checkbox']");
+        var ipt = $(this);
 
         if (!cell.hasClass("checked")) {
           allCells = cell.parent().children('td.check');
