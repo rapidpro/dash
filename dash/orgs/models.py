@@ -18,6 +18,11 @@ from django.conf import settings
 from smartmin.models import SmartModel
 from temba import TembaClient
 
+STATE = 1
+DISTRICT = 2
+
+# we cache boundary data for a month at a time
+BOUNDARY_CACHE_TIME = getattr(settings, 'API_BOUNDARY_CACHE_TIME', 60 * 60 * 24 * 30)
 
 class Org(SmartModel):
     name = models.CharField(verbose_name=_("Name"), max_length=128,
@@ -126,6 +131,59 @@ class Org(SmartModel):
 
     def get_api(self):
         return API(self)
+
+    def build_boundaries(self):
+
+        temba_client = self.get_temba_client()
+        client_boundaries = temba_client.get_boundaries()
+
+        # we now build our cached versions of level 1 (all states) and level 2 (all districts for each state) geojson
+        states = []
+        districts_by_state = dict()
+        for boundary in client_boundaries:
+            if boundary.level == STATE:
+                states.append(boundary)
+            elif boundary.level == DISTRICT:
+                osm_id = boundary.parent
+                if not osm_id in districts_by_state:
+                    districts_by_state[osm_id] = []
+
+                districts = districts_by_state[osm_id]
+                districts.append(boundary)
+
+        # mini function to convert a list of boundary objects to geojson
+        def to_geojson(boundary_list):
+            features = [dict(type='Feature', geometry=dict(type=b.geometry.type, coordinates=b.geometry.coordinates),
+                             properties=dict(name=b.name, id=b.boundary, level=b.level)) for b in boundary_list]
+            return dict(type='FeatureCollection', features=features)
+
+        cached = dict()
+
+        # save our cached geojson to redis
+        cache.set('geojson:%d' % self.id, to_geojson(states), BOUNDARY_CACHE_TIME)
+        cache.set('fallback:geojson:%d' % self.id, to_geojson(states), timeout=None)
+
+        cached['geojson:%d' % self.id] = to_geojson(states)
+
+        for state_id in districts_by_state.keys():
+            cache.set('geojson:%d:%s' % (self.id, state_id), to_geojson(districts_by_state[state_id]), BOUNDARY_CACHE_TIME)
+            cache.set('fallback:geojson:%d:%s' % (self.id, state_id), to_geojson(districts_by_state[state_id]), timeout=None)
+
+            cached['geojson:%d:%s' % (self.id, state_id)] = to_geojson(districts_by_state[state_id])
+
+        return cached
+
+    def get_country_geojson(self):
+        boundaries = self.build_boundaries()
+        return boundaries['geojson:%d' % self.id]
+
+    def get_state_geojson(self, state_id):
+        boundaries = self.build_boundaries()
+        return boundaries['geojson:%d:%s' % (self.id, state_id)]
+
+    def get_top_level_geojson_ids(self):
+        org_country_boundaries = self.get_country_geojson()
+        return [elt['properties']['id'] for elt in org_country_boundaries['features']]
 
     @classmethod
     def create_user(cls, email, password):

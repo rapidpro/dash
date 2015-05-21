@@ -527,7 +527,7 @@ class OrgTest(DashTest):
 
     def test_org_edit(self):
 
-        with patch('dash.utils.get_country_geojson') as mock:
+        with patch('dash.orgs.models.Org.get_country_geojson') as mock:
             mock.return_value = dict(type="FeatureCollection", features=[ dict(type='Feature',
                                                                                properties=dict(id="R3713501",
                                                                                                level=1,
