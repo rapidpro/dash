@@ -26,6 +26,7 @@ from django.utils import timezone
 from mock import patch, Mock
 from smartmin.tests import SmartminTest
 from temba import TembaClient
+from temba.types import Geometry, Boundary
 
 
 class UserTest(SmartminTest):
@@ -336,6 +337,68 @@ class OrgTest(DashTest):
         self.org._config = None
         self.assertEquals(self.org.get_config('field_name'), 'field_value')
         self.assertEquals(self.org.get_config('other_field_name'), 'other_value')
+
+    def test_build_boundaries(self):
+        boundaries = dict()
+        boundaries['geojson:%d' % self.org.pk] = dict(
+            type="FeatureCollection",
+            features=[dict(type="Feature",
+                           geometry=dict(type='MultiPolygon', coordinates=[[1, 2], [3, 4]]),
+                           properties=dict(name='Burundi', id="R195269", level=1))])
+
+        boundaries['geojson:%d:%s' % (self.org.pk, "R195269")] = dict(
+            type="FeatureCollection",
+            features=[dict(type="Feature",
+                           geometry=dict(type='MultiPolygon', coordinates=[[5, 6], [7, 8]]),
+                           properties=dict(name='Bujumbura', id="R195270", level=2))])
+
+        with patch('dash.orgs.models.datetime_to_ms') as mock_datetime_to_ms:
+            mock_datetime_to_ms.return_value = 500
+
+            with patch('django.core.cache.cache.set') as cache_set_mock:
+                cache_set_mock.return_value = "Set"
+
+                with patch('dash.orgs.models.TembaClient.get_boundaries') as mock_client:
+                    geometry1 = Geometry.create(type='MultiPolygon', coordinates=[[1, 2], [3, 4]])
+                    geometry2 = Geometry.create(type='MultiPolygon', coordinates=[[5, 6], [7, 8]])
+                    level_1_boundary = Boundary.create(boundary='R195269', name='Burundi', level=1, parent="",
+                                                       geometry=geometry1)
+                    level_2_boundary = Boundary.create(boundary='R195270', name='Bujumbura', level=2, parent="R195269",
+                                                       geometry=geometry2)
+
+                    mock_client.return_value = [level_1_boundary, level_2_boundary]
+
+                    self.assertEqual(self.org.build_boundaries(), boundaries)
+                    cache_set_mock.assert_called_with('org:%d:boundaries' % self.org.pk, dict(time=500,
+                                                                                              results=boundaries),
+                                                      60 * 60 * 24 * 30)
+
+        with patch('django.core.cache.cache.get') as cache_get_mock:
+            cache_get_mock.return_value = None
+            self.assertIsNone(self.org.get_boundaries())
+
+            cache_get_mock.return_value = dict(time=500, results=boundaries)
+            self.assertEqual(self.org.get_boundaries(), boundaries)
+
+        with patch('dash.orgs.models.Org.get_boundaries') as mock_get_boundaries:
+            mock_get_boundaries.return_value = None
+
+            self.assertIsNone(self.org.get_country_geojson())
+            self.assertIsNone(self.org.get_state_geojson("R195269"))
+
+            mock_get_boundaries.return_value = boundaries
+            self.assertEqual(self.org.get_country_geojson(),
+                             dict(type="FeatureCollection",
+                                  features=[dict(type="Feature",
+                                                 geometry=dict(type='MultiPolygon', coordinates=[[1, 2], [3, 4]]),
+                                                 properties=dict(name='Burundi', id="R195269", level=1))]))
+            self.assertEqual(self.org.get_state_geojson("R195269"),
+                             dict(type="FeatureCollection",
+                                  features=[dict(type="Feature",
+                                                 geometry=dict(type='MultiPolygon', coordinates=[[5, 6], [7, 8]]),
+                                                 properties=dict(name='Bujumbura', id="R195270", level=2))]))
+            # we get None if no value in dict
+            self.assertIsNone(self.org.get_state_geojson("R11"))
 
     def test_org_create(self):
         create_url = reverse("orgs.org_create")
