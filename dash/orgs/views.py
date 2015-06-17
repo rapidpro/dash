@@ -278,7 +278,7 @@ class OrgCRUDL(SmartCRUDL):
                 if is_super or not config_field.get('superuser_only', False):
                     field_name = config_field['name']
                     if field_name == 'featured_state':
-                        choices = [(feature['properties']['id'], feature['properties']['name']) for feature in self.org.get_api().get_country_geojson()['features']]
+                        choices = [(feature['properties']['id'], feature['properties']['name']) for feature in self.org.get_country_geojson()['features']]
                         form.fields[field_name] = forms.ChoiceField(choices=choices, **config_field['field'])
                     elif field_name.startswith('has_') or field_name.startswith('is_'):
                         form.fields[field_name] = forms.BooleanField(**config_field['field'])

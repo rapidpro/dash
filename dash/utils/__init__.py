@@ -3,12 +3,15 @@ from __future__ import absolute_import, unicode_literals
 import calendar
 import datetime
 import json
+from django.conf import settings
 import pytz
 import random
 
 from django.core.cache import cache
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
+
+
 
 
 def intersection(*args):
@@ -107,3 +110,23 @@ def chunks(data, size):
     """
     for i in xrange(0, len(data), size):
         yield data[i:(i + size)]
+
+
+def temba_client_flow_results_serializer(client_results):
+    if not client_results:
+        return client_results
+
+    json_results = []
+    for flow_result in client_results:
+        flow_result_json = dict()
+        flow_result_json['set'] = flow_result.set
+        flow_result_json['unset'] = flow_result.unset
+        flow_result_json['open_ended'] = flow_result.open_ended
+        flow_result_json['label'] = flow_result.label
+        flow_result_json['categories'] = [ dict(label=category.label, count=category.count) for category in flow_result.categories]
+        if flow_result.boundary:
+            flow_result_json['boundary'] = flow_result.boundary
+
+        json_results.append(flow_result_json)
+
+    return json_results
