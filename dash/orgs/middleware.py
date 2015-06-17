@@ -103,10 +103,11 @@ class SetOrgMiddleware(object):
 
         parts = host.split('.')
 
-        # at this point we might be something like 'uganda.localhost'
         if len(parts) > 2:
             subdomain = parts[-3]
             parts = parts[:-3]
+
+        # at this point we might be something like 'uganda.localhost'
         elif len(parts):
             subdomain = parts[0]
             parts = parts[1:]
