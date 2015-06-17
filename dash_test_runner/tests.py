@@ -184,7 +184,8 @@ class SetOrgMiddlewareTest(DashTest):
             self.assertIsNone(self.request.user.get_org())
 
         # check requests to valid host names based on the Ug org's subdomain
-        for host in ('uganda.ureport.io', 'www.UGANDA.ureport.io', 'uganda.staging.ureport.io', 'uganda.localhost'):
+        for host in ('uganda.ureport.io', 'www.UGANDA.ureport.io', 'uganda.staging.ureport.io',
+                     'uganda.localhost', 'blablabla.uganda.staging.rapidpro-dash.com'):
 
             # check white-listed URL
             response = self.simulate_process(host, 'orgs.org_create')
