@@ -48,6 +48,10 @@ class SetOrgMiddleware(object):
 
         org = Org.objects.filter(subdomain__iexact=subdomain, is_active=True).first()
 
+        # try to default to empty subdomain org
+        if not org:
+            org = Org.objects.filter(subdomain='', is_active=True).first()
+
         if not request.user.is_anonymous():
             request.user.set_org(org)
 
