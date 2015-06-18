@@ -13,6 +13,7 @@ hamlpy
 mock
 Pillow
 phonenumbers
+psycopg2
 python-dateutil
 requests
 sorl-thumbnail==12.1c
