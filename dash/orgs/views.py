@@ -116,7 +116,7 @@ class OrgForm(forms.ModelForm):
     name = forms.CharField(label=_("Organization"),
                            help_text=_("The name of this organization"))
 
-    subdomain = forms.CharField(help_text=_("The subdomain of this organization"))
+    subdomain = forms.CharField(help_text=_("The subdomain of this organization"), required=False)
 
     timezone = TimeZoneField(help_text=_("The timezone your organization is in"))
 

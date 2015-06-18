@@ -46,10 +46,7 @@ class SetOrgMiddleware(object):
     def process_request(self, request):
         subdomain = self.get_subdomain(request)
 
-        if subdomain:
-            org = Org.objects.filter(subdomain__iexact=subdomain, is_active=True).first()
-        else:
-            org = None
+        org = Org.objects.filter(subdomain__iexact=subdomain, is_active=True).first()
 
         if not request.user.is_anonymous():
             request.user.set_org(org)
@@ -99,7 +96,7 @@ class SetOrgMiddleware(object):
         except DisallowedHost:
             traceback.print_exc()
 
-        subdomain = None
+        subdomain = ""
 
         parts = host.split('.')
 

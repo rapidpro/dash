@@ -47,8 +47,9 @@ class Org(SmartModel):
     language = models.CharField(verbose_name=_("Language"), max_length=64, null=True, blank=True,
                                 choices=settings.LANGUAGES, help_text=_("The main language used by this organization"))
 
-    subdomain = models.SlugField(verbose_name=_("Subdomain"), max_length=255, unique=True, error_messages=dict(unique=_("This subdomain is not available")),
-                                 help_text=_("The subdomain for this UReport instance"))
+    subdomain = models.SlugField(verbose_name=_("Subdomain"), null=True, blank=True, max_length=255, unique=True,
+                                 error_messages=dict(unique=_("This subdomain is not available")),
+                                 help_text=_("The subdomain for this U-Report instance"))
 
     timezone = models.CharField(verbose_name=_("Timezone"), max_length=64, default='UTC')
 
