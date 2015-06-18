@@ -46,10 +46,7 @@ class SetOrgMiddleware(object):
     def process_request(self, request):
         subdomain = self.get_subdomain(request)
 
-        if subdomain:
-            org = Org.objects.filter(subdomain__iexact=subdomain, is_active=True).first()
-        else:
-            org = None
+        org = Org.objects.filter(subdomain__iexact=subdomain, is_active=True).first()
 
         if not request.user.is_anonymous():
             request.user.set_org(org)
@@ -99,24 +96,19 @@ class SetOrgMiddleware(object):
         except DisallowedHost:
             traceback.print_exc()
 
-        subdomain = None
+        subdomain = ""
 
         parts = host.split('.')
 
         # at this point we might be something like 'uganda.localhost'
-        if parts > 1:
+        if len(parts) > 1:
             subdomain = parts[0]
             parts = parts[1:]
 
-            ignored_subdomains = getattr(settings, 'DASH_IGNORED_SUBDOMAINS', ('www',))
-
             # we keep stripping subdomains if the subdomain is something
             # like 'www' and there are more parts
-            while len(parts) > 2 and subdomain.lower() in ignored_subdomains:
+            while subdomain.lower() == 'www' and len(parts) > 1:
                 subdomain = parts[0]
                 parts = parts[1:]
-
-            if subdomain.lower() in ignored_subdomains:
-                subdomain = None
 
         return subdomain
