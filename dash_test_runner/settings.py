@@ -292,7 +292,7 @@ BROKER_VHOST = '4'
 
 # RapidPRO
 API_ENDPOINT = 'http://localhost:8001'
-SITE_HOST_PATTERN = 'http://%s.localhost:8000'
+HOSTNAME = 'localhost:8000'
 SITE_CHOOSER_TEMPLATE = 'orgs/org_chooser.html'
 SITE_CHOOSER_URL_NAME = 'orgs.org_chooser'
 

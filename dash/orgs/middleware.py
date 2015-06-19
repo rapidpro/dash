@@ -48,10 +48,6 @@ class SetOrgMiddleware(object):
 
         org = Org.objects.filter(subdomain__iexact=subdomain, is_active=True).first()
 
-        # try to default to empty subdomain org
-        if not org:
-            org = Org.objects.filter(subdomain='', is_active=True).first()
-
         if not request.user.is_anonymous():
             request.user.set_org(org)
 
@@ -104,8 +100,8 @@ class SetOrgMiddleware(object):
 
         parts = host.split('.')
 
-        # at this point we might be something like 'uganda.localhost'
-        if len(parts) > 1:
+        # for more than 2 parts
+        if len(parts) > 2:
             subdomain = parts[0]
             parts = parts[1:]
 
@@ -114,5 +110,16 @@ class SetOrgMiddleware(object):
             while subdomain.lower() == 'www' and len(parts) > 1:
                 subdomain = parts[0]
                 parts = parts[1:]
+
+        elif len(parts) > 0:
+            # for less than or equal to 2 parts
+            # subdomain is the first word in the parts
+            subdomain = parts[0]
+            hostname = getattr(settings, 'HOSTNAME', 'localhost')
+
+            # if the subdomain is the same as the first part of hostname
+            # ignore than and return ''
+            if subdomain.lower() == hostname.lower().split('.')[0]:
+                subdomain = ""
 
         return subdomain
