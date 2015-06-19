@@ -166,7 +166,7 @@ class OrgCRUDL(SmartCRUDL):
 
             # populate a 'host' attribute on each org so we can link off to them
             for org in all_orgs:
-                org.host = settings.SITE_HOST_PATTERN % org.subdomain
+                org.host = org.build_host_link()
 
             return dict(orgs=all_orgs)
 
@@ -237,7 +237,7 @@ class OrgCRUDL(SmartCRUDL):
                 self.request.session['org_id'] = org.pk
                 self.request.org = org
 
-            return HttpResponseRedirect(settings.SITE_HOST_PATTERN % org.subdomain + self.get_success_url())
+            return HttpResponseRedirect(org.build_host_link() + self.get_success_url())
 
         def get_success_url(self):
             return getattr(settings, 'SITE_USER_HOME', reverse('orgs.org_home'))
@@ -473,7 +473,7 @@ class OrgCRUDL(SmartCRUDL):
 
             elif request.org != org:
 
-                redirect_path = settings.SITE_HOST_PATTERN % org.subdomain + reverse('orgs.org_create_login', args=[secret])
+                redirect_path = org.build_host_link() + reverse('orgs.org_create_login', args=[secret])
                 return HttpResponseRedirect(redirect_path)
 
             return None
@@ -557,7 +557,7 @@ class OrgCRUDL(SmartCRUDL):
                 return HttpResponseRedirect('/')
             elif request.org != org:
 
-                redirect_path = settings.SITE_HOST_PATTERN % org.subdomain + reverse('orgs.org_join', args=[secret])
+                redirect_path = org.build_host_link() + reverse('orgs.org_join', args=[secret])
                 return HttpResponseRedirect(redirect_path)
 
             if not request.user.is_authenticated():

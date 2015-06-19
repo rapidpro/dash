@@ -137,6 +137,14 @@ class Org(SmartModel):
     def get_api(self):
         return API(self)
 
+    def build_host_link(self):
+        host_tld = getattr(settings, "HOSTNAME", 'locahost')
+
+        if self.subdomain == '':
+            return 'http://' + host_tld
+        return 'http://' + str(self.subdomain) + "." + host_tld
+
+
     def build_boundaries(self):
 
         this_time = datetime.now()
@@ -294,7 +302,7 @@ class Invitation(SmartModel):
 
         context = dict(org=self.org, now=timezone.now(), invitation=self)
         context['subject'] = subject
-        context['host'] = settings.SITE_HOST_PATTERN % self.org.subdomain
+        context['host'] = self.org.build_host_link()
 
         send_dash_email(to_email, subject, template, context)
 

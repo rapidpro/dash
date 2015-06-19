@@ -332,6 +332,14 @@ class OrgTest(DashTest):
         self.assertEquals(self.org.get_config('field_name'), 'field_value')
         self.assertEquals(self.org.get_config('other_field_name'), 'other_value')
 
+    def test_build_host_link(self):
+        self.assertEqual(self.org.build_host_link(), 'http://uganda.localhost:8000')
+
+        self.org.subdomain = ''
+        self.org.save()
+
+        self.assertEqual(self.org.build_host_link(), 'http://localhost:8000')
+
     def test_build_boundaries(self):
         boundaries = dict()
         boundaries['geojson:%d' % self.org.pk] = dict(
