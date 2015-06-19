@@ -100,7 +100,7 @@ class SetOrgMiddleware(object):
 
         parts = host.split('.')
 
-        # at this point we might be something like 'uganda.domain.com'
+        # for more than 2 parts
         if len(parts) > 2:
             subdomain = parts[0]
             parts = parts[1:]
@@ -110,11 +110,15 @@ class SetOrgMiddleware(object):
             while subdomain.lower() == 'www' and len(parts) > 1:
                 subdomain = parts[0]
                 parts = parts[1:]
-        else:
-            # something like 'uganda.localhost' make sure the subdomain is not
-            # a part of the hostname
+
+        elif len(parts) > 0:
+            # for less than or equal to 2 parts
+            # subdomain is the first word in the parts
             subdomain = parts[0]
             hostname = getattr(settings, 'HOSTNAME', 'localhost')
+
+            # if the subdomain is the same as the first part of hostname
+            # ignore than and return ''
             if subdomain.lower() == hostname.lower().split('.')[0]:
                 subdomain = ""
 

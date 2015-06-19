@@ -139,10 +139,15 @@ class Org(SmartModel):
 
     def build_host_link(self):
         host_tld = getattr(settings, "HOSTNAME", 'locahost')
+        is_secure = getattr(settings, 'SESSION_COOKIE_SECURE', False)
+
+        prefix = 'http://'
+        if is_secure:
+            prefix = 'https://'
 
         if self.subdomain == '':
-            return 'http://' + host_tld
-        return 'http://' + str(self.subdomain) + "." + host_tld
+            return prefix + host_tld
+        return prefix + str(self.subdomain) + "." + host_tld
 
 
     def build_boundaries(self):
