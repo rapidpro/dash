@@ -230,6 +230,20 @@ class SetOrgMiddlewareTest(DashTest):
             self.assertIsNone(self.request.org)
             self.assertIsNone(self.request.user.get_org())
 
+        response = self.simulate_process('localhost', 'dash.test_test')
+        self.assertIsNone(self.request.org)
+        self.assertIsNone(self.request.user.get_org())
+        self.assertEquals(response.status_code, 302)
+        self.assertEquals(response.url, reverse(settings.SITE_CHOOSER_URL_NAME))
+
+        empty_subdomain_org = Org.objects.create(subdomain="", name="global", language='en',
+                                                 created_by=self.admin, modified_by=self.admin)
+
+        response = self.simulate_process('localhost', 'dash.test_test')
+        self.assertIsNone(response)
+        self.assertEqual(self.request.org, empty_subdomain_org)
+        self.assertEqual(self.request.user.get_org(), empty_subdomain_org)
+
 
 class OrgContextProcessorTestcase(DashTest):
     def test_group_perms_wrapper(self):
