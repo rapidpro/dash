@@ -1,4 +1,5 @@
 from __future__ import absolute_import, unicode_literals
+import re
 
 import traceback
 from django.core.urlresolvers import reverse
@@ -97,6 +98,10 @@ class SetOrgMiddleware(object):
             traceback.print_exc()
 
         subdomain = ""
+
+        # does the host look like an IP? return ""
+        if re.match("^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$", host):
+            return subdomain
 
         parts = host.split('.')
 
