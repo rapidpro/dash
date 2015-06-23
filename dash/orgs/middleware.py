@@ -1,4 +1,5 @@
 from __future__ import absolute_import, unicode_literals
+import re
 
 import traceback
 from django.core.urlresolvers import reverse
@@ -98,6 +99,10 @@ class SetOrgMiddleware(object):
 
         subdomain = ""
 
+        # does the host look like an IP? return ""
+        if re.match("^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$", host):
+            return subdomain
+
         parts = host.split('.')
 
         # for more than 2 parts
@@ -115,11 +120,12 @@ class SetOrgMiddleware(object):
             # for less than or equal to 2 parts
             # subdomain is the first word in the parts
             subdomain = parts[0]
-            hostname = getattr(settings, 'HOSTNAME', 'localhost')
+            hostname = getattr(settings, 'HOSTNAME', '')
+            domain_first_part = hostname.lower().split('.')[0]
 
             # if the subdomain is the same as the first part of hostname
             # ignore than and return ''
-            if subdomain.lower() == hostname.lower().split('.')[0]:
+            if subdomain.lower() in [domain_first_part, 'localhost']:
                 subdomain = ""
 
         return subdomain
