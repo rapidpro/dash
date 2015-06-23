@@ -245,7 +245,7 @@ class SetOrgMiddlewareTest(DashTest):
         self.assertEqual(self.request.user.get_org(), empty_subdomain_org)
 
         # case get_host gives us an IP
-        response = self.simulate_process('123.123.123.123', 'dash.test_test')
+        response = self.simulate_process('1.12.123.123', 'dash.test_test')
         self.assertIsNone(response)
         self.assertEqual(self.request.org, empty_subdomain_org)
         self.assertEqual(self.request.user.get_org(), empty_subdomain_org)
