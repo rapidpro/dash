@@ -13,4 +13,4 @@ before_script:
   - python manage.py migrate --noinput
 script:
   - coverage run manage.py test
-  - coverage report --show-missing
+  - coverage report --show-missing --fail-under 80
