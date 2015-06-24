@@ -5,6 +5,7 @@ coverage
 django>=1.7.2,<1.8
 django-celery
 django-compressor
+django-guardian
 django-nose
 django-redis==3.8.4
 django-timezones
