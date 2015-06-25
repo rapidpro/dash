@@ -617,7 +617,7 @@ class OrgTest(DashTest):
     def test_org_edit(self):
 
         with patch('dash.orgs.models.Org.get_country_geojson') as mock:
-            mock.return_value = dict(type="FeatureCollection", features=[ dict(type='Feature',
+            mock.return_value = dict(type="FeatureCollection", features=[dict(type='Feature',
                                                                                properties=dict(id="R3713501",
                                                                                                level=1,
                                                                                                name="Abia"),
@@ -1733,7 +1733,7 @@ class CategoryTest(DashTest):
         nigeria_health = Category.objects.create(name="Health", org=self.nigeria,
                                                  created_by=self.admin, modified_by=self.admin)
 
-        list_url =reverse('categories.category_list')
+        list_url = reverse('categories.category_list')
 
         response = self.client.get(list_url, SERVER_NAME='uganda.ureport.io')
         self.assertLoginRedirect(response)

@@ -225,7 +225,7 @@ PERMISSIONS = {
           'update', # can update an object
           'delete', # can delete an object,
           'list'),  # can view a list of the objects
-    'auth.user': ('profile','forget', 'recover', 'expired', 'failed', 'newpassword', 'mimic'),
+    'auth.user': ('profile', 'forget', 'recover', 'expired', 'failed', 'newpassword', 'mimic'),
     'orgs.org': ('choose', 'home', 'edit', 'manage_accounts', 'create_login', 'join'),
     'stories.story': ('images',),
 }
@@ -305,7 +305,7 @@ CACHES = {
     }
 }
 
-ORG_CONFIG_FIELDS =[ dict(name='shortcode', field=dict(help_text=_("The shortcode that users will use to contact U-report locally"), required=True)),
+ORG_CONFIG_FIELDS = [dict(name='shortcode', field=dict(help_text=_("The shortcode that users will use to contact U-report locally"), required=True)),
                      dict(name='join_text', field=dict(help_text=_("The short text used to direct visitors to join U-report"), required=False)),
                      dict(name='join_fg_color', field=dict(help_text=_("The color used to draw the text on the join bar"), required=False), superuser_only=True),
                      dict(name='join_bg_color', field=dict(help_text=_("The color used to draw the background on the join bar"), required=False), superuser_only=True),

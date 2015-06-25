@@ -132,7 +132,7 @@ def temba_client_flow_results_serializer(client_results):
         flow_result_json['unset'] = flow_result.unset
         flow_result_json['open_ended'] = flow_result.open_ended
         flow_result_json['label'] = flow_result.label
-        flow_result_json['categories'] = [ dict(label=category.label, count=category.count) for category in flow_result.categories]
+        flow_result_json['categories'] = [dict(label=category.label, count=category.count) for category in flow_result.categories]
         if flow_result.boundary:
             flow_result_json['boundary'] = flow_result.boundary
 

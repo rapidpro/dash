@@ -60,7 +60,7 @@ class Story(SmartModel):
     def get_category_image(self):
         cat_image = None
         if self.category and self.category.is_active:
-            cat_image =  self.category.get_first_image()
+            cat_image = self.category.get_first_image()
 
         if not cat_image:
             if self.get_featured_images():
@@ -71,11 +71,11 @@ class Story(SmartModel):
     def get_image(self):
         cat_image = None
         if self.get_featured_images():
-            cat_image =  self.get_featured_images()[0].image
+            cat_image = self.get_featured_images()[0].image
 
         if not cat_image:
             if self.category and self.category.is_active:
-                cat_image =  self.category.get_first_image()
+                cat_image = self.category.get_first_image()
 
         return cat_image
 
