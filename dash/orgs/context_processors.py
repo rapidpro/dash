@@ -2,6 +2,7 @@ class defaultdict(dict):
     def __missing__(self, key):
         return False
 
+
 class GroupPermWrapper(object):
     def __init__(self, group):
         self.group = group
@@ -40,6 +41,7 @@ class GroupPermWrapper(object):
             else:
                 return False
 
+
 def user_group_perms_processor(request):
     """
     return context variables with org permissions to the user.
@@ -63,6 +65,7 @@ def user_group_perms_processor(request):
     context['user_org'] = org
 
     return context
+
 
 def set_org_processor(request):
     """

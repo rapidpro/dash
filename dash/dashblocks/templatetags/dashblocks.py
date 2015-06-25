@@ -6,7 +6,7 @@ for the passed in DashBlockType and Org on request. (identified by the slug)  Yo
 then access that list within your context.
 
 It accepts 2 parameter:
-    
+
     org
         The Org set on the request to filter DashBlocks for that org.
 
@@ -48,11 +48,12 @@ register = template.Library()
 DashBlockType = models.get_model('dashblocks', 'dashblocktype')
 DashBlock = models.get_model('dashblocks', 'dashblock')
 
+
 @register.simple_tag(takes_context=True)
 def load_dashblocks(context, org, slug, tag=None):
     if not org:
         return ''
-    
+
     try:
         dashblock_type = DashBlockType.objects.get(slug=slug)
     except DashBlockType.DoesNotExist:
@@ -64,10 +65,10 @@ def load_dashblocks(context, org, slug, tag=None):
     if not tag is None:
         dashblocks = dashblocks.filter(tags__icontains=tag)
 
-    
     context[slug] = dashblocks
 
     return ''
+
 
 @register.simple_tag(takes_context=True)
 def load_qbs(context, org, slug, tag=None):

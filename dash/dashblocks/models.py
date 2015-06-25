@@ -4,6 +4,7 @@ from smartmin.models import SmartModel
 from dash.orgs.models import Org
 from django.utils.translation import ugettext_lazy as _
 
+
 class DashBlockType(SmartModel):
     """
     Dash Block Types just group fields by a slug.. letting you do lookups by type.  In the future
@@ -38,6 +39,7 @@ class DashBlockType(SmartModel):
     def __unicode__(self):
         return self.name
 
+
 class DashBlock(SmartModel):
     """
     A DashBlock is just a block of content, organized by type and priority.  All fields are optional
@@ -65,7 +67,6 @@ class DashBlock(SmartModel):
                            help_text=_("Any tags for this content block, separated by spaces, can be used to do more advanced filtering, optional"))
     priority = models.IntegerField(default=0,
                                    help_text=_("The priority for this block, higher priority blocks come first"))
-
 
     org = models.ForeignKey(Org, help_text=_("The organization this content block belongs to"))
 

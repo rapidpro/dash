@@ -198,7 +198,6 @@ class SetOrgMiddlewareTest(DashTest):
             self.assertEqual(self.request.org, ug_org)
             self.assertEqual(self.request.user.get_org(), ug_org)
 
-
         # test invalid subdomain
         response = self.simulate_process('blabla.ureport.io', 'dash.test_test')
         self.assertIsNone(self.request.org)
@@ -249,6 +248,7 @@ class SetOrgMiddlewareTest(DashTest):
         self.assertIsNone(response)
         self.assertEqual(self.request.org, empty_subdomain_org)
         self.assertEqual(self.request.user.get_org(), empty_subdomain_org)
+
 
 class OrgContextProcessorTestcase(DashTest):
     def test_group_perms_wrapper(self):
@@ -363,7 +363,6 @@ class OrgTest(DashTest):
 
         with self.settings(SESSION_COOKIE_SECURE=True):
             self.assertEqual(self.org.build_host_link(), 'https://localhost:8000')
-
 
     def test_build_boundaries(self):
         boundaries = dict()
@@ -2134,7 +2133,6 @@ class StoryTest(DashTest):
         images_url_uganda = reverse('stories.story_images', args=[story1.pk])
         images_url_nigeria = reverse('stories.story_images', args=[story2.pk])
 
-
         response = self.client.get(images_url_uganda)
         self.assertEquals(response.status_code, 302)
         response = self.client.get(images_url_uganda, follow=True)
@@ -2183,6 +2181,7 @@ class StoryTest(DashTest):
         self.assertEquals(response.request['PATH_INFO'], reverse('stories.story_list'))
 
         self.clear_uploads()
+
 
 class DashBlockTypeTest(DashTest):
     def setUp(self):
@@ -2355,7 +2354,6 @@ class DashBlockTest(DashTest):
                                                      created_by=self.admin,
                                                      modified_by=self.admin)
 
-
     def test_dashblock_model(self):
         dashblock1 = DashBlock.objects.create(dashblock_type=self.type_foo,
                                               org=self.uganda,
@@ -2366,7 +2364,6 @@ class DashBlockTest(DashTest):
                                               modified_by=self.admin)
 
         self.assertEquals(dashblock1.__unicode__(), 'First')
-
 
         dashblock2 = DashBlock.objects.create(dashblock_type=self.type_bar,
                                               org=self.uganda,
@@ -2563,7 +2560,6 @@ class DashBlockTest(DashTest):
         self.assertFalse('org' in fields)
         self.assertFalse('tags' in fields)
 
-
     def test_list_dashblock(self):
         list_url = reverse('dashblocks.dashblock_list')
 
@@ -2574,7 +2570,6 @@ class DashBlockTest(DashTest):
                                               summary='first summary',
                                               created_by=self.admin,
                                               modified_by=self.admin)
-
 
         dashblock2 = DashBlock.objects.create(dashblock_type=self.type_bar,
                                               org=self.uganda,
@@ -2638,7 +2633,6 @@ class DashBlockTest(DashTest):
         self.assertTrue('title' in response.context['fields'])
         self.assertTrue('dashblock_type' in response.context['fields'])
         self.assertTrue('priority' in response.context['fields'])
-
 
         self.type_bar.is_active = False
         self.type_bar.save()
@@ -2721,7 +2715,6 @@ class DashBlockTest(DashTest):
                                               summary='first summary',
                                               created_by=self.admin,
                                               modified_by=self.admin)
-
 
         dashblock2 = DashBlock.objects.create(dashblock_type=self.type_bar,
                                               org=self.uganda,

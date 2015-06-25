@@ -4,6 +4,7 @@ from dash.dashblocks.models import DashBlockType, DashBlock, DashBlockImage
 from dash.orgs.views import OrgObjPermsMixin, OrgPermsMixin
 from django.utils.translation import ugettext_lazy as _
 
+
 class DashBlockTypeCRUDL(SmartCRUDL):
     model = DashBlockType
     actions = ('create', 'update', 'list')
@@ -77,6 +78,8 @@ class DashBlockFormMixin(object):
 
         obj.space_tags()
         return obj
+
+
 class DashBlockCRUDL(SmartCRUDL):
     model = DashBlock
     permissions = True
@@ -164,7 +167,6 @@ class DashBlockCRUDL(SmartCRUDL):
                 return _("Create %s") % block_type.name
             else:
                 return _("Create Content Block")
-
 
 
 class DashBlockImageCRUDL(SmartCRUDL):

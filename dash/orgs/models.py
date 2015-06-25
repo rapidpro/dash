@@ -28,6 +28,7 @@ BOUNDARY_CACHE_KEY = 'org:%d:boundaries'
 BOUNDARY_LEVEL_1_KEY = 'geojson:%d'
 BOUNDARY_LEVEL_2_KEY = 'geojson:%d:%s'
 
+
 class Org(SmartModel):
     name = models.CharField(verbose_name=_("Name"), max_length=128,
                             help_text=_("The name of this organization"))
@@ -149,7 +150,6 @@ class Org(SmartModel):
             return prefix + host_tld
         return prefix + str(self.subdomain) + "." + host_tld
 
-
     def build_boundaries(self):
 
         this_time = datetime.now()
@@ -229,15 +229,18 @@ class Org(SmartModel):
     def __unicode__(self):
         return self.name
 
+
 def get_org(obj):
     return getattr(obj, '_org', None)
 
 User.get_org = get_org
 
+
 def set_org(obj, org):
     obj._org = org
 
 User.set_org = set_org
+
 
 def get_user_orgs(user):
     if user.is_superuser:
@@ -246,6 +249,7 @@ def get_user_orgs(user):
     return user_orgs.distinct()
 
 User.get_user_orgs = get_user_orgs
+
 
 def get_org_group(obj):
     org_group = None
@@ -312,9 +316,9 @@ class Invitation(SmartModel):
         send_dash_email(to_email, subject, template, context)
 
 
-
 BACKGROUND_TYPES = (('B', _("Banner")),
                    ('P', _("Pattern")))
+
 
 class OrgBackground(SmartModel):
     org = models.ForeignKey(Org, verbose_name=_("Org"), related_name="backgrounds",

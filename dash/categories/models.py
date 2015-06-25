@@ -4,6 +4,7 @@ from smartmin.models import SmartModel
 from dash.orgs.models import Org
 from django.utils.translation import ugettext_lazy as _
 
+
 class Category(SmartModel):
     """
     Every organization can choose to categorize their polls or stories according to their needs.
@@ -17,7 +18,6 @@ class Category(SmartModel):
     org = models.ForeignKey(Org, related_name='categories',
                             help_text=_("The organization this category applies to"))
 
-
     def get_first_image(self):
         cat_images = self.images.filter(is_active=True).exclude(image='')
         if cat_images and cat_images.first().image:
@@ -29,6 +29,7 @@ class Category(SmartModel):
     class Meta:
         unique_together = ('name', 'org')
         verbose_name_plural = _("Categories")
+
 
 class CategoryImage(SmartModel):
     name = models.CharField(max_length=64,
@@ -42,5 +43,3 @@ class CategoryImage(SmartModel):
 
     def __unicode__(self):
         return "%s - %s" % (self.category.name, self.name)
-
-

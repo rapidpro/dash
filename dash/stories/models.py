@@ -5,6 +5,7 @@ from dash.orgs.models import Org
 from django.utils.translation import ugettext_lazy as _
 from dash.categories.models import Category
 
+
 class Story(SmartModel):
     title = models.CharField(max_length=255,
                              help_text=_("The title for this story"))
@@ -25,7 +26,6 @@ class Story(SmartModel):
                                  help_text=_("The category for this story"))
 
     org = models.ForeignKey(Org, help_text=_("The organization this story belongs to"))
-
 
     def space_tags(self):
         """
@@ -81,6 +81,7 @@ class Story(SmartModel):
 
     class Meta:
         verbose_name_plural = _("Stories")
+
 
 class StoryImage(SmartModel):
     name = models.CharField(max_length=64,

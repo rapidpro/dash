@@ -10,6 +10,7 @@ def send_invitation_email_task(invitation_id):
     invitation = Invitation.objects.get(pk=invitation_id)
     invitation.send_email()
 
+
 @app.task(name='orgs.build_boundaries')
 def build_boundaries():
     start = time.time()

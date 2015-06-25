@@ -1,5 +1,6 @@
 from django.conf import settings
 
+
 def lang_direction(request):
     """
     Sets lang_direction context variable to whether the language is RTL or LTR

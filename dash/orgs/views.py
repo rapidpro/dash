@@ -392,7 +392,6 @@ class OrgCRUDL(SmartCRUDL):
             emails = cleaned_data['emails'].lower().strip()
             email_list = emails.split(',')
 
-
             if emails:
                 for email in email_list:
 

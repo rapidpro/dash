@@ -31,6 +31,7 @@ CONTACT_RESULT_CACHE_TIME = getattr(settings, 'API_CONTACT_RESULT_CACHE_TIME', 6
 # five minutes to cache contacts and breakdowns
 CONTACT_CACHE_TIME = getattr(settings, 'API_CONTACTS_CACHE_TIME', 60 * 5)
 
+
 class API(object):
 
     def __init__(self, org):

@@ -4,6 +4,7 @@ from django import forms
 from dash.orgs.views import OrgPermsMixin, OrgObjPermsMixin
 from django.utils.translation import ugettext_lazy as _
 
+
 class StoryForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.org = kwargs['org']
@@ -17,6 +18,7 @@ class StoryForm(forms.ModelForm):
     class Meta:
         model = Story
         fields = ('is_active', 'title', 'featured', 'summary', 'content', 'video_id', 'tags', 'category')
+
 
 class StoryCRUDL(SmartCRUDL):
     model = Story
