@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 setup(
     name='dash',
     version=__import__('dash').__version__,
-    licence='BSD',
+    license='BSD',
     install_requires=['django==1.7.2',
                       'smartmin',
                       'coverage',
