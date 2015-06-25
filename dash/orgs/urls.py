@@ -1,4 +1,5 @@
-from .views import *
+from . import views
 
-urlpatterns = OrgCRUDL().as_urlpatterns()
-urlpatterns += OrgBackgroundCRUDL().as_urlpatterns()
+
+urlpatterns = views.OrgCRUDL().as_urlpatterns()
+urlpatterns += views.OrgBackgroundCRUDL().as_urlpatterns()

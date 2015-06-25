@@ -1,5 +1,4 @@
 from smartmin.users.views import UserCRUDL as SmartUserCRUDL
-from smartmin.views import *
 
 
 class UserCRUDL(SmartUserCRUDL):

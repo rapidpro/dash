@@ -1,7 +1,9 @@
-from .models import *
-from smartmin.views import *
+from .models import Category, Story, StoryImage
+from smartmin.views import SmartCRUDL, SmartCreateView, SmartListView, SmartUpdateView
+
 from django import forms
 from dash.orgs.views import OrgPermsMixin, OrgObjPermsMixin
+from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 
 

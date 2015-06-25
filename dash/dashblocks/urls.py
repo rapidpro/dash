@@ -1,5 +1,6 @@
-from .views import *
+from . import views
 
-urlpatterns = DashBlockTypeCRUDL().as_urlpatterns()
-urlpatterns += DashBlockCRUDL().as_urlpatterns()
-urlpatterns += DashBlockImageCRUDL().as_urlpatterns()
+
+urlpatterns = views.DashBlockTypeCRUDL().as_urlpatterns()
+urlpatterns += views.DashBlockCRUDL().as_urlpatterns()
+urlpatterns += views.DashBlockImageCRUDL().as_urlpatterns()

@@ -1,9 +1,10 @@
 from django.conf.urls import patterns, url
 
-from .views import *
+from . import views
 from django.contrib.auth.views import logout
 from django.conf import settings
 from smartmin.users.views import login
+
 
 logout_url = getattr(settings, 'LOGOUT_REDIRECT_URL', None)
 
@@ -12,4 +13,4 @@ urlpatterns = patterns('',
     url(r'^logout/$', logout, dict(redirect_field_name='go', next_page=logout_url), name="users.user_logout"),
 )
 
-urlpatterns += UserCRUDL().as_urlpatterns()
+urlpatterns += views.UserCRUDL().as_urlpatterns()
