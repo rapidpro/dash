@@ -1,0 +1,16 @@
+language: python
+sudo: false
+python:
+  - "2.7"
+services:
+  - redis-server
+env:
+  - DJANGO_SETTINGS_MODULE="dash_test_runner.settings_travis"
+install:
+  - pip install -r pip-requires.txt
+before_script:
+  - createdb -E UTF-8 dash -U postgres -O $USER
+  - python manage.py migrate --noinput
+script:
+  - coverage run manage.py test
+  - coverage report --show-missing --fail-under 80
