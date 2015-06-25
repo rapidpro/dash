@@ -674,7 +674,7 @@ class OrgTest(DashTest):
 
             # featured state is currenty disabled, adjust the following lines
             self.assertFalse(org.get_config('featured_state'))  # this make sure the featured state are disabled
-            #self.assertEquals(org.get_config('featured_state'), "R3713501")
+            # self.assertEquals(org.get_config('featured_state'), "R3713501")
 
             self.assertEquals(response.request['PATH_INFO'], reverse('orgs.org_home'))
 
@@ -2447,7 +2447,7 @@ class DashBlockTest(DashTest):
         self.assertTrue('content' in fields)
         self.assertTrue(response.context['type'])
         self.assertEquals(response.context['type'], self.type_bar)
-        #self.assertEquals(fields['priority'].initial, 3)
+        # self.assertEquals(fields['priority'].initial, 3)
 
         response = self.client.get(create_url + "?type=%d" % self.type_foo.pk, SERVER_NAME='uganda.ureport.io')
         self.assertEquals(response.status_code, 200)

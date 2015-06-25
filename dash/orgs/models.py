@@ -293,7 +293,7 @@ class Invitation(SmartModel):
         """
         Generatesa a [length] characters alpha numeric secret
         """
-        letters = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ" # avoid things that could be mistaken ex: 'I' and '1'
+        letters = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"  # avoid things that could be mistaken ex: 'I' and '1'
         return ''.join([random.choice(letters) for _ in range(length)])
 
     def send_invitation(self):

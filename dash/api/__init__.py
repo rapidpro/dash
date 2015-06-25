@@ -108,7 +108,7 @@ class API(object):
         if flows:
             flow = flows[0]
 
-        if settings.DEBUG: # pragma: no cover
+        if settings.DEBUG:  # pragma: no cover
             print "- got flow %d in %f" % (flow_id, time.time() - start)
 
         return flow
@@ -220,7 +220,7 @@ class API(object):
         result = response.json()
         group = result['results'][0]
 
-        if settings.DEBUG: # pragma: no cover
+        if settings.DEBUG:  # pragma: no cover
             print "- got group %s in %f" % (name, time.time() - start)
 
         return group
@@ -309,7 +309,7 @@ class API(object):
 
             cached['geojson:%d:%s' % (self.org.id, state_id)] = to_geojson(districts_by_state[state_id])
 
-        if settings.DEBUG: # pragma: no cover
+        if settings.DEBUG:  # pragma: no cover
             print "- built boundaries in %f" % (time.time() - start)
 
         return cached
@@ -331,7 +331,7 @@ class API(object):
 
         results = response_json['results']
 
-        if settings.DEBUG: # pragma: no cover
+        if settings.DEBUG:  # pragma: no cover
             print "- got ruleset results for %d in %f" % (ruleset_id, time.time() - start)
 
         return results
@@ -353,7 +353,7 @@ class API(object):
         response_json = response.json()
         results = response_json['results']
 
-        if settings.DEBUG: # pragma: no cover
+        if settings.DEBUG:  # pragma: no cover
             print "- got contact field results for %s in %f" % (contact_field_label, time.time() - start)
 
         return results
@@ -385,7 +385,7 @@ class API(object):
             else:
                 next = None
 
-        if settings.DEBUG and flows: # pragma: no cover
+        if settings.DEBUG and flows:  # pragma: no cover
             print "- got flows in %f" % (time.time() - start)
 
         return flows

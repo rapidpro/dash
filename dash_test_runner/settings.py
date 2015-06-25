@@ -59,7 +59,7 @@ INSTALLED_APPS = (
 
     'djcelery',
 
-    #dash
+    # dash
     'dash.orgs',
     'dash.categories',
     'dash.dashblocks',
@@ -172,7 +172,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # List of callables that know how to import templates from various sources.
@@ -181,7 +181,7 @@ TEMPLATE_LOADERS = (
     'hamlpy.template.loaders.HamlPyAppDirectoriesLoader',
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    # 'django.template.loaders.eggs.Loader',
 )
 
 TEMPLATE_DIRS = (
@@ -214,16 +214,16 @@ LOGGING = {
 }
 
 AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend', # this is default
+    'django.contrib.auth.backends.ModelBackend',  # this is default
     'guardian.backends.ObjectPermissionBackend',
 )
 
 # create the smartmin CRUDL permissions on all objects
 PERMISSIONS = {
-    '*': ('create', # can create an object
+    '*': ('create',  # can create an object
           'read',   # can read an object, viewing it's details
-          'update', # can update an object
-          'delete', # can delete an object,
+          'update',  # can update an object
+          'delete',  # can delete an object,
           'list'),  # can view a list of the objects
     'auth.user': ('profile', 'forget', 'recover', 'expired', 'failed', 'newpassword', 'mimic'),
     'orgs.org': ('choose', 'home', 'edit', 'manage_accounts', 'create_login', 'join'),
@@ -270,15 +270,15 @@ LOGIN_URL = '/users/login/'
 LOGIN_REDIRECT_URL = "/manage/org/choose/"
 LOGOUT_REDIRECT_URL = "/"
 
-#-----------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Django-Nose config
-#-----------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
-#-----------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Async tasks with django-celery
-#-----------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 import djcelery
 djcelery.setup_loader()
 
@@ -328,12 +328,13 @@ ORG_CONFIG_FIELDS = [dict(name='shortcode', field=dict(help_text=_("The shortcod
                      dict(name='district_label', field=dict(help_text=_("The label of the Contact Field that contains the District of reporters")), superuser_only=True),
                      dict(name='male_label', field=dict(help_text=_("The label assigned to U-reporters that are Male.")), superuser_only=True),
                      dict(name='female_label', field=dict(help_text=_("The label assigned to U-reporters that are Female.")), superuser_only=True),
-                     dict(name='has_jobs', field=dict(help_text=_("If there are jobs to be shown on the public site"), required=False))]
-#                     dict(name='featured_state', field=dict(help_text=_("Choose the featured State of reporters shown on the home page")))]
+                     dict(name='has_jobs', field=dict(help_text=_("If there are jobs to be shown on the public site"), required=False)),
+                     # dict(name='featured_state', field=dict(help_text=_("Choose the featured State of reporters shown on the home page"))),
+                     ],
 
-#-----------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Directory Configuration
-#-----------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 import os
 
 PROJECT_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)))
