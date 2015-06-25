@@ -1918,11 +1918,11 @@ class StoryTest(DashTest):
         self.assertEquals(self.story.get_category_image(), 'stories/someimage.jpg')
         self.assertEquals(self.story.get_image(), 'stories/someimage.jpg')
 
-        category_image1 = CategoryImage.objects.create(category=self.health_uganda,
-                                                       name='image 1',
-                                                       image='categories/some_image.jpg',
-                                                       created_by=self.admin,
-                                                       modified_by=self.admin)
+        CategoryImage.objects.create(category=self.health_uganda,
+                                     name='image 1',
+                                     image='categories/some_image.jpg',
+                                     created_by=self.admin,
+                                     modified_by=self.admin)
 
         self.assertEquals(self.story.get_category_image(), 'categories/some_image.jpg')
         self.assertEquals(self.story.get_image(), 'stories/someimage.jpg')
@@ -2519,7 +2519,6 @@ class DashBlockTest(DashTest):
 
         response = self.client.post(update_url, dict(), SERVER_NAME='uganda.ureport.io')
         self.assertTrue('form' in response.context)
-        errors = response.context['form'].errors
 
         self.assertTrue('priority' in response.context['form'].errors)
 
