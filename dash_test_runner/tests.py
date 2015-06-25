@@ -615,14 +615,14 @@ class OrgTest(DashTest):
 
         with patch('dash.orgs.models.Org.get_country_geojson') as mock:
             mock.return_value = dict(type="FeatureCollection", features=[dict(type='Feature',
-                                                                               properties=dict(id="R3713501",
-                                                                                               level=1,
-                                                                                               name="Abia"),
-                                                                               geometry=dict(type="MultiPolygon",
-                                                                                             coordinates=[[[[7, 5]]]]
-                                                                                             )
-                                                                               )
-                                                                               ])
+                                                                              properties=dict(id="R3713501",
+                                                                                              level=1,
+                                                                                              name="Abia"),
+                                                                              geometry=dict(type="MultiPolygon",
+                                                                                            coordinates=[[[[7, 5]]]]
+                                                                                            )
+                                                                              )
+                                                                         ])
 
             edit_url = reverse("orgs.org_edit")
 
@@ -1179,8 +1179,8 @@ class APITest(DashTest):
             mock_request_get.assert_called_once_with(
                 '%s/api/v1/results.json?ruleset=101&segment=null' % settings.API_ENDPOINT,
                 headers={'Content-type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': 'Token %s' % self.org.api_token})
+                         'Accept': 'application/json',
+                         'Authorization': 'Token %s' % self.org.api_token})
 
             self.assertIsNone(self.api.get_ruleset_results(101, dict(location='State')))
             mock_request_get.assert_called_with(
@@ -1188,8 +1188,8 @@ class APITest(DashTest):
                                                                    urllib.quote(unicode(json.dumps(
                                                                        dict(location='LGA'))).encode('utf8'))),
                 headers={'Content-type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': 'Token %s' % self.org.api_token})
+                         'Accept': 'application/json',
+                         'Authorization': 'Token %s' % self.org.api_token})
 
             self.assertIsNone(self.api.get_ruleset_results(101, dict(location='District')))
             mock_request_get.assert_called_with(
@@ -1197,8 +1197,8 @@ class APITest(DashTest):
                                                                    urllib.quote(unicode(json.dumps(
                                                                        dict(location='Province'))).encode('utf8'))),
                 headers={'Content-type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': 'Token %s' % self.org.api_token})
+                         'Accept': 'application/json',
+                         'Authorization': 'Token %s' % self.org.api_token})
             self.assertEquals(mock_request_get.call_count, 3)
 
         with patch('requests.get') as mock_request_get:
@@ -1208,8 +1208,8 @@ class APITest(DashTest):
             mock_request_get.assert_called_once_with(
                 '%s/api/v1/results.json?ruleset=101&segment=null' % settings.API_ENDPOINT,
                 headers={'Content-type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': 'Token %s' % self.org.api_token})
+                         'Accept': 'application/json',
+                         'Authorization': 'Token %s' % self.org.api_token})
 
             self.assertIsNone(self.api.get_ruleset_results(101, dict(location='State')))
             mock_request_get.assert_called_with(
@@ -1217,8 +1217,8 @@ class APITest(DashTest):
                                                                    urllib.quote(unicode(json.dumps(
                                                                        dict(location='LGA'))).encode('utf8'))),
                 headers={'Content-type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': 'Token %s' % self.org.api_token})
+                         'Accept': 'application/json',
+                         'Authorization': 'Token %s' % self.org.api_token})
 
             self.assertIsNone(self.api.get_ruleset_results(101, dict(location='District')))
             mock_request_get.assert_called_with(
@@ -1226,8 +1226,8 @@ class APITest(DashTest):
                                                                    urllib.quote(unicode(json.dumps(
                                                                        dict(location='Province'))).encode('utf8'))),
                 headers={'Content-type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': 'Token %s' % self.org.api_token})
+                         'Accept': 'application/json',
+                         'Authorization': 'Token %s' % self.org.api_token})
 
             self.assertEquals(mock_request_get.call_count, 3)
 
@@ -1238,8 +1238,8 @@ class APITest(DashTest):
             mock_request_get.assert_called_once_with(
                 '%s/api/v1/results.json?ruleset=101&segment=null' % settings.API_ENDPOINT,
                 headers={'Content-type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': 'Token %s' % self.org.api_token})
+                         'Accept': 'application/json',
+                         'Authorization': 'Token %s' % self.org.api_token})
 
             self.assertIsNone(self.api.get_ruleset_results(101, dict(location='State')))
             mock_request_get.assert_called_with(
@@ -1247,8 +1247,8 @@ class APITest(DashTest):
                                                                    urllib.quote(unicode(json.dumps(
                                                                        dict(location='LGA'))).encode('utf8'))),
                 headers={'Content-type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': 'Token %s' % self.org.api_token})
+                         'Accept': 'application/json',
+                         'Authorization': 'Token %s' % self.org.api_token})
 
             self.assertIsNone(self.api.get_ruleset_results(101, dict(location='District')))
             mock_request_get.assert_called_with(
@@ -1256,8 +1256,8 @@ class APITest(DashTest):
                                                                    urllib.quote(unicode(json.dumps(
                                                                        dict(location='Province'))).encode('utf8'))),
                 headers={'Content-type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': 'Token %s' % self.org.api_token})
+                         'Accept': 'application/json',
+                         'Authorization': 'Token %s' % self.org.api_token})
 
             self.assertEquals(mock_request_get.call_count, 3)
 
@@ -1268,8 +1268,8 @@ class APITest(DashTest):
             mock_request_get.assert_called_once_with(
                 '%s/api/v1/results.json?ruleset=101&segment=null' % settings.API_ENDPOINT,
                 headers={'Content-type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': 'Token %s' % self.org.api_token})
+                         'Accept': 'application/json',
+                         'Authorization': 'Token %s' % self.org.api_token})
 
             self.assertEquals(self.api.get_ruleset_results(101, dict(location='State')), ["RULESET_DATA"])
             mock_request_get.assert_called_with(
@@ -1277,8 +1277,8 @@ class APITest(DashTest):
                                                                    urllib.quote(unicode(json.dumps(
                                                                        dict(location='LGA'))).encode('utf8'))),
                 headers={'Content-type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': 'Token %s' % self.org.api_token})
+                         'Accept': 'application/json',
+                         'Authorization': 'Token %s' % self.org.api_token})
 
             self.assertEquals(self.api.get_ruleset_results(101, dict(location='District')), ["RULESET_DATA"])
             mock_request_get.assert_called_with(
@@ -1286,8 +1286,8 @@ class APITest(DashTest):
                                                                    urllib.quote(unicode(json.dumps(
                                                                        dict(location='Province'))).encode('utf8'))),
                 headers={'Content-type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': 'Token %s' % self.org.api_token})
+                         'Accept': 'application/json',
+                         'Authorization': 'Token %s' % self.org.api_token})
 
             self.assertEquals(mock_request_get.call_count, 3)
 
@@ -1300,8 +1300,8 @@ class APITest(DashTest):
             mock_request_get.assert_called_once_with(
                 '%s/api/v1/results.json?contact_field=contact_field_name&segment=null' % settings.API_ENDPOINT,
                 headers={'Content-type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': 'Token %s' % self.org.api_token})
+                         'Accept': 'application/json',
+                         'Authorization': 'Token %s' % self.org.api_token})
 
             self.assertEquals(self.api.get_contact_field_results('contact_field_name', dict(location='State')),
                               ["CONTACT_FIELD_DATA"])
@@ -1312,8 +1312,8 @@ class APITest(DashTest):
                                                                                                 dict(location='LGA')
                                                                                             )).encode('utf8'))),
                 headers={'Content-type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': 'Token %s' % self.org.api_token})
+                         'Accept': 'application/json',
+                         'Authorization': 'Token %s' % self.org.api_token})
 
             self.assertEquals(self.api.get_contact_field_results('contact_field_name', dict(location='District')),
                               ["CONTACT_FIELD_DATA"])
@@ -1326,8 +1326,8 @@ class APITest(DashTest):
                                                                                             )
                                                                                         ).encode('utf8'))),
                 headers={'Content-type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': 'Token %s' % self.org.api_token})
+                         'Accept': 'application/json',
+                         'Authorization': 'Token %s' % self.org.api_token})
 
             self.assertEquals(mock_request_get.call_count, 3)
 
@@ -1340,8 +1340,8 @@ class APITest(DashTest):
             mock_request_get.assert_called_once_with(
                 '%s/api/v1/results.json?contact_field=contact_field_name&segment=null' % settings.API_ENDPOINT,
                 headers={'Content-type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': 'Token %s' % self.org.api_token})
+                         'Accept': 'application/json',
+                         'Authorization': 'Token %s' % self.org.api_token})
 
         with patch('requests.get') as mock_request_get:
             mock_request_get.return_value = MockResponse(200, 'invalid_json')
@@ -1350,8 +1350,8 @@ class APITest(DashTest):
             mock_request_get.assert_called_once_with(
                 '%s/api/v1/results.json?contact_field=contact_field_name&segment=null' % settings.API_ENDPOINT,
                 headers={'Content-type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': 'Token %s' % self.org.api_token})
+                         'Accept': 'application/json',
+                         'Authorization': 'Token %s' % self.org.api_token})
 
     @patch('requests.models.Response', MockResponse)
     def test_get_flows(self):
@@ -1562,8 +1562,8 @@ class APITest(DashTest):
             self.assertRaises(ValueError, lambda: self.api._build_boundaries())
             mock_request_get.assert_called_once_with('%s/api/v1/boundaries.json' % settings.API_ENDPOINT,
                                                      headers={'Content-type': 'application/json',
-                                                     'Accept': 'application/json',
-                                                     'Authorization': 'Token %s' % self.org.api_token})
+                                                              'Accept': 'application/json',
+                                                              'Authorization': 'Token %s' % self.org.api_token})
 
         with patch('requests.get') as mock_request_get:
             self.clear_cache()
@@ -2324,18 +2324,18 @@ class DashBlockTest(DashTest):
         self.nigeria = self.create_org('nigeria', self.admin)
 
         self.type_foo = DashBlockType.objects.create(name='Foo', slug='foo',
-                                                      description='foo description',
-                                                      has_title=True,
-                                                      has_image=True,
-                                                      has_rich_text=True,
-                                                      has_summary=True,
-                                                      has_link=True,
-                                                      has_color=False,
-                                                      has_video=False,
-                                                      has_tags=True,
-                                                      has_gallery=False,
-                                                      created_by=self.admin,
-                                                      modified_by=self.admin)
+                                                     description='foo description',
+                                                     has_title=True,
+                                                     has_image=True,
+                                                     has_rich_text=True,
+                                                     has_summary=True,
+                                                     has_link=True,
+                                                     has_color=False,
+                                                     has_video=False,
+                                                     has_tags=True,
+                                                     has_gallery=False,
+                                                     created_by=self.admin,
+                                                     modified_by=self.admin)
 
         self.type_bar = DashBlockType.objects.create(name='Bar', slug='bar',
                                                      description='bar description',

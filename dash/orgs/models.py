@@ -316,7 +316,7 @@ class Invitation(SmartModel):
 
 
 BACKGROUND_TYPES = (('B', _("Banner")),
-                   ('P', _("Pattern")))
+                    ('P', _("Pattern")))
 
 
 class OrgBackground(SmartModel):

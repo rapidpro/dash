@@ -126,8 +126,8 @@ class API(object):
             response = requests.get(url,
                                     params=params,
                                     headers={'Content-type': 'application/json',
-                                    'Accept': 'application/json',
-                                    'Authorization': 'Token %s' % self.org.api_token})
+                                             'Accept': 'application/json',
+                                             'Authorization': 'Token %s' % self.org.api_token})
 
             result = response.json()
             return result['results']
@@ -369,8 +369,8 @@ class API(object):
         while next:
             response = requests.get(next,
                                     headers={'Content-type': 'application/json',
-                                    'Accept': 'application/json',
-                                    'Authorization': 'Token %s' % self.org.api_token})
+                                             'Accept': 'application/json',
+                                             'Authorization': 'Token %s' % self.org.api_token})
 
             response.raise_for_status()
             result = response.json()

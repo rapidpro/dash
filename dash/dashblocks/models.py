@@ -58,13 +58,13 @@ class DashBlock(SmartModel):
     image = models.ImageField(blank=True, null=True, upload_to='dashblocks',
                               help_text=_("Any image that should be displayed with this content block, optional"))
     color = models.CharField(blank=True, null=True, max_length=16,
-                            help_text=_("A background color to use for the image, in the format: #rrggbb"))
+                             help_text=_("A background color to use for the image, in the format: #rrggbb"))
     link = models.CharField(blank=True, null=True, max_length=255,
                             help_text=_("Any link that should be associated with this content block, optional"))
     video_id = models.CharField(blank=True, null=True, max_length=255,
                                 help_text=_("The id of the YouTube video that should be linked to this item"))
     tags = models.CharField(blank=True, null=True, max_length=255,
-                           help_text=_("Any tags for this content block, separated by spaces, can be used to do more advanced filtering, optional"))
+                            help_text=_("Any tags for this content block, separated by spaces, can be used to do more advanced filtering, optional"))
     priority = models.IntegerField(default=0,
                                    help_text=_("The priority for this block, higher priority blocks come first"))
 

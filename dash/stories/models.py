@@ -88,7 +88,7 @@ class StoryImage(SmartModel):
                             help_text=_("The name to describe this image"))
 
     story = models.ForeignKey(Story, related_name="images",
-                             help_text=_("The story to associate to"))
+                              help_text=_("The story to associate to"))
 
     image = models.ImageField(upload_to='stories',
                               help_text=_("The image file to use"))
