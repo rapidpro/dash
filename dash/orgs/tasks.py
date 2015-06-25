@@ -1,6 +1,5 @@
 import time
-from django.core.cache import cache
-from .models import Invitation, Org, BOUNDARY_CACHE_KEY
+from .models import Invitation, Org
 from djcelery.app import app
 from django_redis import get_redis_connection
 

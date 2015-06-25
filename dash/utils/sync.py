@@ -2,7 +2,6 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 
-from collections import defaultdict
 from enum import Enum
 from temba.types import Contact as TembaContact
 from . import union, intersection, filter_dict

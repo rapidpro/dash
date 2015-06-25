@@ -7,7 +7,6 @@ from django.http import HttpResponseRedirect
 
 from dash.orgs.models import Org
 from django.conf import settings
-from django.template.response import TemplateResponse
 from django.utils import translation, timezone
 from django.core.exceptions import DisallowedHost
 

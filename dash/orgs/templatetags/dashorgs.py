@@ -1,6 +1,5 @@
 from datetime import datetime
 from django import template
-from django.conf import settings
 from django.db import models
 import pytz
 import phonenumbers
