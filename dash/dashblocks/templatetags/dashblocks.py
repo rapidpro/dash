@@ -62,7 +62,7 @@ def load_dashblocks(context, org, slug, tag=None):
     dashblocks = DashBlock.objects.filter(dashblock_type=dashblock_type, org=org, is_active=True).order_by('-priority')
 
     # filter by our tag if one was specified
-    if not tag is None:
+    if tag is not None:
         dashblocks = dashblocks.filter(tags__icontains=tag)
 
     context[slug] = dashblocks

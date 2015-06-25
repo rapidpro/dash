@@ -164,7 +164,7 @@ class Org(SmartModel):
                 states.append(boundary)
             elif boundary.level == DISTRICT:
                 osm_id = boundary.parent
-                if not osm_id in districts_by_state:
+                if osm_id not in districts_by_state:
                     districts_by_state[osm_id] = []
 
                 districts = districts_by_state[osm_id]

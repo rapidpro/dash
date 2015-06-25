@@ -86,7 +86,7 @@ class SetOrgMiddleware(object):
             chooser_view = getattr(settings, 'SITE_CHOOSER_URL_NAME', 'orgs.org_chooser')
             whitelist += (chooser_view,)
 
-            if not url_name in whitelist:
+            if url_name not in whitelist:
                 return HttpResponseRedirect(reverse(chooser_view))
 
     @staticmethod
