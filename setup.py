@@ -1,4 +1,9 @@
+import re
+
 from setuptools import setup, find_packages
+
+
+EGG_REGEX = re.compile(r".*#egg=(?P<package>.+)-(?P<version>[\d.]+)$")
 
 
 def _is_requirement(line):
@@ -22,10 +27,15 @@ def _read_requirements(filename):
     for req in requirements:
         if req.startswith("-e "):
             # Installation requires a dependency link.
+            # The dependency link package must be included in the requirements.
             link = req.split()[-1]
-            package = link.split("#")[-1].split("=")[-1].rsplit("-", 1)[0]
-            links.append(link)
-            packages.append(package)
+            m = EGG_REGEX.match(link)
+            if m:
+                links.append(link)
+                packages.append(m.groupdict()['package'])
+            else:
+                raise Exception("Could not get package name from "
+                                "dependency link: {}".format(link))
         else:
             packages.append(req)
     return packages, links
