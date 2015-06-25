@@ -2,7 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from enum import Enum
 from temba.types import Contact as TembaContact
 from . import union, intersection, filter_dict
@@ -154,6 +154,11 @@ def temba_compare_contacts(first, second, fields=None, groups=None):
     return None
 
 
+def remove_duplicates(group):
+    """Remove duplicates from the group while maintaining order."""
+    return OrderedDict.fromkeys(group).keys()
+
+
 def temba_merge_contacts(first, second, mutex_group_sets):
     """
     Merges two Temba contacts, with priority given to the first contact
@@ -172,8 +177,8 @@ def temba_merge_contacts(first, second, mutex_group_sets):
     merged_fields.update(first.fields)
 
     # first merge mutually exclusive group sets
-    first_groups = set(first.groups)
-    second_groups = set(second.groups)
+    first_groups = remove_duplicates(first.groups)
+    second_groups = remove_duplicates(second.groups)
     merged_mutex_groups = []
     for group_set in mutex_group_sets:
         from_first = intersection(first_groups, group_set)
