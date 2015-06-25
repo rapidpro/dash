@@ -51,7 +51,7 @@ class Story(SmartModel):
 
     def short_teaser(self):
         if self.summary:
-           return self.teaser(self.summary, 40)
+            return self.teaser(self.summary, 40)
         return self.teaser(self.content, 40)
 
     def get_featured_images(self):
