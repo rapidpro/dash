@@ -89,14 +89,12 @@ class DashBlockCRUDL(SmartCRUDL):
         search_fields = ('title__icontains', 'content__icontains', 'summary__icontains')
 
         def derive_fields(self):
-            fields = super(DashBlockCRUDL.List, self).derive_exclude()
-
+            fields = super(DashBlockCRUDL.List, self).derive_fields()
             block_type = self.get_type()
             if block_type:
                 if not block_type.has_tags:
-                    return ('title', 'priority', 'dashblock_type')
-
-            return ('title', 'priority', 'dashblock_type', 'tags')
+                    fields = type(fields)(x for x in fields if x != 'tags')
+            return fields
 
         def get_title(self, obj):
             block_type = self.get_type()
