@@ -2,7 +2,7 @@
 -e git+https://github.com/rapidpro/rapidpro-python.git@master#egg=rapidpro-python-1.0
 celery-with-redis
 coverage
-django>=1.7.2,<1.8
+django>=1.7.2
 django-celery
 django-compressor
 django-guardian
