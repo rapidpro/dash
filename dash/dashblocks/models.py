@@ -3,11 +3,13 @@ from __future__ import unicode_literals
 from smartmin.models import SmartModel
 
 from django.db import models
+from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 from dash.orgs.models import Org
 
 
+@python_2_unicode_compatible
 class DashBlockType(SmartModel):
     """
     Dash Block Types just group fields by a slug.. letting you do lookups by
@@ -55,10 +57,11 @@ class DashBlockType(SmartModel):
         default=False,
         help_text=_("Whether this content should allow tags"))
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
+@python_2_unicode_compatible
 class DashBlock(SmartModel):
     """
     A DashBlock is just a block of content, organized by type and priority.
@@ -137,12 +140,13 @@ class DashBlock(SmartModel):
     def sorted_images(self):
         return self.images.filter(is_active=True).order_by('-priority')
 
-    def __unicode__(self):
+    def __str__(self):
         if self.dashblock_type.has_title:
             return self.title
         return '%s - %d' % (self.dashblock_type, self.pk)
 
 
+@python_2_unicode_compatible
 class DashBlockImage(SmartModel):
     dashblock = models.ForeignKey(DashBlock, related_name='images')
     image = models.ImageField(
@@ -153,5 +157,5 @@ class DashBlockImage(SmartModel):
     width = models.IntegerField()
     height = models.IntegerField()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.image.url

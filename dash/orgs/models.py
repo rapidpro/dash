@@ -13,6 +13,7 @@ from django.core.cache import cache
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import python_2_unicode_compatible
 
 from dash.api import API
 from dash.dash_email import send_dash_email
@@ -30,6 +31,7 @@ BOUNDARY_LEVEL_1_KEY = 'geojson:%d'
 BOUNDARY_LEVEL_2_KEY = 'geojson:%d:%s'
 
 
+@python_2_unicode_compatible
 class Org(SmartModel):
     name = models.CharField(
         verbose_name=_("Name"), max_length=128,
@@ -248,7 +250,7 @@ class Org(SmartModel):
 
         return getattr(user, '_org', None)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 

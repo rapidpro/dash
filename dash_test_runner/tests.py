@@ -277,7 +277,7 @@ class OrgTest(DashTest):
     def test_org_model(self):
         user = self.create_user("User")
 
-        self.assertEquals(self.org.__unicode__(), 'uganda')
+        self.assertEquals(str(self.org), 'uganda')
 
         self.assertIsNone(Org.get_org(None))
         self.assertEquals(Org.get_org(self.admin), self.org)
@@ -1645,7 +1645,7 @@ class CategoryTest(DashTest):
                                             created_by=self.admin,
                                             modified_by=self.admin)
 
-        self.assertEquals(category1.__unicode__(), 'uganda - category 1')
+        self.assertEquals(str(category1), 'uganda - category 1')
 
         with self.assertRaises(IntegrityError):
             Category.objects.create(name='category 1',
@@ -2228,7 +2228,7 @@ class DashBlockTypeTest(DashTest):
         self.assertFalse(dashblocktype.has_tags)
         self.assertFalse(dashblocktype.has_video)
 
-        self.assertEquals(dashblocktype.__unicode__(), 'Test Pages')
+        self.assertEquals(str(dashblocktype), 'Test Pages')
 
     def test_list_dashblocktype(self):
         list_url = reverse('dashblocks.dashblocktype_list')
@@ -2361,7 +2361,7 @@ class DashBlockTest(DashTest):
                                               created_by=self.admin,
                                               modified_by=self.admin)
 
-        self.assertEquals(dashblock1.__unicode__(), 'First')
+        self.assertEquals(str(dashblock1), 'First')
 
         dashblock2 = DashBlock.objects.create(dashblock_type=self.type_bar,
                                               org=self.uganda,
@@ -2370,7 +2370,7 @@ class DashBlockTest(DashTest):
                                               created_by=self.admin,
                                               modified_by=self.admin)
 
-        self.assertEquals(dashblock2.__unicode__(), 'Bar - %d' % dashblock2.pk)
+        self.assertEquals(str(dashblock2), 'Bar - %d' % dashblock2.pk)
 
         self.assertEquals(dashblock1.teaser(dashblock1.content, 1), 'First ...')
         self.assertEquals(dashblock1.teaser(dashblock1.content, 10), 'First content')
