@@ -1,29 +1,55 @@
+import re
+
 from setuptools import setup, find_packages
+
+
+EGG_REGEX = re.compile(r".*#egg=(?P<package>.+)-(?P<version>[\d.]+)$")
+
+
+def _is_requirement(line):
+    """Returns whether the line is a valid package requirement."""
+    line = line.strip()
+    return line and not line.startswith("#")
+
+
+def _read_requirements(filename):
+    """Parses a file for pip installation requirements.
+
+    Returns two lists: one with package requirements, and the other with
+    dependency links.
+    """
+    with open(filename) as requirements_file:
+        contents = requirements_file.read()
+        requirements = [line.strip() for line in contents.splitlines()
+                        if _is_requirement(line)]
+    packages = []
+    links = []
+    for req in requirements:
+        if req.startswith("-e "):
+            # Installation requires a dependency link.
+            # The dependency link package must be included in the requirements.
+            link = req.split()[-1]
+            m = EGG_REGEX.match(link)
+            if m:
+                links.append(link)
+                packages.append(m.groupdict()['package'])
+            else:
+                raise Exception("Could not get package name from "
+                                "dependency link: {}".format(link))
+        else:
+            packages.append(req)
+    return packages, links
+
+
+install_requires, dependency_links = _read_requirements("pip-requires.txt")
+
 
 setup(
     name='dash',
-    version='0.0.1',
-    licence='BSD',
-    install_requires=['django==1.7.2',
-                      'smartmin',
-                      'coverage',
-                      'django-nose',
-                      'django-celery',
-                      'django-compressor',
-                      'celery-with-redis',
-                      'Pillow',
-                      'mock',
-                      'requests',
-                      'hamlpy',
-                      'sorl-thumbnail==12.1c',
-                      'django-timezones',
-                      'phonenumbers',
-                      'django-redis',
-                      'rapidpro-python',
-                      'enum34',
-                      'python-dateutil'],
-    dependency_links=['https://github.com/nyaruka/smartmin.git#egg=smartmin-dev',
-                      'https://github.com/rapidpro/rapidpro-python#egg=rapidpro-python'],
+    version=__import__('dash').__version__,
+    license='BSD',
+    install_requires=install_requires,
+    dependency_links=dependency_links,
     description="",
     long_description=open('README.md').read(),
     author='Nyaruka Team',
