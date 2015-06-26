@@ -1,22 +1,30 @@
-from .models import *
-from smartmin.views import *
+from smartmin.views import SmartCRUDL, SmartCreateView, SmartListView, SmartUpdateView
+
 from django import forms
-from dash.orgs.views import OrgPermsMixin, OrgObjPermsMixin
+from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
+
+from dash.orgs.views import OrgPermsMixin, OrgObjPermsMixin
+
+from .models import Category, Story, StoryImage
+
 
 class StoryForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.org = kwargs['org']
         del kwargs['org']
-
         super(StoryForm, self).__init__(*args, **kwargs)
-        self.fields['category'].queryset = Category.objects.filter(org=self.org, is_active=True)
+        qs = Category.objects.filter(org=self.org, is_active=True)
+        self.fields['category'].queryset = qs
 
     category = forms.ModelChoiceField(Category.objects.filter(id__lte=-1))
 
     class Meta:
         model = Story
-        fields = ('is_active', 'title', 'featured', 'summary', 'content', 'video_id', 'tags', 'category')
+        fields = (
+            'is_active', 'title', 'featured', 'summary', 'content',
+            'video_id', 'tags', 'category')
+
 
 class StoryCRUDL(SmartCRUDL):
     model = Story
@@ -24,7 +32,9 @@ class StoryCRUDL(SmartCRUDL):
 
     class Update(OrgObjPermsMixin, SmartUpdateView):
         form_class = StoryForm
-        fields = ('is_active', 'title', 'featured', 'summary', 'content', 'video_id', 'tags', 'category')
+        fields = (
+            'is_active', 'title', 'featured', 'summary', 'content',
+            'video_id', 'tags', 'category')
 
         def pre_save(self, obj):
             obj = super(StoryCRUDL.Update, self).pre_save(obj)
@@ -75,15 +85,17 @@ class StoryCRUDL(SmartCRUDL):
             # add existing images
             for image in self.object.images.all().order_by('pk'):
                 image_field_name = 'image_%d' % idx
-                image_field = forms.ImageField(required=False, initial=image.image, label=_("Image %d") % idx,
-                                               help_text=_("Image to display on story page and in previews. (optional)"))
+                image_field = forms.ImageField(
+                    required=False, initial=image.image, label=_("Image %d") % idx,
+                    help_text=_("Image to display on story page and in previews. (optional)"))
 
                 self.form.fields[image_field_name] = image_field
                 idx += 1
 
             while idx <= 3:
-                self.form.fields['image_%d' % idx] = forms.ImageField(required=False, label=_("Image %d") % idx,
-                                                                      help_text=_("Image to display on story page and in previews (optional)"))
+                self.form.fields['image_%d' % idx] = forms.ImageField(
+                    required=False, label=_("Image %d") % idx,
+                    help_text=_("Image to display on story page and in previews (optional)"))
                 idx += 1
 
             return form
@@ -100,15 +112,18 @@ class StoryCRUDL(SmartCRUDL):
                 image = self.form.cleaned_data.get('image_%d' % idx, None)
 
                 if image:
-                    StoryImage.objects.create(story=self.object, image=image,
-                                              created_by=self.request.user, modified_by=self.request.user)
+                    StoryImage.objects.create(
+                        story=self.object, image=image,
+                        created_by=self.request.user, modified_by=self.request.user)
 
             return obj
 
     class Create(OrgPermsMixin, SmartCreateView):
         form_class = StoryForm
         success_url = 'id@stories.story_images'
-        fields = ('title', 'featured', 'summary', 'content', 'video_id', 'tags', 'category')
+        fields = (
+            'title', 'featured', 'summary', 'content', 'video_id', 'tags',
+            'category')
 
         def pre_save(self, obj):
             obj = super(StoryCRUDL.Create, self).pre_save(obj)

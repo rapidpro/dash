@@ -1,6 +1,10 @@
 from __future__ import unicode_literals
-
 import re
+
+from smartmin.views import (
+    SmartCRUDL, SmartCreateView, SmartReadView, SmartUpdateView,
+    SmartListView, SmartFormView, SmartTemplateView)
+from timezones.forms import TimeZoneField
 
 from django import forms
 from django.conf import settings
@@ -12,16 +16,15 @@ from django.core.urlresolvers import reverse
 from django.core.validators import validate_email
 from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext_lazy as _
-from smartmin.views import SmartCRUDL, SmartCreateView, SmartReadView, SmartUpdateView, SmartListView, SmartFormView, \
-    SmartTemplateView
-from timezones.forms import TimeZoneField
+
 from .models import Org, OrgBackground, Invitation
 
 
 class OrgPermsMixin(object):
     """
-    Get the organisation and the user within the inheriting view so that it be come easy to decide
-    whether this user has a certain permission for that particular organization to perform the view's actions
+    Get the organisation and the user within the inheriting view so that it be
+    come easy to decide whether this user has a certain permission for that
+    particular organization to perform the view's actions
     """
     def get_user(self):
         return self.request.user
@@ -52,8 +55,10 @@ class OrgPermsMixin(object):
 
         if self.org:
             org_group = self.get_user().get_org_group()
-            if org_group and org_group.permissions.filter(content_type__app_label=app_label, codename=codename):
-                return True
+            if org_group:
+                if org_group.permissions.filter(content_type__app_label=app_label,
+                                                codename=codename).exists():
+                    return True
 
         return False
 
@@ -120,7 +125,8 @@ class OrgForm(forms.ModelForm):
 
     timezone = TimeZoneField(help_text=_("The timezone your organization is in"))
 
-    administrators = forms.ModelMultipleChoiceField(queryset=User.objects.exclude(username="root").exclude(username="root2").exclude(pk__lt=0))
+    administrators = forms.ModelMultipleChoiceField(
+        queryset=User.objects.exclude(username="root").exclude(username="root2").exclude(pk__lt=0))
 
     def clean_email(self):
         email = self.cleaned_data['email']
@@ -138,8 +144,9 @@ class OrgForm(forms.ModelForm):
         return password
 
     class Meta:
-        fields = ('is_active', 'first_name', 'last_name', 'email', 'password', 'name', 'subdomain', 'timezone',
-                  'language', 'api_token', 'logo', 'administrators')
+        fields = ('is_active', 'first_name', 'last_name', 'email', 'password',
+                  'name', 'subdomain', 'timezone', 'language', 'api_token',
+                  'logo', 'administrators')
         model = Org
 
 
@@ -153,8 +160,8 @@ class InferOrgMixin(object):
 
 
 class OrgCRUDL(SmartCRUDL):
-    actions = ('create', 'list', 'update', 'choose', 'home', 'edit', 'manage_accounts', 'create_login', 'join',
-               'chooser')
+    actions = ('create', 'list', 'update', 'choose', 'home', 'edit',
+               'manage_accounts', 'create_login', 'join', 'chooser')
     model = Org
 
     class Chooser(SmartTemplateView):
@@ -172,11 +179,13 @@ class OrgCRUDL(SmartCRUDL):
 
     class Create(SmartCreateView):
         form_class = OrgForm
-        fields = ('name', 'language', 'subdomain', 'timezone', 'administrators', 'api_token')
+        fields = ('name', 'language', 'subdomain', 'timezone',
+                  'administrators', 'api_token')
 
     class Update(SmartUpdateView):
         form_class = OrgForm
-        fields = ('is_active', 'name', 'subdomain', 'timezone', 'language', 'api_token', 'logo', 'administrators')
+        fields = ('is_active', 'name', 'subdomain', 'timezone', 'language',
+                  'api_token', 'logo', 'administrators')
 
     class List(SmartListView):
         fields = ('name', 'timezone', 'created_on', 'modified_on')
@@ -190,7 +199,8 @@ class OrgCRUDL(SmartCRUDL):
                 super(OrgCRUDL.Choose.ChooseForm, self).__init__(*args, **kwargs)
                 self.fields['organization'].queryset = self.user.get_user_orgs()
 
-            organization = forms.ModelChoiceField(queryset=Org.objects.filter(id__lte=-1) ,empty_label=None)
+            organization = forms.ModelChoiceField(queryset=Org.objects.filter(id__lte=-1),
+                                                  empty_label=None)
 
         form_class = ChooseForm
         fields = ('organization',)
@@ -204,7 +214,9 @@ class OrgCRUDL(SmartCRUDL):
                     return HttpResponseRedirect(reverse('orgs.org_list'))
 
                 elif not user_orgs:
-                    messages.info(request, _("Your account is not associated to an organization. Please Contact the adminstrator."))
+                    messages.info(
+                        request, _("Your account is not associated to an "
+                                   "organization. Please Contact the adminstrator."))
                     return HttpResponseRedirect(reverse('users.user_login'))
 
                 elif user_orgs.count() == 1:
@@ -264,7 +276,7 @@ class OrgCRUDL(SmartCRUDL):
             config_fields = getattr(settings, 'ORG_CONFIG_FIELDS', [])
             for config_field in config_fields:
                 if is_super or not config_field.get('superuser_only', False):
-                   fields.append(config_field['name'])
+                    fields.append(config_field['name'])
 
             return fields
 
@@ -278,8 +290,10 @@ class OrgCRUDL(SmartCRUDL):
                 if is_super or not config_field.get('superuser_only', False):
                     field_name = config_field['name']
                     if field_name == 'featured_state':
-                        choices = [(feature['properties']['id'], feature['properties']['name']) for feature in self.org.get_country_geojson()['features']]
-                        form.fields[field_name] = forms.ChoiceField(choices=choices, **config_field['field'])
+                        choices = [(feature['properties']['id'], feature['properties']['name'])
+                                   for feature in self.org.get_country_geojson()['features']]
+                        form.fields[field_name] = forms.ChoiceField(choices=choices,
+                                                                    **config_field['field'])
                     elif field_name.startswith('has_') or field_name.startswith('is_'):
                         form.fields[field_name] = forms.BooleanField(**config_field['field'])
                     else:
@@ -319,7 +333,8 @@ class OrgCRUDL(SmartCRUDL):
 
         class InviteForm(forms.ModelForm):
             emails = forms.CharField(label=_("Invite people to your organization"), required=False)
-            user_group = forms.ChoiceField(choices=(('A', _("Administrators")), ('E', _("Editors"))),
+            user_group = forms.ChoiceField(choices=(('A', _("Administrators")),
+                                                    ('E', _("Editors"))),
                                            required=True, initial='E', label=_("User group"))
 
             def clean_emails(self):
@@ -330,7 +345,8 @@ class OrgCRUDL(SmartCRUDL):
                         try:
                             validate_email(email)
                         except ValidationError:
-                            raise forms.ValidationError(_("One of the emails you entered is invalid."))
+                            raise forms.ValidationError(
+                                _("One of the emails you entered is invalid."))
                 return emails
 
             class Meta:
@@ -343,7 +359,7 @@ class OrgCRUDL(SmartCRUDL):
         GROUP_LEVELS = ('administrators', 'editors')
 
         def derive_title(self):
-            return _("Manage %(name)s Accounts") % {'name':self.get_object().name}
+            return _("Manage %(name)s Accounts") % {'name': self.get_object().name}
 
         def add_check_fields(self, form, objects, org_id, field_dict):
             for obj in objects:
@@ -376,7 +392,8 @@ class OrgCRUDL(SmartCRUDL):
         def get_form(self, form_class):
             form = super(OrgCRUDL.ManageAccounts, self).get_form(form_class)
             self.group_fields = dict()
-            self.add_check_fields(form, self.org_users, self.get_object().pk, self.group_fields)
+            self.add_check_fields(form, self.org_users, self.get_object().pk,
+                                  self.group_fields)
 
             return form
 
@@ -391,7 +408,6 @@ class OrgCRUDL(SmartCRUDL):
 
             emails = cleaned_data['emails'].lower().strip()
             email_list = emails.split(',')
-
 
             if emails:
                 for email in email_list:
@@ -468,12 +484,14 @@ class OrgCRUDL(SmartCRUDL):
 
             org = self.get_object()
             if not org:
-                messages.info(request, _("Your invitation link is invalid. Please contact your organization administrator."))
+                messages.info(
+                    request, _("Your invitation link is invalid. Please "
+                               "contact your organization administrator."))
                 return HttpResponseRedirect('/')
 
             elif request.org != org:
-
-                redirect_path = org.build_host_link() + reverse('orgs.org_create_login', args=[secret])
+                redirect_path = reverse('orgs.org_create_login', args=[secret])
+                redirect_path = org.build_host_link() + redirect_path
                 return HttpResponseRedirect(redirect_path)
 
             return None
@@ -491,7 +509,8 @@ class OrgCRUDL(SmartCRUDL):
             invitation = self.get_invitation()
 
             # log the user in
-            user = authenticate(username=user.username, password=self.form.cleaned_data['password'])
+            user = authenticate(username=user.username,
+                                password=self.form.cleaned_data['password'])
             login(self.request, user)
             if invitation.user_group == 'A':
                 obj.administrators.add(user)
@@ -523,7 +542,7 @@ class OrgCRUDL(SmartCRUDL):
 
         def derive_title(self):
             org = self.get_object()
-            return _("Join %(name)s") % {'name':org.name}
+            return _("Join %(name)s") % {'name': org.name}
 
         def get_context_data(self, **kwargs):
             context = super(OrgCRUDL.CreateLogin, self).get_context_data(**kwargs)
@@ -553,7 +572,9 @@ class OrgCRUDL(SmartCRUDL):
 
             org = self.get_object()
             if not org:
-                messages.info(request, _("Your invitation link has expired. Please contact your organization administrator."))
+                messages.info(
+                    request, _("Your invitation link has expired. Please "
+                               "contact your organization administrator."))
                 return HttpResponseRedirect('/')
             elif request.org != org:
 
@@ -566,7 +587,7 @@ class OrgCRUDL(SmartCRUDL):
 
         def derive_title(self):
             org = self.get_object()
-            return _("Join %(name)s") % {'name':org.name}
+            return _("Join %(name)s") % {'name': org.name}
 
         def save(self, org):
             org = self.get_object()

@@ -10,6 +10,7 @@ django-nose
 django-redis==3.8.4
 django-timezones
 enum34
+flake8
 hamlpy
 mock
 Pillow

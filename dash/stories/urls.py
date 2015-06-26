@@ -1,3 +1,4 @@
-from .views import *
+from . import views
 
-urlpatterns = StoryCRUDL().as_urlpatterns()
+
+urlpatterns = views.StoryCRUDL().as_urlpatterns()

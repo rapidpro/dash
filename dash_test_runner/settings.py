@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 from django.utils.translation import ugettext_lazy as _
-import sys
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -59,7 +58,7 @@ INSTALLED_APPS = (
 
     'djcelery',
 
-    #dash
+    # dash
     'dash.orgs',
     'dash.categories',
     'dash.dashblocks',
@@ -82,7 +81,8 @@ MIDDLEWARE_CLASSES = (
 )
 
 import warnings
-warnings.filterwarnings('error', r"DateTimeField received a naive datetime", RuntimeWarning, r'django\.db\.models\.fields')
+warnings.filterwarnings('error', r"DateTimeField received a naive datetime",
+                        RuntimeWarning, r'django\.db\.models\.fields')
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
@@ -95,7 +95,6 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'dash.orgs.context_processors.user_group_perms_processor',
     'dash.orgs.context_processors.set_org_processor',
 )
-
 
 
 ROOT_URLCONF = 'dash_test_runner.urls'
@@ -173,7 +172,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # List of callables that know how to import templates from various sources.
@@ -182,7 +181,7 @@ TEMPLATE_LOADERS = (
     'hamlpy.template.loaders.HamlPyAppDirectoriesLoader',
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    # 'django.template.loaders.eggs.Loader',
 )
 
 TEMPLATE_DIRS = (
@@ -215,18 +214,18 @@ LOGGING = {
 }
 
 AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend', # this is default
+    'django.contrib.auth.backends.ModelBackend',  # this is default
     'guardian.backends.ObjectPermissionBackend',
 )
 
 # create the smartmin CRUDL permissions on all objects
 PERMISSIONS = {
-    '*': ('create', # can create an object
+    '*': ('create',  # can create an object
           'read',   # can read an object, viewing it's details
-          'update', # can update an object
-          'delete', # can delete an object,
+          'update',  # can update an object
+          'delete',  # can delete an object,
           'list'),  # can view a list of the objects
-    'auth.user': ('profile','forget', 'recover', 'expired', 'failed', 'newpassword', 'mimic'),
+    'auth.user': ('profile', 'forget', 'recover', 'expired', 'failed', 'newpassword', 'mimic'),
     'orgs.org': ('choose', 'home', 'edit', 'manage_accounts', 'create_login', 'join'),
     'stories.story': ('images',),
 }
@@ -271,15 +270,15 @@ LOGIN_URL = '/users/login/'
 LOGIN_REDIRECT_URL = "/manage/org/choose/"
 LOGOUT_REDIRECT_URL = "/"
 
-#-----------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Django-Nose config
-#-----------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
-#-----------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Async tasks with django-celery
-#-----------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 import djcelery
 djcelery.setup_loader()
 
@@ -306,36 +305,100 @@ CACHES = {
     }
 }
 
-ORG_CONFIG_FIELDS =[ dict(name='shortcode', field=dict(help_text=_("The shortcode that users will use to contact U-report locally"), required=True)),
-                     dict(name='join_text', field=dict(help_text=_("The short text used to direct visitors to join U-report"), required=False)),
-                     dict(name='join_fg_color', field=dict(help_text=_("The color used to draw the text on the join bar"), required=False), superuser_only=True),
-                     dict(name='join_bg_color', field=dict(help_text=_("The color used to draw the background on the join bar"), required=False), superuser_only=True),
-                     dict(name='primary_color', field=dict(help_text=_("The primary color for styling for this organization"), required=False), superuser_only=True),
-                     dict(name='secondary_color', field=dict(help_text=_("The secondary color for styling for this organization"), required=False), superuser_only=True),
-                     dict(name='bg_color', field=dict(help_text=_("The background color for the site"), required=False), superuser_only=True),
-                     dict(name='colors', field=dict(help_text=_("Up to 6 colors for styling charts, use comma between colors"), required=False), superuser_only=True),
-                     dict(name='google_tracking_id', field=dict(help_text=_("The Google Analytics Tracking ID for this organization"), required=False)),
-                     dict(name='youtube_channel_url', field=dict(help_text=_("The URL to the Youtube channel for this organization"), required=False)),
-                     dict(name='facebook_page_url', field=dict(help_text=_("The URL to the Facebook page for this organization"), required=False)),
-                     dict(name='twitter_handle', field=dict(help_text=_("The Twitter handle for this organization"), required=False)),
-                     dict(name='twitter_user_widget', field=dict(help_text=_("The Twitter widget used for following new users"), required=False)),
-                     dict(name='twitter_search_widget', field=dict(help_text=_("The Twitter widget used for searching"), required=False)),
-                     dict(name='reporter_group', field=dict(help_text=_("The name of txbhe Contact Group that contains registered reporters")), superuser_only=True),
-                     dict(name='born_label', field=dict(help_text=_("The label of the Contact Field that contains the birth date of reporters")), superuser_only=True),
-                     dict(name='gender_label', field=dict(help_text=_("The label of the Contact Field that contains the gender of reporters")), superuser_only=True),
-                     dict(name='occupation_label', field=dict(help_text=_("The label of the Contact Field that contains the occupation of reporters")), superuser_only=True),
-                     dict(name='registration_label', field=dict(help_text=_("The label of the Contact Field that contains the registration date of reporters")), superuser_only=True),
-                     dict(name='state_label', field=dict(help_text=_("The label of the Contact Field that contains the State of reporters")), superuser_only=True),
-                     dict(name='district_label', field=dict(help_text=_("The label of the Contact Field that contains the District of reporters")), superuser_only=True),
-                     dict(name='male_label', field=dict(help_text=_("The label assigned to U-reporters that are Male.")), superuser_only=True),
-                     dict(name='female_label', field=dict(help_text=_("The label assigned to U-reporters that are Female.")), superuser_only=True),
-                     dict(name='has_jobs', field=dict(help_text=_("If there are jobs to be shown on the public site"), required=False))]
-#                     dict(name='featured_state', field=dict(help_text=_("Choose the featured State of reporters shown on the home page")))]
+ORG_CONFIG_FIELDS = [
+    dict(name='shortcode',
+         field=dict(help_text=_("The shortcode that users will use to contact U-report locally"),
+                    required=True)),
+    dict(name='join_text',
+         field=dict(help_text=_("The short text used to direct visitors to join U-report"),
+                    required=False)),
+    dict(name='join_fg_color',
+         field=dict(help_text=_("The color used to draw the text on the join bar"),
+                    required=False),
+         superuser_only=True),
+    dict(name='join_bg_color',
+         field=dict(help_text=_("The color used to draw the background on the join bar"),
+                    required=False),
+         superuser_only=True),
+    dict(name='primary_color',
+         field=dict(help_text=_("The primary color for styling for this organization"),
+                    required=False),
+         superuser_only=True),
+    dict(name='secondary_color',
+         field=dict(help_text=_("The secondary color for styling for this organization"),
+                    required=False),
+         superuser_only=True),
+    dict(name='bg_color',
+         field=dict(help_text=_("The background color for the site"),
+                    required=False),
+         superuser_only=True),
+    dict(name='colors',
+         field=dict(help_text=_("Up to 6 colors for styling charts, use comma between colors"),
+                    required=False),
+         superuser_only=True),
+    dict(name='google_tracking_id',
+         field=dict(help_text=_("The Google Analytics Tracking ID for this organization"),
+                    required=False)),
+    dict(name='youtube_channel_url',
+         field=dict(help_text=_("The URL to the Youtube channel for this organization"),
+                    required=False)),
+    dict(name='facebook_page_url',
+         field=dict(help_text=_("The URL to the Facebook page for this organization"),
+                    required=False)),
+    dict(name='twitter_handle',
+         field=dict(help_text=_("The Twitter handle for this organization"),
+                    required=False)),
+    dict(name='twitter_user_widget',
+         field=dict(help_text=_("The Twitter widget used for following new users"),
+                    required=False)),
+    dict(name='twitter_search_widget',
+         field=dict(help_text=_("The Twitter widget used for searching"),
+                    required=False)),
+    dict(name='reporter_group',
+         field=dict(help_text=_("The name of txbhe Contact Group that contains "
+                                "registered reporters")),
+         superuser_only=True),
+    dict(name='born_label',
+         field=dict(help_text=_("The label of the Contact Field that contains "
+                                "the birth date of reporters")),
+         superuser_only=True),
+    dict(name='gender_label',
+         field=dict(help_text=_("The label of the Contact Field that contains "
+                                "the gender of reporters")),
+         superuser_only=True),
+    dict(name='occupation_label',
+         field=dict(help_text=_("The label of the Contact Field that contains "
+                                "the occupation of reporters")),
+         superuser_only=True),
+    dict(name='registration_label',
+         field=dict(help_text=_("The label of the Contact Field that contains "
+                                "the registration date of reporters")),
+         superuser_only=True),
+    dict(name='state_label',
+         field=dict(help_text=_("The label of the Contact Field that contains "
+                                "the State of reporters")),
+         superuser_only=True),
+    dict(name='district_label',
+         field=dict(help_text=_("The label of the Contact Field that contains "
+                                "the District of reporters")),
+         superuser_only=True),
+    dict(name='male_label',
+         field=dict(help_text=_("The label assigned to U-reporters that are Male.")),
+         superuser_only=True),
+    dict(name='female_label',
+         field=dict(help_text=_("The label assigned to U-reporters that are Female.")),
+         superuser_only=True),
+    dict(name='has_jobs',
+         field=dict(help_text=_("If there are jobs to be shown on the public site"),
+                    required=False)),
+    # dict(name='featured_state',
+    #      field=dict(help_text=_("Choose the featured State of reporters "
+    #                             "shown on the home page"))),
+]
 
-#-----------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Directory Configuration
-#-----------------------------------------------------------------------------------
-import os
+# ----------------------------------------------------------------------------
 
 PROJECT_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)))
 RESOURCES_DIR = os.path.join(PROJECT_DIR, '../resources')

@@ -1,4 +1,5 @@
-from .views import *
+from . import views
 
-urlpatterns = CategoryCRUDL().as_urlpatterns()
-urlpatterns += CategoryImageCRUDL().as_urlpatterns()
+
+urlpatterns = views.CategoryCRUDL().as_urlpatterns()
+urlpatterns += views.CategoryImageCRUDL().as_urlpatterns()

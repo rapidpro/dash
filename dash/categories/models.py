@@ -1,12 +1,17 @@
 from __future__ import unicode_literals
-from django.db import models
+
 from smartmin.models import SmartModel
-from dash.orgs.models import Org
+
+from django.db import models
 from django.utils.translation import ugettext_lazy as _
+
+from dash.orgs.models import Org
+
 
 class Category(SmartModel):
     """
-    Every organization can choose to categorize their polls or stories according to their needs.
+    Every organization can choose to categorize their polls or stories
+    according to their needs.
     """
     name = models.CharField(max_length=64,
                             help_text=_("The name of this category"))
@@ -16,7 +21,6 @@ class Category(SmartModel):
 
     org = models.ForeignKey(Org, related_name='categories',
                             help_text=_("The organization this category applies to"))
-
 
     def get_first_image(self):
         cat_images = self.images.filter(is_active=True).exclude(image='')
@@ -30,6 +34,7 @@ class Category(SmartModel):
         unique_together = ('name', 'org')
         verbose_name_plural = _("Categories")
 
+
 class CategoryImage(SmartModel):
     name = models.CharField(max_length=64,
                             help_text=_("The name to describe this image"))
@@ -42,5 +47,3 @@ class CategoryImage(SmartModel):
 
     def __unicode__(self):
         return "%s - %s" % (self.category.name, self.name)
-
-

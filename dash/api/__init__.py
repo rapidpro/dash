@@ -1,13 +1,18 @@
 from __future__ import unicode_literals
 import json
+import logging
+import time
 import urllib
+
+from redis_cache import get_redis_connection
+import requests
 
 from django.conf import settings
 from django.core.cache import cache
 from django.utils.text import slugify
-from redis_cache import get_redis_connection
-import requests
-import time
+
+
+logger = logging.getLogger(__name__)
 
 COUNTRY = 0
 STATE = 1
@@ -30,6 +35,7 @@ CONTACT_RESULT_CACHE_TIME = getattr(settings, 'API_CONTACT_RESULT_CACHE_TIME', 6
 
 # five minutes to cache contacts and breakdowns
 CONTACT_CACHE_TIME = getattr(settings, 'API_CONTACTS_CACHE_TIME', 60 * 5)
+
 
 class API(object):
 
@@ -62,7 +68,9 @@ class API(object):
         Returns the geojson for a particular state
         """
         key = 'geojson:%d:%s' % (self.org.id, state_id)
-        return self._get_from_cache(key, BOUNDARY_CACHE_TIME, lambda: self._fetch_state_geojson(state_id))
+        return self._get_from_cache(
+            key, BOUNDARY_CACHE_TIME,
+            lambda: self._fetch_state_geojson(state_id))
 
     def get_ruleset_results(self, ruleset_id, segment=None):
         """
@@ -78,7 +86,9 @@ class API(object):
 
             key += ":" + slugify(unicode(json.dumps(segment)))
 
-        return self._get_from_cache(key, RESULT_CACHE_TIME, lambda: self._fetch_ruleset_results(ruleset_id, segment))
+        return self._get_from_cache(
+            key, RESULT_CACHE_TIME,
+            lambda: self._fetch_ruleset_results(ruleset_id, segment))
 
     def get_contact_field_results(self, contact_field_label, segment=None):
         """
@@ -94,7 +104,9 @@ class API(object):
 
             key += ":" + slugify(unicode(json.dumps(segment)))
 
-        return self._get_from_cache(key, CONTACT_RESULT_CACHE_TIME, lambda: self._fetch_contact_field_results(contact_field_label, segment))
+        return self._get_from_cache(
+            key, CONTACT_RESULT_CACHE_TIME,
+            lambda: self._fetch_contact_field_results(contact_field_label, segment))
 
     def get_flow(self, flow_id):
         """
@@ -107,8 +119,7 @@ class API(object):
         if flows:
             flow = flows[0]
 
-        if settings.DEBUG: # pragma: no cover
-            print "- got flow %d in %f" % (flow_id, time.time() - start)
+        logger.debug("- got flow %d in %f" % (flow_id, time.time() - start))
 
         return flow
 
@@ -125,8 +136,8 @@ class API(object):
             response = requests.get(url,
                                     params=params,
                                     headers={'Content-type': 'application/json',
-                                    'Accept': 'application/json',
-                                    'Authorization': 'Token %s' % self.org.api_token})
+                                             'Accept': 'application/json',
+                                             'Authorization': 'Token %s' % self.org.api_token})
 
             result = response.json()
             return result['results']
@@ -144,12 +155,16 @@ class API(object):
     def _get_from_cache(self, key, timeout, fetch_method):
         """
         Takes care of performing the following logic:
-            1) check whether we have a recent version of the cached value, if so returns it
-            2) if not, tries to acquire a lock to calculate it, if lock exists returns 'fallback' value
-            3) if lock is available calls 'fetch_method' to calculate the new value
+            1) check whether we have a recent version of the cached value, if
+               so returns it
+            2) if not, tries to acquire a lock to calculate it, if lock exists
+               returns 'fallback' value
+            3) if lock is available calls 'fetch_method' to calculate the new
+               value
 
-        The above keeps us from having a stampeding herd of clients hammering the API for an expensive calculating at the
-        cost of us serving a stale value once in a while.
+        The above keeps us from having a stampeding herd of clients hammering
+        the API for an expensive calculating at the cost of us serving a stale
+        value once in a while.
         """
         # 1) try to get it from our cache
         cached_value = cache.get(key)
@@ -180,7 +195,8 @@ class API(object):
                 return cached_value
 
             # no such luck, let's go calculate it
-            # fetch_methods are expected to raise exception if we aren't getting something valid looking
+            # fetch_methods are expected to raise exception if we aren't
+            # getting something valid looking
             try:
                 calculated = fetch_method()
             except:
@@ -219,8 +235,7 @@ class API(object):
         result = response.json()
         group = result['results'][0]
 
-        if settings.DEBUG: # pragma: no cover
-            print "- got group %s in %f" % (name, time.time() - start)
+        logger.debug("- got group %s in %f" % (name, time.time() - start))
 
         return group
 
@@ -274,7 +289,8 @@ class API(object):
             else:
                 next = None
 
-        # we now build our cached versions of level 1 (all states) and level 2 (all districts for each state) geojson
+        # we now build our cached versions of level 1 (all states) and level 2
+        # (all districts for each state) geojson
         states = []
         districts_by_state = dict()
         for boundary in boundaries:
@@ -282,7 +298,7 @@ class API(object):
                 states.append(boundary)
             elif boundary['level'] == DISTRICT:
                 osm_id = boundary['parent']
-                if not osm_id in districts_by_state:
+                if osm_id not in districts_by_state:
                     districts_by_state[osm_id] = []
 
                 districts = districts_by_state[osm_id]
@@ -291,7 +307,9 @@ class API(object):
         # mini function to convert a list of boundary objects to geojson
         def to_geojson(boundary_list):
             features = [dict(type='Feature', geometry=b['geometry'],
-                             properties=dict(name=b['name'], id=b['boundary'], level=b['level'])) for b in boundary_list]
+                             properties=dict(name=b['name'], id=b['boundary'],
+                             level=b['level']))
+                        for b in boundary_list]
             return dict(type='FeatureCollection', features=features)
 
         cached = dict()
@@ -303,22 +321,26 @@ class API(object):
         cached['geojson:%d' % self.org.id] = to_geojson(states)
 
         for state_id in districts_by_state.keys():
-            cache.set('geojson:%d:%s' % (self.org.id, state_id), to_geojson(districts_by_state[state_id]), BOUNDARY_CACHE_TIME)
-            cache.set('fallback:geojson:%d:%s' % (self.org.id, state_id), to_geojson(districts_by_state[state_id]), timeout=None)
+            cache.set('geojson:%d:%s' % (self.org.id, state_id),
+                      to_geojson(districts_by_state[state_id]), BOUNDARY_CACHE_TIME)
+            cache.set('fallback:geojson:%d:%s' % (self.org.id, state_id),
+                      to_geojson(districts_by_state[state_id]), timeout=None)
 
-            cached['geojson:%d:%s' % (self.org.id, state_id)] = to_geojson(districts_by_state[state_id])
+            cached['geojson:%d:%s' % (self.org.id, state_id)] = to_geojson(
+                districts_by_state[state_id])
 
-        if settings.DEBUG: # pragma: no cover
-            print "- built boundaries in %f" % (time.time() - start)
+            logger.debug("- built boundaries in %f" % (time.time() - start))
 
         return cached
 
     def _fetch_ruleset_results(self, ruleset_id, segment=None):
         start = time.time()
 
-        url = '%s/api/v1/results.json?ruleset=%d&segment=%s' % (settings.API_ENDPOINT, ruleset_id,
-                                                                urllib.quote(unicode(json.dumps(segment)).encode('utf8')))
-        print url
+        url = '%s/api/v1/results.json?ruleset=%d&segment=%s' % (
+            settings.API_ENDPOINT, ruleset_id,
+            urllib.quote(unicode(json.dumps(segment)).encode('utf8')))
+
+        logger.debug(url)
 
         response = requests.get(url,
                                 headers={'Content-type': 'application/json',
@@ -330,18 +352,18 @@ class API(object):
 
         results = response_json['results']
 
-        if settings.DEBUG: # pragma: no cover
-            print "- got ruleset results for %d in %f" % (ruleset_id, time.time() - start)
+        logger.debug("- got ruleset results for %d in %f" % (ruleset_id, time.time() - start))
 
         return results
 
     def _fetch_contact_field_results(self, contact_field_label, segment=None):
         start = time.time()
 
-        url = '%s/api/v1/results.json?contact_field=%s&segment=%s' % (settings.API_ENDPOINT,
-                                                                      contact_field_label,
-                                                                      urllib.quote(unicode(json.dumps(segment)).encode('utf8')))
-        print url
+        url = '%s/api/v1/results.json?contact_field=%s&segment=%s' % (
+            settings.API_ENDPOINT,
+            contact_field_label,
+            urllib.quote(unicode(json.dumps(segment)).encode('utf8')))
+        logger.debug(url)
 
         response = requests.get(url,
                                 headers={'Content-type': 'application/json',
@@ -352,8 +374,8 @@ class API(object):
         response_json = response.json()
         results = response_json['results']
 
-        if settings.DEBUG: # pragma: no cover
-            print "- got contact field results for %s in %f" % (contact_field_label, time.time() - start)
+        logger.debug("- got contact field results for %s in %f" % (
+            contact_field_label, time.time() - start))
 
         return results
 
@@ -368,8 +390,8 @@ class API(object):
         while next:
             response = requests.get(next,
                                     headers={'Content-type': 'application/json',
-                                    'Accept': 'application/json',
-                                    'Authorization': 'Token %s' % self.org.api_token})
+                                             'Accept': 'application/json',
+                                             'Authorization': 'Token %s' % self.org.api_token})
 
             response.raise_for_status()
             result = response.json()
@@ -384,7 +406,7 @@ class API(object):
             else:
                 next = None
 
-        if settings.DEBUG and flows: # pragma: no cover
-            print "- got flows in %f" % (time.time() - start)
+        if flows:
+            logger.debug("- got flows in %f" % (time.time() - start))
 
         return flows

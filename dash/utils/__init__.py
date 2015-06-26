@@ -1,15 +1,15 @@
 from __future__ import absolute_import, unicode_literals
-
 import calendar
+from collections import OrderedDict
 import datetime
 import json
-import pytz
 import random
 
-from collections import OrderedDict
+from dateutil.relativedelta import relativedelta
+import pytz
+
 from django.core.cache import cache
 from django.utils import timezone
-from dateutil.relativedelta import relativedelta
 
 
 def intersection(*args):
@@ -47,7 +47,8 @@ def random_string(length):
     """
     Generates a random alphanumeric string
     """
-    letters = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"  # avoid things that could be mistaken ex: 'I' and '1'
+    # avoid things that could be mistaken ex: 'I' and '1'
+    letters = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"
     return ''.join([random.choice(letters) for _ in range(length)])
 
 
@@ -74,7 +75,8 @@ def get_cacheable(cache_key, cache_ttl, calculate):
 
 def get_obj_cacheable(obj, attr_name, calculate):
     """
-    Gets the result of a method call, using the given object and attribute name as a cache
+    Gets the result of a method call, using the given object and attribute name
+    as a cache
     """
     if hasattr(obj, attr_name):
         return getattr(obj, attr_name)
@@ -103,7 +105,8 @@ def ms_to_datetime(ms):
 
 def get_month_range(d=None):
     """
-    Gets the start (inclusive) and end (exclusive) datetimes of the current month in the same timezone as the given date
+    Gets the start (inclusive) and end (exclusive) datetimes of the current
+    month in the same timezone as the given date
     """
     if not d:
         d = timezone.now()
@@ -132,7 +135,8 @@ def temba_client_flow_results_serializer(client_results):
         flow_result_json['unset'] = flow_result.unset
         flow_result_json['open_ended'] = flow_result.open_ended
         flow_result_json['label'] = flow_result.label
-        flow_result_json['categories'] = [ dict(label=category.label, count=category.count) for category in flow_result.categories]
+        flow_result_json['categories'] = [dict(label=category.label, count=category.count)
+                                          for category in flow_result.categories]
         if flow_result.boundary:
             flow_result_json['boundary'] = flow_result.boundary
 

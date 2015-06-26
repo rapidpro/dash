@@ -1,13 +1,16 @@
 from datetime import datetime
-from django import template
-from django.conf import settings
-from django.db import models
-import pytz
+
 import phonenumbers
+import pytz
+
+from django import template
+from django.db import models
+
 
 register = template.Library()
 
 Org = models.get_model('orgs', 'Org')
+
 
 @register.simple_tag()
 def display_time(text_timestamp, org, time_format=None):
@@ -21,6 +24,7 @@ def display_time(text_timestamp, org, time_format=None):
     output_time = parsed_time.astimezone(org_tz)
 
     return output_time.strftime(time_format)
+
 
 @register.simple_tag()
 def national_phone(number_str):

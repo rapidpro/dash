@@ -1,7 +1,11 @@
-from django import forms
-from dash.orgs.views import OrgPermsMixin, OrgObjPermsMixin
 from smartmin.views import SmartCRUDL, SmartCreateView, SmartListView, SmartUpdateView
+
+from django import forms
+
+from dash.orgs.views import OrgPermsMixin, OrgObjPermsMixin
+
 from .models import Category, CategoryImage
+
 
 class CategoryImageForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -16,6 +20,7 @@ class CategoryImageForm(forms.ModelForm):
     class Meta:
         model = CategoryImage
         fields = ('is_active', 'name', 'category', 'image')
+
 
 class CategoryCRUDL(SmartCRUDL):
     model = Category
@@ -37,7 +42,6 @@ class CategoryCRUDL(SmartCRUDL):
 
             return queryset
 
-
     class Create(OrgPermsMixin, SmartCreateView):
 
         def derive_fields(self):
@@ -54,6 +58,7 @@ class CategoryCRUDL(SmartCRUDL):
                     obj.org = org
 
             return obj
+
 
 class CategoryImageCRUDL(SmartCRUDL):
     model = CategoryImage

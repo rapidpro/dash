@@ -2,6 +2,7 @@ class defaultdict(dict):
     def __missing__(self, key):
         return False
 
+
 class GroupPermWrapper(object):
     def __init__(self, group):
         self.group = group
@@ -40,6 +41,7 @@ class GroupPermWrapper(object):
             else:
                 return False
 
+
 def user_group_perms_processor(request):
     """
     return context variables with org permissions to the user.
@@ -64,14 +66,18 @@ def user_group_perms_processor(request):
 
     return context
 
+
 def set_org_processor(request):
     """
-    Simple context processor that automatically sets 'org' on the context if it is present in the request.
+    Simple context processor that automatically sets 'org' on the context if it
+    is present in the request.
     """
     if getattr(request, 'org', None):
         org = request.org
-        pattern_bg = org.backgrounds.filter(is_active=True, background_type='P').order_by('-pk').first()
-        banner_bg = org.backgrounds.filter(is_active=True, background_type='B').order_by('-pk').first()
+        pattern_bg = org.backgrounds.filter(is_active=True, background_type='P')
+        pattern_bg = pattern_bg.order_by('-pk').first()
+        banner_bg = org.backgrounds.filter(is_active=True, background_type='B')
+        banner_bg = banner_bg.order_by('-pk').first()
 
         return dict(org=org, pattern_bg=pattern_bg, banner_bg=banner_bg)
     else:

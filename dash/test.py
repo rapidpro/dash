@@ -1,13 +1,14 @@
 from __future__ import absolute_import, unicode_literals
-
 import json
+
 import redis
 
-from dash.utils import random_string
-from dash.orgs.models import Org
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.test import TestCase
+
+from dash.orgs.models import Org
+from dash.utils import random_string
 
 
 class DashTest(TestCase):
@@ -17,7 +18,8 @@ class DashTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.clear_cache()
-        cls.superuser = User.objects.create_superuser(username="root", email="super@user.com", password="root")
+        cls.superuser = User.objects.create_superuser(
+            username="root", email="super@user.com", password="root")
 
     @classmethod
     def clear_cache(cls):
@@ -27,8 +29,9 @@ class DashTest(TestCase):
         r.flushdb()
 
     def create_org(self, name, timezone, subdomain):
-        return Org.objects.create(name=name, timezone=timezone, subdomain=subdomain, api_token=random_string(32),
-                                  created_by=self.superuser, modified_by=self.superuser)
+        return Org.objects.create(
+            name=name, timezone=timezone, subdomain=subdomain, api_token=random_string(32),
+            created_by=self.superuser, modified_by=self.superuser)
 
     def login(self, user):
         result = self.client.login(username=user.username, password=user.username)
@@ -41,7 +44,8 @@ class DashTest(TestCase):
         return self._url_request(subdomain, 'post', url, data)
 
     def assertLoginRedirect(self, response, subdomain, next_url):
-        self.assertRedirects(response, 'http://%s.localhost/users/login/?next=%s' % (subdomain, next_url))
+        self.assertRedirects(response,
+                             'http://%s.localhost/users/login/?next=%s' % (subdomain, next_url))
 
     def _url_request(self, subdomain, method, url, data):
         if data is None:

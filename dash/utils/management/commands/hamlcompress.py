@@ -106,17 +106,17 @@ class Command(NoArgsCommand):
     help = "Compress content outside of the request/response cycle"
     option_list = NoArgsCommand.option_list + (
         make_option('--extension', '-e', action='append', dest='extensions',
-            help='The file extension(s) to examine (default: ".html", '
-                'separate multiple extensions with commas, or use -e '
-                'multiple times)'),
+                    help='The file extension(s) to examine (default: ".html", '
+                    'separate multiple extensions with commas, or use -e '
+                    'multiple times)'),
         make_option('-f', '--force', default=False, action='store_true',
-            help="Force the generation of compressed content even if the "
-                "COMPRESS_ENABLED setting is not True.", dest='force'),
+                    help="Force the generation of compressed content even if the "
+                    "COMPRESS_ENABLED setting is not True.", dest='force'),
         make_option('--follow-links', default=False, action='store_true',
-            help="Follow symlinks when traversing the COMPRESS_ROOT "
-                "(which defaults to STATIC_ROOT). Be aware that using this "
-                "can lead to infinite recursion if a link points to a parent "
-                "directory of itself.", dest='follow_links'),
+                    help="Follow symlinks when traversing the COMPRESS_ROOT "
+                    "(which defaults to STATIC_ROOT). Be aware that using this "
+                    "can lead to infinite recursion if a link points to a parent "
+                    "directory of itself.", dest='follow_links'),
     )
 
     requires_model_validation = False
@@ -180,7 +180,7 @@ class Command(NoArgsCommand):
             try:
                 module = import_module(loader.__module__)
                 get_template_sources = getattr(module,
-                    'get_template_sources', None)
+                                               'get_template_sources', None)
                 if get_template_sources is None:
                     get_template_sources = loader.get_template_sources
                 paths.update(list(get_template_sources('')))
@@ -199,10 +199,10 @@ class Command(NoArgsCommand):
         templates = set()
         for path in paths:
             for root, dirs, files in os.walk(path,
-                    followlinks=options.get('followlinks', False)):
+                                             followlinks=options.get('followlinks', False)):
                 templates.update(os.path.join(root, name)
-                    for name in files if not name.startswith('.') and
-                        any(fnmatch(name, "*%s" % glob) for glob in extensions))
+                                 for name in files if not name.startswith('.') and
+                                 any(fnmatch(name, "*%s" % glob) for glob in extensions))
         if not templates:
             raise OfflineGenerationError("No templates found. Make sure your "
                                          "TEMPLATE_LOADERS and TEMPLATE_DIRS "

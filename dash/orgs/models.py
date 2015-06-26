@@ -1,22 +1,23 @@
 from __future__ import absolute_import, unicode_literals
-
+from datetime import datetime
 import json
-import math
-import pytz
 import random
 
-from dash.api import API
-from dash.dash_email import send_dash_email
-from dash.utils import temba_client_flow_results_serializer, datetime_to_ms
-from datetime import timedelta, datetime
+import pytz
+from smartmin.models import SmartModel
+from temba import TembaClient
+
+from django.conf import settings
 from django.contrib.auth.models import User, Group
 from django.core.cache import cache
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
-from django.conf import settings
-from smartmin.models import SmartModel
-from temba import TembaClient
+
+from dash.api import API
+from dash.dash_email import send_dash_email
+from dash.utils import datetime_to_ms
+
 
 STATE = 1
 DISTRICT = 2
@@ -28,36 +29,49 @@ BOUNDARY_CACHE_KEY = 'org:%d:boundaries'
 BOUNDARY_LEVEL_1_KEY = 'geojson:%d'
 BOUNDARY_LEVEL_2_KEY = 'geojson:%d:%s'
 
+
 class Org(SmartModel):
-    name = models.CharField(verbose_name=_("Name"), max_length=128,
-                            help_text=_("The name of this organization"))
+    name = models.CharField(
+        verbose_name=_("Name"), max_length=128,
+        help_text=_("The name of this organization"))
 
-    logo = models.ImageField(upload_to='logos', null=True, blank=True,
-                             help_text=_("The logo that should be used for this organization"))
+    logo = models.ImageField(
+        upload_to='logos', null=True, blank=True,
+        help_text=_("The logo that should be used for this organization"))
 
-    administrators = models.ManyToManyField(User, verbose_name=_("Administrators"), related_name="org_admins",
-                                            help_text=_("The administrators in your organization"))
+    administrators = models.ManyToManyField(
+        User, verbose_name=_("Administrators"), related_name="org_admins",
+        help_text=_("The administrators in your organization"))
 
-    viewers = models.ManyToManyField(User, verbose_name=_("Viewers"), related_name="org_viewers",
-                                     help_text=_("The viewers in your organization"))
+    viewers = models.ManyToManyField(
+        User, verbose_name=_("Viewers"), related_name="org_viewers",
+        help_text=_("The viewers in your organization"))
 
-    editors = models.ManyToManyField(User, verbose_name=_("Editors"), related_name="org_editors",
-                                     help_text=_("The editors in your organization"))
+    editors = models.ManyToManyField(
+        User, verbose_name=_("Editors"), related_name="org_editors",
+        help_text=_("The editors in your organization"))
 
-    language = models.CharField(verbose_name=_("Language"), max_length=64, null=True, blank=True,
-                                choices=settings.LANGUAGES, help_text=_("The main language used by this organization"))
+    language = models.CharField(
+        verbose_name=_("Language"), max_length=64, null=True, blank=True,
+        choices=settings.LANGUAGES, help_text=_("The main language used by this organization"))
 
-    subdomain = models.SlugField(verbose_name=_("Subdomain"), null=True, blank=True, max_length=255, unique=True,
-                                 error_messages=dict(unique=_("This subdomain is not available")),
-                                 help_text=_("The subdomain for this U-Report instance"))
+    subdomain = models.SlugField(
+        verbose_name=_("Subdomain"), null=True, blank=True, max_length=255, unique=True,
+        error_messages=dict(unique=_("This subdomain is not available")),
+        help_text=_("The subdomain for this U-Report instance"))
 
-    timezone = models.CharField(verbose_name=_("Timezone"), max_length=64, default='UTC')
+    timezone = models.CharField(
+        verbose_name=_("Timezone"), max_length=64, default='UTC')
 
-    api_token = models.CharField(max_length=128, null=True, blank=True,
-                                 help_text=_("The API token for the RapidPro account this dashboard is tied to"))
+    api_token = models.CharField(
+        max_length=128, null=True, blank=True,
+        help_text=_("The API token for the RapidPro account this dashboard "
+                    "is tied to"))
 
-    config = models.TextField(null=True, blank=True,
-                              help_text=_("JSON blob used to store configuration information associated with this organization"))
+    config = models.TextField(
+        null=True, blank=True,
+        help_text=_("JSON blob used to store configuration information "
+                    "associated with this organization"))
 
     def set_timezone(self, timezone):
         self.timezone = timezone
@@ -158,7 +172,8 @@ class Org(SmartModel):
         temba_client = self.get_temba_client()
         client_boundaries = temba_client.get_boundaries()
 
-        # we now build our cached versions of level 1 (all states) and level 2 (all districts for each state) geojson
+        # we now build our cached versions of level 1 (all states) and level 2
+        # (all districts for each state) geojson
         states = []
         districts_by_state = dict()
         for boundary in client_boundaries:
@@ -166,7 +181,7 @@ class Org(SmartModel):
                 states.append(boundary)
             elif boundary.level == DISTRICT:
                 osm_id = boundary.parent
-                if not osm_id in districts_by_state:
+                if osm_id not in districts_by_state:
                     districts_by_state[osm_id] = []
 
                 districts = districts_by_state[osm_id]
@@ -174,18 +189,23 @@ class Org(SmartModel):
 
         # mini function to convert a list of boundary objects to geojson
         def to_geojson(boundary_list):
-            features = [dict(type='Feature', geometry=dict(type=b.geometry.type, coordinates=b.geometry.coordinates),
-                             properties=dict(name=b.name, id=b.boundary, level=b.level)) for b in boundary_list]
+            features = [dict(type='Feature',
+                             geometry=dict(type=b.geometry.type,
+                                           coordinates=b.geometry.coordinates),
+                             properties=dict(name=b.name, id=b.boundary, level=b.level))
+                        for b in boundary_list]
             return dict(type='FeatureCollection', features=features)
 
         boundaries = dict()
         boundaries[BOUNDARY_LEVEL_1_KEY % self.id] = to_geojson(states)
 
         for state_id in districts_by_state.keys():
-            boundaries[BOUNDARY_LEVEL_2_KEY % (self.id, state_id)] = to_geojson(districts_by_state[state_id])
+            boundaries[BOUNDARY_LEVEL_2_KEY % (self.id, state_id)] = to_geojson(
+                districts_by_state[state_id])
 
         key = BOUNDARY_CACHE_KEY % self.pk
-        cache.set(key, {'time': datetime_to_ms(this_time), 'results': boundaries}, BOUNDARY_CACHE_TIME)
+        value = {'time': datetime_to_ms(this_time), 'results': boundaries}
+        cache.set(key, value, BOUNDARY_CACHE_TIME)
 
         return boundaries
 
@@ -231,15 +251,18 @@ class Org(SmartModel):
     def __unicode__(self):
         return self.name
 
+
 def get_org(obj):
     return getattr(obj, '_org', None)
 
 User.get_org = get_org
 
+
 def set_org(obj, org):
     obj._org = org
 
 User.set_org = set_org
+
 
 def get_user_orgs(user):
     if user.is_superuser:
@@ -248,6 +271,7 @@ def get_user_orgs(user):
     return user_orgs.distinct()
 
 User.get_user_orgs = get_user_orgs
+
 
 def get_org_group(obj):
     org_group = None
@@ -265,15 +289,20 @@ USER_GROUPS = (('A', _("Administrator")),
 
 
 class Invitation(SmartModel):
-    org = models.ForeignKey(Org, verbose_name=_("Org"), related_name="invitations",
-                            help_text=_("The organization to which the account is invited to view"))
+    org = models.ForeignKey(
+        Org, verbose_name=_("Org"), related_name="invitations",
+        help_text=_("The organization to which the account is invited to view"))
 
-    email = models.EmailField(verbose_name=_("Email"), help_text=_("The email to which we send the invitation of the viewer"))
+    email = models.EmailField(
+        verbose_name=_("Email"),
+        help_text=_("The email to which we send the invitation of the viewer"))
 
-    secret = models.CharField(verbose_name=_("Secret"), max_length=64, unique=True,
-                              help_text=_("a unique code associated with this invitation"))
+    secret = models.CharField(
+        verbose_name=_("Secret"), max_length=64, unique=True,
+        help_text=_("a unique code associated with this invitation"))
 
-    user_group = models.CharField(max_length=1, choices=USER_GROUPS, default='V', verbose_name=_("User Role"))
+    user_group = models.CharField(
+        max_length=1, choices=USER_GROUPS, default='V', verbose_name=_("User Role"))
 
     def save(self, *args, **kwargs):
         if not self.secret:
@@ -291,7 +320,8 @@ class Invitation(SmartModel):
         """
         Generatesa a [length] characters alpha numeric secret
         """
-        letters="23456789ABCDEFGHJKLMNPQRSTUVWXYZ" # avoid things that could be mistaken ex: 'I' and '1'
+        # avoid things that could be mistaken ex: 'I' and '1'
+        letters = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"
         return ''.join([random.choice(letters) for _ in range(length)])
 
     def send_invitation(self):
@@ -314,17 +344,20 @@ class Invitation(SmartModel):
         send_dash_email(to_email, subject, template, context)
 
 
-
 BACKGROUND_TYPES = (('B', _("Banner")),
-                   ('P', _("Pattern")))
+                    ('P', _("Pattern")))
+
 
 class OrgBackground(SmartModel):
-    org = models.ForeignKey(Org, verbose_name=_("Org"), related_name="backgrounds",
-                            help_text=_("The organization in which the image will be used"))
+    org = models.ForeignKey(
+        Org, verbose_name=_("Org"), related_name="backgrounds",
+        help_text=_("The organization in which the image will be used"))
 
-    name = models.CharField(verbose_name=_("Name"), max_length=128,
-                            help_text=_("The name to describe this background"))
+    name = models.CharField(
+        verbose_name=_("Name"), max_length=128,
+        help_text=_("The name to describe this background"))
 
-    background_type = models.CharField(max_length=1, choices=BACKGROUND_TYPES, default='P', verbose_name=_("Background type"))
+    background_type = models.CharField(
+        max_length=1, choices=BACKGROUND_TYPES, default='P', verbose_name=_("Background type"))
 
     image = models.ImageField(upload_to='org_bgs', help_text=_("The image file"))

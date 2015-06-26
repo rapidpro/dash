@@ -1,15 +1,14 @@
 from __future__ import absolute_import, unicode_literals
 import re
-
 import traceback
+
+from django.conf import settings
+from django.core.exceptions import DisallowedHost
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
+from django.utils import translation, timezone
 
 from dash.orgs.models import Org
-from django.conf import settings
-from django.template.response import TemplateResponse
-from django.utils import translation, timezone
-from django.core.exceptions import DisallowedHost
 
 
 ALLOW_NO_ORG = (
@@ -75,7 +74,9 @@ class SetOrgMiddleware(object):
             static_url = getattr(settings, 'STATIC_URL', None)
             path = request.path
 
-            if (media_url and path.startswith(media_url)) or (static_url and path.startswith(static_url)):
+            if media_url and path.startswith(media_url):
+                return None
+            if static_url and path.startswith(static_url):
                 return None
 
             # only some pages can be viewed without an org
@@ -86,7 +87,7 @@ class SetOrgMiddleware(object):
             chooser_view = getattr(settings, 'SITE_CHOOSER_URL_NAME', 'orgs.org_chooser')
             whitelist += (chooser_view,)
 
-            if not url_name in whitelist:
+            if url_name not in whitelist:
                 return HttpResponseRedirect(reverse(chooser_view))
 
     @staticmethod
