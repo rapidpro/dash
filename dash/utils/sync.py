@@ -172,8 +172,8 @@ def temba_merge_contacts(first, second, mutex_group_sets):
     merged_fields.update(first.fields)
 
     # first merge mutually exclusive group sets
-    first_groups = set(first.groups)
-    second_groups = set(second.groups)
+    first_groups = list(first.groups)
+    second_groups = list(second.groups)
     merged_mutex_groups = []
     for group_set in mutex_group_sets:
         from_first = intersection(first_groups, group_set)

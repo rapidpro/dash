@@ -3,35 +3,44 @@ from __future__ import absolute_import, unicode_literals
 import calendar
 import datetime
 import json
-from django.conf import settings
 import pytz
 import random
 
+from collections import OrderedDict
 from django.core.cache import cache
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 
 
-
-
 def intersection(*args):
     """
-    Return the intersection of lists
+    Return the intersection of lists, using the first list to determine item order
     """
     if not args:
         return []
 
-    return list(set(args[0]).intersection(*args[1:]))
+    # remove duplicates from first list whilst preserving order
+    base = list(OrderedDict.fromkeys(args[0]))
+
+    if len(args) == 1:
+        return base
+    else:
+        others = set(args[1]).intersection(*args[2:])
+        return [e for e in base if e in others]
 
 
 def union(*args):
     """
-    Return the union of lists
+    Return the union of lists, ordering by first seen in any list
     """
     if not args:
         return []
 
-    return list(set(args[0]).union(*args[1:]))
+    base = args[0]
+    for other in args[1:]:
+        base.extend(other)
+
+    return list(OrderedDict.fromkeys(base))  # remove duplicates whilst preserving order
 
 
 def random_string(length):

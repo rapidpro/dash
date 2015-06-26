@@ -16,12 +16,15 @@ class InitTest(TestCase):
     def test_intersection(self):
         self.assertEqual(intersection(), [])
         self.assertEqual(intersection([1]), [1])
-        self.assertEqual(sorted(intersection([1, 2, 3], [2, 3, 4])), [2, 3])
+        self.assertEqual(intersection([2, 1, 1]), [2, 1])
+        self.assertEqual(intersection([3, 2, 1], [2, 3, 4]), [3, 2])  # order from first list
+        self.assertEqual(intersection([4, 3, 2, 1], [3, 2, 4], [1, 2, 3]), [3, 2])
 
     def test_union(self):
         self.assertEqual(union(), [])
         self.assertEqual(union([1]), [1])
-        self.assertEqual(sorted(union([1, 2, 3], [2, 3, 4])), [1, 2, 3, 4])
+        self.assertEqual(union([2, 1, 1], [1, 2, 3]), [2, 1, 3])  # order is first seen
+        self.assertEqual(union([2, 1], [2, 3, 3], [4, 5]), [2, 1, 3, 4, 5])
 
     def test_random_string(self):
         rs = random_string(1000)
