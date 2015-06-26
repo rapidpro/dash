@@ -2,10 +2,10 @@ from __future__ import unicode_literals
 import json
 import logging
 import time
-import urllib
 
 from redis_cache import get_redis_connection
 import requests
+from six.moves import urllib
 
 from django.conf import settings
 from django.core.cache import cache
@@ -339,7 +339,7 @@ class API(object):
 
         url = '%s/api/v1/results.json?ruleset=%d&segment=%s' % (
             settings.API_ENDPOINT, ruleset_id,
-            urllib.quote(force_text(json.dumps(segment)).encode('utf8')))
+            urllib.parse.quote(force_text(json.dumps(segment)).encode('utf8')))
 
         logger.debug(url)
 
@@ -363,7 +363,7 @@ class API(object):
         url = '%s/api/v1/results.json?contact_field=%s&segment=%s' % (
             settings.API_ENDPOINT,
             contact_field_label,
-            urllib.quote(force_text(json.dumps(segment)).encode('utf8')))
+            urllib.parse.quote(force_text(json.dumps(segment)).encode('utf8')))
         logger.debug(url)
 
         response = requests.get(url,
