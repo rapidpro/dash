@@ -130,9 +130,12 @@ class Org(SmartModel):
 
     def get_temba_client(self):
         host = getattr(settings, 'SITE_API_HOST', None)
+        agent = getattr(settings, 'SITE_API_USER_AGENT', None)
+
         if not host:
             host = '%s/api/v1' % settings.API_ENDPOINT  # UReport sites use this
-        return TembaClient(host, self.api_token)
+
+        return TembaClient(host, self.api_token, user_agent=agent)
 
     def get_api(self):
         return API(self)
@@ -148,7 +151,6 @@ class Org(SmartModel):
         if self.subdomain == '':
             return prefix + host_tld
         return prefix + str(self.subdomain) + "." + host_tld
-
 
     def build_boundaries(self):
 
