@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 import json
+import logging
 import time
 import urllib
 
@@ -10,6 +11,8 @@ from django.conf import settings
 from django.core.cache import cache
 from django.utils.text import slugify
 
+
+logger = logging.getLogger(__name__)
 
 COUNTRY = 0
 STATE = 1
@@ -116,8 +119,7 @@ class API(object):
         if flows:
             flow = flows[0]
 
-        if settings.DEBUG:  # pragma: no cover
-            print "- got flow %d in %f" % (flow_id, time.time() - start)
+        logger.debug("- got flow %d in %f" % (flow_id, time.time() - start))
 
         return flow
 
@@ -233,8 +235,7 @@ class API(object):
         result = response.json()
         group = result['results'][0]
 
-        if settings.DEBUG:  # pragma: no cover
-            print "- got group %s in %f" % (name, time.time() - start)
+        logger.debug("- got group %s in %f" % (name, time.time() - start))
 
         return group
 
@@ -328,8 +329,7 @@ class API(object):
             cached['geojson:%d:%s' % (self.org.id, state_id)] = to_geojson(
                 districts_by_state[state_id])
 
-        if settings.DEBUG:  # pragma: no cover
-            print "- built boundaries in %f" % (time.time() - start)
+            logger.debug("- built boundaries in %f" % (time.time() - start))
 
         return cached
 
@@ -339,7 +339,8 @@ class API(object):
         url = '%s/api/v1/results.json?ruleset=%d&segment=%s' % (
             settings.API_ENDPOINT, ruleset_id,
             urllib.quote(unicode(json.dumps(segment)).encode('utf8')))
-        print url
+
+        logger.debug(url)
 
         response = requests.get(url,
                                 headers={'Content-type': 'application/json',
@@ -351,8 +352,7 @@ class API(object):
 
         results = response_json['results']
 
-        if settings.DEBUG:  # pragma: no cover
-            print "- got ruleset results for %d in %f" % (ruleset_id, time.time() - start)
+        logger.debug("- got ruleset results for %d in %f" % (ruleset_id, time.time() - start))
 
         return results
 
@@ -363,7 +363,7 @@ class API(object):
             settings.API_ENDPOINT,
             contact_field_label,
             urllib.quote(unicode(json.dumps(segment)).encode('utf8')))
-        print url
+        logger.debug(url)
 
         response = requests.get(url,
                                 headers={'Content-type': 'application/json',
@@ -374,9 +374,8 @@ class API(object):
         response_json = response.json()
         results = response_json['results']
 
-        if settings.DEBUG:  # pragma: no cover
-            print "- got contact field results for %s in %f" % (
-                contact_field_label, time.time() - start)
+        logger.debug("- got contact field results for %s in %f" % (
+            contact_field_label, time.time() - start))
 
         return results
 
@@ -407,7 +406,7 @@ class API(object):
             else:
                 next = None
 
-        if settings.DEBUG and flows:  # pragma: no cover
-            print "- got flows in %f" % (time.time() - start)
+        if flows:
+            logger.debug("- got flows in %f" % (time.time() - start))
 
         return flows
