@@ -2,7 +2,7 @@
 -e git+https://github.com/rapidpro/rapidpro-python.git@master#egg=rapidpro-python-1.0
 celery-with-redis
 coverage
-django>=1.7.2
+django>=1.7.2,<1.9
 django-celery
 django-compressor
 django-guardian
@@ -18,5 +18,5 @@ phonenumbers
 psycopg2
 python-dateutil
 requests
-sorl-thumbnail==12.1c
+sorl-thumbnail>=12.1c
 xlutils

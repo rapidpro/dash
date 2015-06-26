@@ -6,6 +6,7 @@ services:
   - redis-server
 env:
   - TOXENV=py2.7-django1.7
+  - TOXENV=py2.7-django1.8
 install:
   - pip install -q --use-mirrors tox
 before_script:
