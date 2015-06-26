@@ -9,6 +9,7 @@ import requests
 
 from django.conf import settings
 from django.core.cache import cache
+from django.utils.encoding import force_text
 from django.utils.text import slugify
 
 
@@ -84,7 +85,7 @@ class API(object):
             elif location == 'District':
                 segment['location'] = self.org.get_config('district_label')
 
-            key += ":" + slugify(unicode(json.dumps(segment)))
+            key += ":" + slugify(force_text(json.dumps(segment)))
 
         return self._get_from_cache(
             key, RESULT_CACHE_TIME,
@@ -102,7 +103,7 @@ class API(object):
             elif location == 'District':
                 segment['location'] = self.org.get_config('district_label')
 
-            key += ":" + slugify(unicode(json.dumps(segment)))
+            key += ":" + slugify(force_text(json.dumps(segment)))
 
         return self._get_from_cache(
             key, CONTACT_RESULT_CACHE_TIME,
@@ -338,7 +339,7 @@ class API(object):
 
         url = '%s/api/v1/results.json?ruleset=%d&segment=%s' % (
             settings.API_ENDPOINT, ruleset_id,
-            urllib.quote(unicode(json.dumps(segment)).encode('utf8')))
+            urllib.quote(force_text(json.dumps(segment)).encode('utf8')))
 
         logger.debug(url)
 
@@ -362,7 +363,7 @@ class API(object):
         url = '%s/api/v1/results.json?contact_field=%s&segment=%s' % (
             settings.API_ENDPOINT,
             contact_field_label,
-            urllib.quote(unicode(json.dumps(segment)).encode('utf8')))
+            urllib.quote(force_text(json.dumps(segment)).encode('utf8')))
         logger.debug(url)
 
         response = requests.get(url,

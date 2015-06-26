@@ -13,7 +13,7 @@ from django.core.cache import cache
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import python_2_unicode_compatible
+from django.utils.encoding import force_text, python_2_unicode_compatible
 
 from dash.api import API
 from dash.dash_email import send_dash_email
@@ -166,7 +166,7 @@ class Org(SmartModel):
 
         if self.subdomain == '':
             return prefix + host_tld
-        return prefix + str(self.subdomain) + "." + host_tld
+        return prefix + force_text(self.subdomain) + "." + host_tld
 
     def build_boundaries(self):
 

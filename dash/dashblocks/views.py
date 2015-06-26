@@ -1,6 +1,7 @@
 from smartmin.views import SmartCRUDL, SmartListView, SmartUpdateView, SmartCreateView
 
 from django.core.urlresolvers import reverse
+from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 
 from dash.orgs.views import OrgObjPermsMixin, OrgPermsMixin
@@ -109,7 +110,7 @@ class DashBlockCRUDL(SmartCRUDL):
             block_type = self.get_type()
             if block_type:
                 if not block_type.has_title:
-                    return unicode(obj)
+                    return force_text(obj)
             return obj.title
 
         def derive_title(self):
