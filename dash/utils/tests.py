@@ -1,14 +1,17 @@
 from __future__ import absolute_import, unicode_literals
-
-import json
-import pytz
-
 from datetime import datetime
-from django.core.cache import cache
-from django.utils import timezone
-from django.test import TestCase
+import json
+
+import pytz
 from temba.types import Contact as TembaContact
-from . import intersection, union, random_string, filter_dict, get_cacheable, get_obj_cacheable, get_month_range, chunks
+
+from django.core.cache import cache
+from django.test import TestCase
+from django.utils import timezone
+
+from . import (
+    intersection, union, random_string, filter_dict, get_cacheable,
+    get_obj_cacheable, get_month_range, chunks)
 from .sync import temba_compare_contacts, temba_merge_contacts
 
 

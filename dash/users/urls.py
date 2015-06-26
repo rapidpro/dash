@@ -1,9 +1,10 @@
+from smartmin.users.views import login
+
+from django.conf import settings
 from django.conf.urls import patterns, url
+from django.contrib.auth.views import logout
 
 from . import views
-from django.contrib.auth.views import logout
-from django.conf import settings
-from smartmin.users.views import login
 
 
 logout_url = getattr(settings, 'LOGOUT_REDIRECT_URL', None)

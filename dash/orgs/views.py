@@ -1,6 +1,10 @@
 from __future__ import unicode_literals
-
 import re
+
+from smartmin.views import (
+    SmartCRUDL, SmartCreateView, SmartReadView, SmartUpdateView,
+    SmartListView, SmartFormView, SmartTemplateView)
+from timezones.forms import TimeZoneField
 
 from django import forms
 from django.conf import settings
@@ -12,9 +16,7 @@ from django.core.urlresolvers import reverse
 from django.core.validators import validate_email
 from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext_lazy as _
-from smartmin.views import SmartCRUDL, SmartCreateView, SmartReadView, SmartUpdateView, SmartListView, SmartFormView, \
-    SmartTemplateView
-from timezones.forms import TimeZoneField
+
 from .models import Org, OrgBackground, Invitation
 
 

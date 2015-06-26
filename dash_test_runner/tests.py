@@ -1,8 +1,20 @@
 from __future__ import unicode_literals
-
 import json
-import redis
 import urllib
+
+from mock import patch, Mock
+import redis
+from smartmin.tests import SmartminTest
+from temba import TembaClient
+from temba.types import Geometry, Boundary
+
+from django.conf import settings
+from django.contrib.auth.models import User, Group
+from django.core import mail
+from django.core.exceptions import DisallowedHost
+from django.core.urlresolvers import reverse, ResolverMatch
+from django.db.utils import IntegrityError
+from django.http import HttpRequest
 
 from dash.api import API
 from dash.categories.models import Category, CategoryImage
@@ -13,17 +25,6 @@ from dash.orgs.models import Org, OrgBackground, Invitation
 from dash.orgs.templatetags.dashorgs import display_time, national_phone
 from dash.orgs.context_processors import GroupPermWrapper
 from dash.stories.models import Story, StoryImage
-from django.conf import settings
-from django.contrib.auth.models import User, Group
-from django.core import mail
-from django.core.exceptions import DisallowedHost
-from django.core.urlresolvers import reverse, ResolverMatch
-from django.db.utils import IntegrityError
-from django.http import HttpRequest
-from mock import patch, Mock
-from smartmin.tests import SmartminTest
-from temba import TembaClient
-from temba.types import Geometry, Boundary
 
 
 class UserTest(SmartminTest):

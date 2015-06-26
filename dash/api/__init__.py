@@ -1,13 +1,15 @@
 from __future__ import unicode_literals
 import json
+import time
 import urllib
+
+from redis_cache import get_redis_connection
+import requests
 
 from django.conf import settings
 from django.core.cache import cache
 from django.utils.text import slugify
-from redis_cache import get_redis_connection
-import requests
-import time
+
 
 COUNTRY = 0
 STATE = 1

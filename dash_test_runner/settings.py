@@ -334,7 +334,6 @@ ORG_CONFIG_FIELDS = [dict(name='shortcode', field=dict(help_text=_("The shortcod
 # ----------------------------------------------------------------------------
 # Directory Configuration
 # ----------------------------------------------------------------------------
-import os
 
 PROJECT_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)))
 RESOURCES_DIR = os.path.join(PROJECT_DIR, '../resources')

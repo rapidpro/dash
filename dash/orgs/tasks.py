@@ -1,7 +1,9 @@
 import time
-from .models import Invitation, Org
-from djcelery.app import app
+
 from django_redis import get_redis_connection
+from djcelery.app import app
+
+from .models import Invitation, Org
 
 
 @app.task(track_started=True, name='send_invitation_email_task')
