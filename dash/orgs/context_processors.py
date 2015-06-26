@@ -1,12 +1,10 @@
-class defaultdict(dict):
-    def __missing__(self, key):
-        return False
+from collections import defaultdict
 
 
 class GroupPermWrapper(object):
     def __init__(self, group):
         self.group = group
-        self.empty = defaultdict()
+        self.empty = defaultdict(lambda: False)
 
         self.apps = dict()
         if self.group:
@@ -15,7 +13,7 @@ class GroupPermWrapper(object):
                 app_perms = self.apps.get(app_name, None)
 
                 if not app_perms:
-                    app_perms = defaultdict()
+                    app_perms = defaultdict(lambda: False)
                     self.apps[app_name] = app_perms
 
                 app_perms[perm.codename] = True
