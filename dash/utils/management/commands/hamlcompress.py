@@ -1,4 +1,5 @@
 # flake8: noqa
+from collections import OrderedDict
 from importlib import import_module
 import os
 import sys
@@ -14,7 +15,6 @@ except ImportError:
 from django.core.management.base import  NoArgsCommand, CommandError
 from django.template import (Context, Template,
                              TemplateDoesNotExist, TemplateSyntaxError)
-from django.utils.datastructures import SortedDict
 from django.template.loader import get_template  # noqa Leave this in to preload template locations
 from django.template.defaulttags import IfNode
 from django.template.loader_tags import (ExtendsNode, BlockNode,
@@ -210,7 +210,7 @@ class Command(NoArgsCommand):
         if verbosity > 1:
             log.write("Found templates:\n\t" + "\n\t".join(templates) + "\n")
 
-        compressor_nodes = SortedDict()
+        compressor_nodes = OrderedDict()
         for template_name in templates:
             try:
                 template_file = open(template_name)
@@ -253,7 +253,7 @@ class Command(NoArgsCommand):
         log.write("Compressing... ")
         count = 0
         results = []
-        offline_manifest = SortedDict()
+        offline_manifest = OrderedDict()
         for template, nodes in compressor_nodes.iteritems():
             context = Context(settings.COMPRESS_OFFLINE_CONTEXT)
             template._log = log
