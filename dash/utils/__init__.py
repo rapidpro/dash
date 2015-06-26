@@ -7,6 +7,7 @@ import random
 
 from dateutil.relativedelta import relativedelta
 import pytz
+import six
 
 from django.core.cache import cache
 from django.utils import timezone
@@ -56,7 +57,7 @@ def filter_dict(d, keys):
     """
     Creates a new dict from an existing dict that only has the given keys
     """
-    return {k: v for k, v in d.iteritems() if k in keys}
+    return {k: v for k, v in six.iteritems(d) if k in keys}
 
 
 def get_cacheable(cache_key, cache_ttl, calculate):
