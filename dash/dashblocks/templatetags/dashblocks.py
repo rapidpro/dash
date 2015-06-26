@@ -2,8 +2,8 @@
 This module offers one templatetag called ``load_dashblocks``.
 
 ``load_dashblocks`` does a query for all active DashBlock objects
-for the passed in DashBlockType and Org on request. (identified by the slug)  You can
-then access that list within your context.
+for the passed in DashBlockType and Org on request. (identified by the slug)
+You can then access that list within your context.
 
 It accepts 2 parameter:
 
@@ -30,7 +30,8 @@ Example usage::
 
     ...
 
-    Note: You may also use the shortcut tag 'load_qbs' eg: {% load_qbs request.org "home_banner_blocks %}
+    Note: You may also use the shortcut tag 'load_qbs'
+    eg: {% load_qbs request.org "home_banner_blocks %}
 
 .. note::
 
@@ -57,9 +58,11 @@ def load_dashblocks(context, org, slug, tag=None):
     try:
         dashblock_type = DashBlockType.objects.get(slug=slug)
     except DashBlockType.DoesNotExist:
-        return getattr(settings, 'DASHBLOCK_STRING_IF_INVALID', '<b><font color="red">DashBlockType with slug: %s not found</font></b>') % slug
+        default_invalid = '<b><font color="red">DashBlockType with slug: %s not found</font></b>'
+        return getattr(settings, 'DASHBLOCK_STRING_IF_INVALID', default_invalid) % slug
 
-    dashblocks = DashBlock.objects.filter(dashblock_type=dashblock_type, org=org, is_active=True).order_by('-priority')
+    dashblocks = DashBlock.objects.filter(dashblock_type=dashblock_type, org=org, is_active=True)
+    dashblocks = dashblocks.order_by('-priority')
 
     # filter by our tag if one was specified
     if tag is not None:

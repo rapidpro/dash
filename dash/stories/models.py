@@ -10,29 +10,42 @@ from dash.orgs.models import Org
 
 
 class Story(SmartModel):
-    title = models.CharField(max_length=255,
-                             help_text=_("The title for this story"))
+    title = models.CharField(
+        max_length=255,
+        help_text=_("The title for this story"))
 
-    featured = models.BooleanField(default=False,
-                                   help_text=_("Whether this story is featured"))
-    summary = models.TextField(null=True, blank=True, help_text=_("The summary for the story"))
+    featured = models.BooleanField(
+        default=False,
+        help_text=_("Whether this story is featured"))
+    summary = models.TextField(
+        null=True, blank=True,
+        help_text=_("The summary for the story"))
 
     content = models.TextField(help_text=_("The body of text for the story"))
 
-    video_id = models.CharField(blank=True, null=True, max_length=255,
-                                help_text=_("The id of the YouTube video that should be linked to this story (this is the text that comes afer v= and before & in the YouTube URL)"))
+    video_id = models.CharField(
+        blank=True, null=True, max_length=255,
+        help_text=_("The id of the YouTube video that should be linked to "
+                    "this story (this is the text that comes afer v= and "
+                    "before & in the YouTube URL)"))
 
-    tags = models.CharField(blank=True, null=True, max_length=255,
-                            help_text=_("Any tags for this story, separated by spaces, can be used to do more advanced filtering, optional"))
+    tags = models.CharField(
+        blank=True, null=True, max_length=255,
+        help_text=_("Any tags for this story, separated by spaces, can be "
+                    "used to do more advanced filtering, optional"))
 
-    category = models.ForeignKey(Category, null=True, blank=True,
-                                 help_text=_("The category for this story"))
+    category = models.ForeignKey(
+        Category, null=True, blank=True,
+        help_text=_("The category for this story"))
 
-    org = models.ForeignKey(Org, help_text=_("The organization this story belongs to"))
+    org = models.ForeignKey(
+        Org,
+        help_text=_("The organization this story belongs to"))
 
     def space_tags(self):
         """
-        If we have tags set, then adds spaces before and after to allow for SQL querying for them.
+        If we have tags set, then adds spaces before and after to allow for SQL
+        querying for them.
         """
         if self.tags and self.tags.strip():
             self.tags = " " + self.tags.strip().lower() + " "

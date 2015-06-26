@@ -11,8 +11,14 @@ logout_url = getattr(settings, 'LOGOUT_REDIRECT_URL', None)
 
 urlpatterns = patterns(
     '',
-    url(r'^login/$', login, dict(template_name='smartmin/users/login.html'), name="users.user_login"),
-    url(r'^logout/$', logout, dict(redirect_field_name='go', next_page=logout_url), name="users.user_logout"),
+    url(r'^login/$',
+        login,
+        dict(template_name='smartmin/users/login.html'),
+        name="users.user_login"),
+    url(r'^logout/$',
+        logout,
+        dict(redirect_field_name='go', next_page=logout_url),
+        name="users.user_logout"),
 )
 
 urlpatterns += views.UserCRUDL().as_urlpatterns()

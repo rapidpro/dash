@@ -10,7 +10,8 @@ from dash.orgs.models import Org
 
 class Category(SmartModel):
     """
-    Every organization can choose to categorize their polls or stories according to their needs.
+    Every organization can choose to categorize their polls or stories
+    according to their needs.
     """
     name = models.CharField(max_length=64,
                             help_text=_("The name of this category"))

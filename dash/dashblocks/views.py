@@ -31,7 +31,8 @@ class DashBlockFormMixin(object):
         return context
 
     def get_success_url(self):
-        return "%s?type=%d" % (reverse('dashblocks.dashblock_list'), self.object.dashblock_type.id)
+        url = reverse('dashblocks.dashblock_list')
+        return "%s?type=%d" % (url, self.object.dashblock_type.id)
 
     def derive_exclude(self):
         exclude = super(DashBlockFormMixin, self).derive_exclude()
@@ -92,7 +93,8 @@ class DashBlockCRUDL(SmartCRUDL):
         fields = ('title', 'priority', 'dashblock_type', 'tags')
         link_fields = ('title',)
         default_order = '-modified_on'
-        search_fields = ('title__icontains', 'content__icontains', 'summary__icontains')
+        search_fields = (
+            'title__icontains', 'content__icontains', 'summary__icontains')
 
         def derive_fields(self):
             fields = super(DashBlockCRUDL.List, self).derive_fields()
@@ -142,7 +144,9 @@ class DashBlockCRUDL(SmartCRUDL):
             return context
 
     class Update(OrgObjPermsMixin, DashBlockFormMixin, SmartUpdateView):
-        fields = ('title', 'summary', 'content', 'image', 'color', 'link', 'video_id', 'tags', 'dashblock_type', 'priority', 'is_active')
+        fields = (
+            'title', 'summary', 'content', 'image', 'color', 'link',
+            'video_id', 'tags', 'dashblock_type', 'priority', 'is_active')
 
         def get_type(self):
             return self.object.dashblock_type
@@ -156,7 +160,12 @@ class DashBlockCRUDL(SmartCRUDL):
         def derive_initial(self, *args, **kwargs):
             initial = super(DashBlockCRUDL.Create, self).derive_initial(*args, **kwargs)
             dashblock_type = self.get_type()
-            other_blocks = DashBlock.objects.filter(is_active=True, org=self.derive_org(), dashblock_type=dashblock_type).order_by('-priority')
+            other_blocks = DashBlock.objects.filter(
+                is_active=True,
+                org=self.derive_org(),
+                dashblock_type=dashblock_type,
+            )
+            other_blocks = other_blocks.order_by('-priority')
             if not other_blocks:
                 initial['priority'] = 0
             else:
@@ -177,7 +186,9 @@ class DashBlockImageCRUDL(SmartCRUDL):
     actions = ('create', 'update', 'list')
 
     class Update(SmartUpdateView):
-        exclude = ('dashblock', 'modified_by', 'modified_on', 'created_on', 'created_by', 'width', 'height')
+        exclude = (
+            'dashblock', 'modified_by', 'modified_on', 'created_on',
+            'created_by', 'width', 'height')
         title = "Edit Image"
         success_message = "Image edited successfully."
 
@@ -185,7 +196,9 @@ class DashBlockImageCRUDL(SmartCRUDL):
             return reverse('dashblocks.dashblock_update', args=[self.object.dashblock.id])
 
     class Create(SmartCreateView):
-        exclude = ('dashblock', 'is_active', 'modified_by', 'modified_on', 'created_on', 'created_by', 'width', 'height')
+        exclude = (
+            'dashblock', 'is_active', 'modified_by', 'modified_on',
+            'created_on', 'created_by', 'width', 'height')
         title = "Add Image"
         success_message = "Image added successfully."
 

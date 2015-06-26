@@ -74,7 +74,9 @@ class SetOrgMiddleware(object):
             static_url = getattr(settings, 'STATIC_URL', None)
             path = request.path
 
-            if (media_url and path.startswith(media_url)) or (static_url and path.startswith(static_url)):
+            if media_url and path.startswith(media_url):
+                return None
+            if static_url and path.startswith(static_url):
                 return None
 
             # only some pages can be viewed without an org

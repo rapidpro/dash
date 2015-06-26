@@ -67,9 +67,10 @@ class InitTest(TestCase):
         self.assertEqual(get_obj_cacheable(self, '_test_value', calculate), "CACHED")
 
     def test_get_month_range(self):
-        self.assertEqual(get_month_range(datetime(2014, 2, 10, 12, 30, 0, 0, pytz.timezone("Africa/Kigali"))),
-                         (datetime(2014, 2, 1, 0, 0, 0, 0, pytz.timezone("Africa/Kigali")),
-                          datetime(2014, 3, 1, 0, 0, 0, 0, pytz.timezone("Africa/Kigali"))))
+        self.assertEqual(
+            get_month_range(datetime(2014, 2, 10, 12, 30, 0, 0, pytz.timezone("Africa/Kigali"))),
+            (datetime(2014, 2, 1, 0, 0, 0, 0, pytz.timezone("Africa/Kigali")),
+             datetime(2014, 3, 1, 0, 0, 0, 0, pytz.timezone("Africa/Kigali"))))
 
     def test_chunks(self):
         self.assertEqual(list(chunks([], 2)), [])
@@ -79,42 +80,51 @@ class InitTest(TestCase):
 class SyncTest(TestCase):
     def test_temba_compare_contacts(self):
         # no differences
-        first = TembaContact.create(uuid='000-001', name="Ann", urns=['tel:1234'], groups=['000-001'],
-                                    fields=dict(chat_name="ann"), language='eng', modified_on=timezone.now())
-        second = TembaContact.create(uuid='000-001', name="Ann", urns=['tel:1234'], groups=['000-001'],
-                                     fields=dict(chat_name="ann"), language='eng', modified_on=timezone.now())
+        first = TembaContact.create(
+            uuid='000-001', name="Ann", urns=['tel:1234'], groups=['000-001'],
+            fields=dict(chat_name="ann"), language='eng', modified_on=timezone.now())
+        second = TembaContact.create(
+            uuid='000-001', name="Ann", urns=['tel:1234'], groups=['000-001'],
+            fields=dict(chat_name="ann"), language='eng', modified_on=timezone.now())
         self.assertIsNone(temba_compare_contacts(first, second))
         self.assertIsNone(temba_compare_contacts(second, first))
 
         # different name
-        second = TembaContact.create(uuid='000-001', name="Annie", urns=['tel:1234'], groups=['000-001'],
-                                     fields=dict(chat_name="ann"), language='eng', modified_on=timezone.now())
+        second = TembaContact.create(
+            uuid='000-001', name="Annie", urns=['tel:1234'], groups=['000-001'],
+            fields=dict(chat_name="ann"), language='eng', modified_on=timezone.now())
         self.assertEqual(temba_compare_contacts(first, second), 'name')
 
         # different URNs
-        second = TembaContact.create(uuid='000-001', name="Ann", urns=['tel:1234', 'twitter:ann'], groups=['000-001'],
-                                     fields=dict(chat_name="ann"), language='eng', modified_on=timezone.now())
+        second = TembaContact.create(
+            uuid='000-001', name="Ann", urns=['tel:1234', 'twitter:ann'], groups=['000-001'],
+            fields=dict(chat_name="ann"), language='eng', modified_on=timezone.now())
         self.assertEqual(temba_compare_contacts(first, second), 'urns')
 
         # different group
-        second = TembaContact.create(uuid='000-001', name="Ann", urns=['tel:1234'], groups=['000-002'],
-                                     fields=dict(chat_name="ann"), language='eng', modified_on=timezone.now())
+        second = TembaContact.create(
+            uuid='000-001', name="Ann", urns=['tel:1234'], groups=['000-002'],
+            fields=dict(chat_name="ann"), language='eng', modified_on=timezone.now())
         self.assertEqual(temba_compare_contacts(first, second), 'groups')
-        self.assertEqual(temba_compare_contacts(first, second, groups=('000-001', '000-002')), 'groups')
+        self.assertEqual(temba_compare_contacts(first, second, groups=('000-001', '000-002')),
+                         'groups')
         self.assertIsNone(temba_compare_contacts(first, second, groups=()))
         self.assertIsNone(temba_compare_contacts(first, second, groups=('000-003', '000-004')))
 
         # different field
-        second = TembaContact.create(uuid='000-001', name="Ann", urns=['tel:1234'], groups=['000-001'],
-                                     fields=dict(chat_name="annie"), language='eng', modified_on=timezone.now())
+        second = TembaContact.create(
+            uuid='000-001', name="Ann", urns=['tel:1234'], groups=['000-001'],
+            fields=dict(chat_name="annie"), language='eng', modified_on=timezone.now())
         self.assertEqual(temba_compare_contacts(first, second), 'fields')
-        self.assertEqual(temba_compare_contacts(first, second, fields=('chat_name', 'gender')), 'fields')
+        self.assertEqual(temba_compare_contacts(first, second, fields=('chat_name', 'gender')),
+                         'fields')
         self.assertIsNone(temba_compare_contacts(first, second, fields=()))
         self.assertIsNone(temba_compare_contacts(first, second, fields=('age', 'gender')))
 
         # additional field
-        second = TembaContact.create(uuid='000-001', name="Ann", urns=['tel:1234'], groups=['000-001'],
-                                     fields=dict(chat_name="ann", age=18), language='eng', modified_on=timezone.now())
+        second = TembaContact.create(
+            uuid='000-001', name="Ann", urns=['tel:1234'], groups=['000-001'],
+            fields=dict(chat_name="ann", age=18), language='eng', modified_on=timezone.now())
         self.assertEqual(temba_compare_contacts(first, second), 'fields')
         self.assertIsNone(temba_compare_contacts(first, second, fields=()))
         self.assertIsNone(temba_compare_contacts(first, second, fields=('chat_name',)))
@@ -129,9 +139,11 @@ class SyncTest(TestCase):
                                        fields=dict(chat_name="bobz", state='IN'),
                                        groups=['000-003', '000-009', '000-011'])
 
-        merged = temba_merge_contacts(contact1, contact2, mutex_group_sets=(('000-001', '000-002', '000-003'),
-                                                                            ('000-008', '000-009'),
-                                                                            ('000-098', '000-099')))
+        merged = temba_merge_contacts(contact1, contact2, mutex_group_sets=(
+            ('000-001', '000-002', '000-003'),
+            ('000-008', '000-009'),
+            ('000-098', '000-099'),
+        ))
         self.assertEqual(merged.uuid, '000-001')
         self.assertEqual(merged.name, "Bob")
         self.assertEqual(sorted(merged.urns), ['email:bob@bob.com', 'tel:123', 'twitter:bob'])

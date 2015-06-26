@@ -18,8 +18,9 @@ class ChangeType(Enum):
 
 def sync_push_contact(org, contact, change_type, mutex_group_sets):
     """
-    Pushes a local change to a contact. mutex_group_sets is a list of UUID sets of groups whose membership is mutually
-    exclusive. Contact class must define an as_temba instance method.
+    Pushes a local change to a contact. mutex_group_sets is a list of UUID sets
+    of groups whose membership is mutually exclusive. Contact class must define
+    an as_temba instance method.
     """
     client = org.get_temba_client()
 
@@ -39,10 +40,14 @@ def sync_push_contact(org, contact, change_type, mutex_group_sets):
         local_contact = contact.as_temba()
 
         if temba_compare_contacts(remote_contact, local_contact):
-            merged_contact = temba_merge_contacts(local_contact, remote_contact, mutex_group_sets)
+            merged_contact = temba_merge_contacts(
+                local_contact, remote_contact, mutex_group_sets)
 
-            # fetched contacts may have fields with null values but we can't push these so we remove them
-            merged_contact.fields = {k: v for k, v in merged_contact.fields.iteritems() if v is not None}
+            # fetched contacts may have fields with null values but we can't
+            # push these so we remove them
+            merged_contact.fields = {k: v
+                                     for k, v in merged_contact.fields.iteritems()
+                                     if v is not None}
 
             client.update_contact(merged_contact.uuid,
                                   merged_contact.name,
@@ -56,8 +61,10 @@ def sync_push_contact(org, contact, change_type, mutex_group_sets):
 
 def sync_pull_contacts(org, contact_class, fields=None, groups=None):
     """
-    Pulls all contacts from RapidPro and syncs with local contacts. Contact class must define a class method called
-    kwargs_from_temba which generates field kwargs from a fetched temba contact.
+    Pulls all contacts from RapidPro and syncs with local contacts. Contact
+    class must define a class method called kwargs_from_temba which generates
+    field kwargs from a fetched temba contact.
+
     :param org: the org
     :param contact_class: the contact class type
     :param fields: the contact field keys used - used to determine if local contact differs
@@ -117,7 +124,8 @@ def sync_pull_contacts(org, contact_class, fields=None, groups=None):
 
         synced_uuids.add(incoming.uuid)
 
-    # any existing contact not in the synched set, is now deleted if not already deleted
+    # any existing contact not in the synched set, is now deleted if not
+    # already deleted
     for existing_uuid, existing in existing_by_uuid.iteritems():
         if existing_uuid not in synced_uuids and existing.is_active:
             deleted_uuids.append(existing_uuid)
@@ -129,7 +137,8 @@ def sync_pull_contacts(org, contact_class, fields=None, groups=None):
 
 def temba_compare_contacts(first, second, fields=None, groups=None):
     """
-    Compares two Temba contacts to determine if there are differences. Returns first difference found.
+    Compares two Temba contacts to determine if there are differences. Returns
+    first difference found.
     """
     if first.uuid != second.uuid:  # pragma: no cover
         raise ValueError("Can't compare contacts with different UUIDs")
@@ -142,8 +151,11 @@ def temba_compare_contacts(first, second, fields=None, groups=None):
 
     if groups is None and (sorted(first.groups) != sorted(second.groups)):
         return 'groups'
-    if groups and (sorted(intersection(first.groups, groups)) != sorted(intersection(second.groups, groups))):
-        return 'groups'
+    if groups:
+        a = sorted(intersection(first.groups, groups))
+        b = sorted(intersection(second.groups, groups))
+        if a != b:
+            return 'groups'
 
     if fields is None and (first.fields != second.fields):
         return 'fields'
