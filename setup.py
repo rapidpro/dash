@@ -41,15 +41,17 @@ def _read_requirements(filename):
     return packages, links
 
 
-install_requires, dependency_links = _read_requirements("pip-requires.txt")
+base_packages, base_links = _read_requirements("requirements/base.txt")
+test_packages, test_links = _read_requirements("requirements/tests.txt")
 
 
 setup(
     name='dash',
     version=__import__('dash').__version__,
     license='BSD',
-    install_requires=install_requires,
-    dependency_links=dependency_links,
+    install_requires=base_packages,
+    tests_require=base_packages + test_packages,
+    dependency_links=base_links + test_links,
     description="",
     long_description=open('README.md').read(),
     author='Nyaruka Team',

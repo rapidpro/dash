@@ -56,7 +56,6 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 
-    'djcelery',
 
     # dash
     'dash.orgs',
@@ -279,8 +278,6 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 # ----------------------------------------------------------------------------
 # Async tasks with django-celery
 # ----------------------------------------------------------------------------
-import djcelery
-djcelery.setup_loader()
 
 CELERY_RESULT_BACKEND = 'database'
 

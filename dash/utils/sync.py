@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 import logging
 
 from enum import Enum
+import six
 from temba.types import Contact as TembaContact
 
 from . import union, intersection, filter_dict
@@ -46,7 +47,7 @@ def sync_push_contact(org, contact, change_type, mutex_group_sets):
             # fetched contacts may have fields with null values but we can't
             # push these so we remove them
             merged_contact.fields = {k: v
-                                     for k, v in merged_contact.fields.iteritems()
+                                     for k, v in six.iteritems(merged_contact.fields)
                                      if v is not None}
 
             client.update_contact(merged_contact.uuid,
@@ -105,7 +106,7 @@ def sync_pull_contacts(org, contact_class, fields=None, groups=None):
                     failed_uuids.append(incoming.uuid)
                     continue
 
-                for field, value in kwargs.iteritems():
+                for field, value in six.iteritems(kwargs):
                     setattr(existing, field, value)
 
                 existing.is_active = True
@@ -126,7 +127,7 @@ def sync_pull_contacts(org, contact_class, fields=None, groups=None):
 
     # any existing contact not in the synched set, is now deleted if not
     # already deleted
-    for existing_uuid, existing in existing_by_uuid.iteritems():
+    for existing_uuid, existing in six.iteritems(existing_by_uuid):
         if existing_uuid not in synced_uuids and existing.is_active:
             deleted_uuids.append(existing_uuid)
 
@@ -176,7 +177,7 @@ def temba_merge_contacts(first, second, mutex_group_sets):
     first_urns_by_scheme = {u[0]: u[1] for u in [urn.split(':', 1) for urn in first.urns]}
     urns_by_scheme = {u[0]: u[1] for u in [urn.split(':', 1) for urn in second.urns]}
     urns_by_scheme.update(first_urns_by_scheme)
-    merged_urns = ['%s:%s' % (scheme, path) for scheme, path in urns_by_scheme.iteritems()]
+    merged_urns = ['%s:%s' % (scheme, path) for scheme, path in six.iteritems(urns_by_scheme)]
 
     # fields are simple key based merge
     merged_fields = second.fields.copy()

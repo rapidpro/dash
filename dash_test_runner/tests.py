@@ -15,6 +15,7 @@ from django.core.exceptions import DisallowedHost
 from django.core.urlresolvers import reverse, ResolverMatch
 from django.db.utils import IntegrityError
 from django.http import HttpRequest
+from django.utils.encoding import force_text
 
 from dash.api import API
 from dash.categories.models import Category, CategoryImage
@@ -277,7 +278,7 @@ class OrgTest(DashTest):
     def test_org_model(self):
         user = self.create_user("User")
 
-        self.assertEquals(self.org.__unicode__(), 'uganda')
+        self.assertEquals(force_text(self.org), 'uganda')
 
         self.assertIsNone(Org.get_org(None))
         self.assertEquals(Org.get_org(self.admin), self.org)
@@ -1094,7 +1095,7 @@ class MockResponse(object):
 
     def raise_for_status(self):
         if self.status_code != 200:
-            raise Exception("Server returned %s" % str(self.status_code))
+            raise Exception("Server returned %s" % force_text(self.status_code))
 
     def json(self, **kwargs):
         return json.loads(self.content)
@@ -1186,7 +1187,7 @@ class APITest(DashTest):
             self.assertIsNone(self.api.get_ruleset_results(101, dict(location='State')))
             mock_request_get.assert_called_with(
                 '%s/api/v1/results.json?ruleset=101&segment=%s' % (settings.API_ENDPOINT,
-                                                                   urllib.quote(unicode(json.dumps(
+                                                                   urllib.quote(force_text(json.dumps(
                                                                        dict(location='LGA'))).encode('utf8'))),
                 headers={'Content-type': 'application/json',
                          'Accept': 'application/json',
@@ -1195,7 +1196,7 @@ class APITest(DashTest):
             self.assertIsNone(self.api.get_ruleset_results(101, dict(location='District')))
             mock_request_get.assert_called_with(
                 '%s/api/v1/results.json?ruleset=101&segment=%s' % (settings.API_ENDPOINT,
-                                                                   urllib.quote(unicode(json.dumps(
+                                                                   urllib.quote(force_text(json.dumps(
                                                                        dict(location='Province'))).encode('utf8'))),
                 headers={'Content-type': 'application/json',
                          'Accept': 'application/json',
@@ -1215,7 +1216,7 @@ class APITest(DashTest):
             self.assertIsNone(self.api.get_ruleset_results(101, dict(location='State')))
             mock_request_get.assert_called_with(
                 '%s/api/v1/results.json?ruleset=101&segment=%s' % (settings.API_ENDPOINT,
-                                                                   urllib.quote(unicode(json.dumps(
+                                                                   urllib.quote(force_text(json.dumps(
                                                                        dict(location='LGA'))).encode('utf8'))),
                 headers={'Content-type': 'application/json',
                          'Accept': 'application/json',
@@ -1224,7 +1225,7 @@ class APITest(DashTest):
             self.assertIsNone(self.api.get_ruleset_results(101, dict(location='District')))
             mock_request_get.assert_called_with(
                 '%s/api/v1/results.json?ruleset=101&segment=%s' % (settings.API_ENDPOINT,
-                                                                   urllib.quote(unicode(json.dumps(
+                                                                   urllib.quote(force_text(json.dumps(
                                                                        dict(location='Province'))).encode('utf8'))),
                 headers={'Content-type': 'application/json',
                          'Accept': 'application/json',
@@ -1245,7 +1246,7 @@ class APITest(DashTest):
             self.assertIsNone(self.api.get_ruleset_results(101, dict(location='State')))
             mock_request_get.assert_called_with(
                 '%s/api/v1/results.json?ruleset=101&segment=%s' % (settings.API_ENDPOINT,
-                                                                   urllib.quote(unicode(json.dumps(
+                                                                   urllib.quote(force_text(json.dumps(
                                                                        dict(location='LGA'))).encode('utf8'))),
                 headers={'Content-type': 'application/json',
                          'Accept': 'application/json',
@@ -1254,7 +1255,7 @@ class APITest(DashTest):
             self.assertIsNone(self.api.get_ruleset_results(101, dict(location='District')))
             mock_request_get.assert_called_with(
                 '%s/api/v1/results.json?ruleset=101&segment=%s' % (settings.API_ENDPOINT,
-                                                                   urllib.quote(unicode(json.dumps(
+                                                                   urllib.quote(force_text(json.dumps(
                                                                        dict(location='Province'))).encode('utf8'))),
                 headers={'Content-type': 'application/json',
                          'Accept': 'application/json',
@@ -1275,7 +1276,7 @@ class APITest(DashTest):
             self.assertEquals(self.api.get_ruleset_results(101, dict(location='State')), ["RULESET_DATA"])
             mock_request_get.assert_called_with(
                 '%s/api/v1/results.json?ruleset=101&segment=%s' % (settings.API_ENDPOINT,
-                                                                   urllib.quote(unicode(json.dumps(
+                                                                   urllib.quote(force_text(json.dumps(
                                                                        dict(location='LGA'))).encode('utf8'))),
                 headers={'Content-type': 'application/json',
                          'Accept': 'application/json',
@@ -1284,7 +1285,7 @@ class APITest(DashTest):
             self.assertEquals(self.api.get_ruleset_results(101, dict(location='District')), ["RULESET_DATA"])
             mock_request_get.assert_called_with(
                 '%s/api/v1/results.json?ruleset=101&segment=%s' % (settings.API_ENDPOINT,
-                                                                   urllib.quote(unicode(json.dumps(
+                                                                   urllib.quote(force_text(json.dumps(
                                                                        dict(location='Province'))).encode('utf8'))),
                 headers={'Content-type': 'application/json',
                          'Accept': 'application/json',
@@ -1309,7 +1310,7 @@ class APITest(DashTest):
             mock_request_get.assert_called_with(
                 '%s/api/v1/results.json?contact_field=contact_field_name&segment=%s' % (settings.API_ENDPOINT,
                                                                                         urllib.quote(
-                                                                                            unicode(json.dumps(
+                                                                                            force_text(json.dumps(
                                                                                                 dict(location='LGA')
                                                                                             )).encode('utf8'))),
                 headers={'Content-type': 'application/json',
@@ -1320,7 +1321,7 @@ class APITest(DashTest):
                               ["CONTACT_FIELD_DATA"])
             mock_request_get.assert_called_with(
                 '%s/api/v1/results.json?contact_field=contact_field_name&segment=%s' % (settings.API_ENDPOINT,
-                                                                                        urllib.quote(unicode(
+                                                                                        urllib.quote(force_text(
                                                                                             json.dumps(
                                                                                                 dict(
                                                                                                     location='Province')
@@ -1645,7 +1646,7 @@ class CategoryTest(DashTest):
                                             created_by=self.admin,
                                             modified_by=self.admin)
 
-        self.assertEquals(category1.__unicode__(), 'uganda - category 1')
+        self.assertEquals(force_text(category1), 'uganda - category 1')
 
         with self.assertRaises(IntegrityError):
             Category.objects.create(name='category 1',
@@ -1667,7 +1668,7 @@ class CategoryTest(DashTest):
                                                        created_by=self.admin,
                                                        modified_by=self.admin)
 
-        self.assertEquals(unicode(category_image1), 'category 1 - image 1')
+        self.assertEquals(force_text(category_image1), 'category 1 - image 1')
         self.assertIsNone(category1.get_first_image())
 
         category_image1.image = 'categories/image.jpg'
@@ -2228,7 +2229,7 @@ class DashBlockTypeTest(DashTest):
         self.assertFalse(dashblocktype.has_tags)
         self.assertFalse(dashblocktype.has_video)
 
-        self.assertEquals(dashblocktype.__unicode__(), 'Test Pages')
+        self.assertEquals(force_text(dashblocktype), 'Test Pages')
 
     def test_list_dashblocktype(self):
         list_url = reverse('dashblocks.dashblocktype_list')
@@ -2361,7 +2362,7 @@ class DashBlockTest(DashTest):
                                               created_by=self.admin,
                                               modified_by=self.admin)
 
-        self.assertEquals(dashblock1.__unicode__(), 'First')
+        self.assertEquals(force_text(dashblock1), 'First')
 
         dashblock2 = DashBlock.objects.create(dashblock_type=self.type_bar,
                                               org=self.uganda,
@@ -2370,7 +2371,7 @@ class DashBlockTest(DashTest):
                                               created_by=self.admin,
                                               modified_by=self.admin)
 
-        self.assertEquals(dashblock2.__unicode__(), 'Bar - %d' % dashblock2.pk)
+        self.assertEquals(force_text(dashblock2), 'Bar - %d' % dashblock2.pk)
 
         self.assertEquals(dashblock1.teaser(dashblock1.content, 1), 'First ...')
         self.assertEquals(dashblock1.teaser(dashblock1.content, 10), 'First content')
@@ -2610,7 +2611,7 @@ class DashBlockTest(DashTest):
         self.assertTrue(dashblock2 in response.context['object_list'])
         self.assertFalse(dashblock3 in response.context['object_list'])
 
-        self.assertTrue(unicode(dashblock2) in response.content)
+        self.assertTrue(force_text(dashblock2) in response.content)
 
         self.assertEquals(len(response.context['fields']), 4)
         self.assertTrue('tags' in response.context['fields'])

@@ -1,8 +1,8 @@
 import logging
 import time
 
+from celery import shared_task
 from django_redis import get_redis_connection
-from djcelery.app import app
 
 from .models import Invitation, Org
 
@@ -10,13 +10,13 @@ from .models import Invitation, Org
 logger = logging.getLogger(__name__)
 
 
-@app.task(track_started=True, name='send_invitation_email_task')
+@shared_task(track_started=True, name='send_invitation_email_task')
 def send_invitation_email_task(invitation_id):
     invitation = Invitation.objects.get(pk=invitation_id)
     invitation.send_email()
 
 
-@app.task(name='orgs.build_boundaries')
+@shared_task(name='orgs.build_boundaries')
 def build_boundaries():
     start = time.time()
     r = get_redis_connection()

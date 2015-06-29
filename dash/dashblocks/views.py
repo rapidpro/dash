@@ -1,6 +1,7 @@
 from smartmin.views import SmartCRUDL, SmartListView, SmartUpdateView, SmartCreateView
 
 from django.core.urlresolvers import reverse
+from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 
 from dash.orgs.views import OrgObjPermsMixin, OrgPermsMixin
@@ -21,8 +22,9 @@ class DashBlockTypeCRUDL(SmartCRUDL):
 class DashBlockFormMixin(object):
 
     def get_type(self):
-        if 'type' in self.request.REQUEST:
-            return DashBlockType.objects.get(id=self.request.REQUEST.get('type'))
+        block_type = self.request.POST.get('type', self.request.GET.get('type', None))
+        if block_type:
+            return DashBlockType.objects.get(id=block_type)
         return None
 
     def get_context_data(self, *args, **kwargs):
@@ -108,7 +110,7 @@ class DashBlockCRUDL(SmartCRUDL):
             block_type = self.get_type()
             if block_type:
                 if not block_type.has_title:
-                    return unicode(obj)
+                    return force_text(obj)
             return obj.title
 
         def derive_title(self):
@@ -119,10 +121,12 @@ class DashBlockCRUDL(SmartCRUDL):
                 return _("%s Blocks") % type.name
 
         def get_type(self):
-            if 'type' in self.request.REQUEST and not self.request.REQUEST.get('type') == '0':
-                return DashBlockType.objects.get(id=self.request.REQUEST.get('type'))
-            elif 'slug' in self.request.REQUEST:
-                return DashBlockType.objects.get(slug=self.request.REQUEST.get('slug'))
+            block_type = self.request.POST.get('type', self.request.GET.get('type', None))
+            if block_type and block_type != '0':
+                return DashBlockType.objects.get(id=block_type)
+            slug = self.request.POST.get('slug', self.request.GET.get('slug', None))
+            if slug:
+                return DashBlockType.objects.get(slug=slug)
             return None
 
         def get_queryset(self, **kwargs):
@@ -204,7 +208,8 @@ class DashBlockImageCRUDL(SmartCRUDL):
 
         def derive_initial(self, *args, **kwargs):
             initial = super(DashBlockImageCRUDL.Create, self).derive_initial(*args, **kwargs)
-            dashblock = DashBlock.objects.get(pk=self.request.REQUEST.get('dashblock'))
+            block_id = self.request.POST.get('dashblock', self.request.GET.get('dashblock', None))
+            dashblock = DashBlock.objects.get(pk=block_id)
             images = dashblock.sorted_images()
             if not images:
                 initial['priority'] = 0
@@ -217,5 +222,6 @@ class DashBlockImageCRUDL(SmartCRUDL):
 
         def pre_save(self, obj):
             obj = super(DashBlockImageCRUDL.Create, self).pre_save(obj)
-            obj.dashblock = DashBlock.objects.get(pk=self.request.REQUEST.get('dashblock'))
+            block_id = self.request.POST.get('dashblock', self.request.GET.get('dashblock', None))
+            obj.dashblock = DashBlock.objects.get(pk=block_id)
             return obj

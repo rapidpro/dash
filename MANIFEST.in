@@ -1,10 +1,10 @@
 include README.md
 include LICENSE
-include pip-requires.txt
 include tox.ini
 recursive-include dash/categories/templates *
 recursive-include dash/dashblocks/templates *
 recursive-include dash/orgs/templates *
 recursive-include dash/stories/templates *
 recursive-include dash_test_runner *
+recursive-include requirements *
 recursive-include testfiles *

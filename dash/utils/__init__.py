@@ -7,6 +7,7 @@ import random
 
 from dateutil.relativedelta import relativedelta
 import pytz
+import six
 
 from django.core.cache import cache
 from django.utils import timezone
@@ -56,7 +57,7 @@ def filter_dict(d, keys):
     """
     Creates a new dict from an existing dict that only has the given keys
     """
-    return {k: v for k, v in d.iteritems() if k in keys}
+    return {k: v for k, v in six.iteritems(d) if k in keys}
 
 
 def get_cacheable(cache_key, cache_ttl, calculate):
@@ -120,7 +121,7 @@ def chunks(data, size):
     """
     Yield successive chunks from the given slice-able collection
     """
-    for i in xrange(0, len(data), size):
+    for i in six.moves.xrange(0, len(data), size):
         yield data[i:(i + size)]
 
 

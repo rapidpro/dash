@@ -1,22 +1,20 @@
 -e git+https://github.com/nyaruka/smartmin.git@master#egg=smartmin-1.7.0
 -e git+https://github.com/rapidpro/rapidpro-python.git@master#egg=rapidpro-python-1.0
 celery-with-redis
-coverage
 django>=1.7.2
-django-celery
 django-compressor
 django-guardian
 django-nose
 django-redis==3.8.4
 django-timezones
 enum34
-flake8
 hamlpy
-mock
 Pillow
 phonenumbers
 psycopg2
 python-dateutil
 requests
-sorl-thumbnail==12.1c
-xlutils
+six
+sorl-thumbnail>=12.1c
+xlrd
+xlwt
