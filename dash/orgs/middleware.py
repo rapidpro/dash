@@ -105,7 +105,6 @@ class SetOrgMiddleware(object):
             if url_name not in whitelist:
                 return HttpResponseRedirect(reverse(chooser_view))
 
-
     def get_host_parts(self, request):
         host = 'localhost'
         try:
@@ -118,7 +117,6 @@ class SetOrgMiddleware(object):
             return []
 
         return host.split('.')
-
 
     def get_subdomain(self, request):
 
