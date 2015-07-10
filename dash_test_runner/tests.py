@@ -234,6 +234,48 @@ class SetOrgMiddlewareTest(DashTest):
         self.assertEquals(response.status_code, 302)
         self.assertEquals(response.url, reverse(settings.SITE_CHOOSER_URL_NAME))
 
+        ug_org.domain = 'ureport.co.ug'
+        ug_org.save()
+
+        # check white-listed URL
+        response = self.simulate_process('ureport.co.ug', 'orgs.org_create')
+        self.assertIsNone(response)
+        self.assertEqual(self.request.org, ug_org)
+        self.assertEqual(self.request.user.get_org(), ug_org)
+
+        # check non-white-listed URL
+        response = self.simulate_process('ureport.co.ug', 'dash.test_test')
+        self.assertIsNone(response)
+        self.assertEqual(self.request.org, ug_org)
+        self.assertEqual(self.request.user.get_org(), ug_org)
+
+        ug_org.domain = 'ureport.ug'
+        ug_org.save()
+
+        # check white-listed URL
+        response = self.simulate_process('ureport.ug', 'orgs.org_create')
+        self.assertIsNone(response)
+        self.assertEqual(self.request.org, ug_org)
+        self.assertEqual(self.request.user.get_org(), ug_org)
+
+        # check non-white-listed URL
+        response = self.simulate_process('ureport.ug', 'dash.test_test')
+        self.assertIsNone(response)
+        self.assertEqual(self.request.org, ug_org)
+        self.assertEqual(self.request.user.get_org(), ug_org)
+
+        # no org with the domain
+        response = self.simulate_process('ureport.co.ug', 'dash.test_test')
+        self.assertIsNone(self.request.org)
+        self.assertIsNone(self.request.user.get_org())
+        self.assertEquals(response.status_code, 302)
+
+        # do not check subdomain if not domain has host name
+        response = self.simulate_process('uganda.co.ug', 'dash.test_test')
+        self.assertIsNone(self.request.org)
+        self.assertIsNone(self.request.user.get_org())
+        self.assertEquals(response.status_code, 302)
+
         empty_subdomain_org = Org.objects.create(subdomain="", name="global", language='en',
                                                  created_by=self.admin, modified_by=self.admin)
 
@@ -351,17 +393,18 @@ class OrgTest(DashTest):
         self.assertEquals(self.org.get_config('other_field_name'), 'other_value')
 
     def test_build_host_link(self):
-        self.assertEqual(self.org.build_host_link(), 'http://uganda.localhost:8000')
+        with self.settings(HOSTNAME='localhost:8000'):
+            self.assertEqual(self.org.build_host_link(), 'http://uganda.localhost:8000')
 
-        with self.settings(SESSION_COOKIE_SECURE=True):
-            self.assertEqual(self.org.build_host_link(), 'https://uganda.localhost:8000')
-        self.org.subdomain = ''
-        self.org.save()
+            with self.settings(SESSION_COOKIE_SECURE=True):
+                self.assertEqual(self.org.build_host_link(), 'https://uganda.localhost:8000')
+            self.org.subdomain = ''
+            self.org.save()
 
-        self.assertEqual(self.org.build_host_link(), 'http://localhost:8000')
+            self.assertEqual(self.org.build_host_link(), 'http://localhost:8000')
 
-        with self.settings(SESSION_COOKIE_SECURE=True):
-            self.assertEqual(self.org.build_host_link(), 'https://localhost:8000')
+            with self.settings(SESSION_COOKIE_SECURE=True):
+                self.assertEqual(self.org.build_host_link(), 'https://localhost:8000')
 
     def test_build_boundaries(self):
         boundaries = dict()
@@ -438,6 +481,7 @@ class OrgTest(DashTest):
         self.login(self.superuser)
         response = self.client.get(create_url)
         self.assertEquals(200, response.status_code)
+        self.assertEquals(len(response.context['form'].fields), 8)
         self.assertFalse(Org.objects.filter(name="kLab"))
         self.assertEquals(User.objects.all().count(), 4)
 
@@ -466,7 +510,7 @@ class OrgTest(DashTest):
         response = self.client.get(update_url)
         self.assertEquals(200, response.status_code)
         self.assertFalse(Org.objects.filter(name="Burundi"))
-        self.assertEquals(len(response.context['form'].fields), 9)
+        self.assertEquals(len(response.context['form'].fields), 10)
 
         post_data = dict(name="Burundi", timezone="Africa/Bujumbura", subdomain="burundi", is_active=True,
                          male_label="male", female_label='female', administrators=self.admin.pk)
@@ -690,7 +734,7 @@ class OrgTest(DashTest):
         self.assertEquals(response.status_code, 200)
         self.assertEquals(len(response.context['orgs']), 1)
         self.assertTrue(self.org in response.context['orgs'])
-        self.assertEquals(response.context['orgs'][0].host, "http://uganda.localhost:8000")
+        self.assertEquals(response.context['orgs'][0].host, "http://uganda.ureport.io")
 
         self.org2 = self.create_org('nigeria', self.admin)
 
@@ -1842,7 +1886,7 @@ class CategoryTest(DashTest):
 
         upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "r")
         post_data = dict(name='health image', image=upload, category=uganda_health.pk, is_active=True)
-        response = self.client.post(update_url, post_data, follow=True, SERVER_NAME='uganda.ureprt.io')
+        response = self.client.post(update_url, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
         self.assertEquals(response.request['PATH_INFO'], reverse('categories.categoryimage_list'))
         cat_image = CategoryImage.objects.filter(pk=cat_image.pk)[0]
         self.assertEquals(cat_image.name, 'health image')
@@ -2205,7 +2249,7 @@ class DashBlockTypeTest(DashTest):
         fields = response.context['form'].fields
         self.assertEquals(len(fields), 13)
 
-        response = self.client.post(create_url, dict(), SERVER_NAME='uganda.uerport.io')
+        response = self.client.post(create_url, dict(), SERVER_NAME='uganda.ureport.io')
         self.assertTrue(response.context['form'].errors)
         errors = response.context['form'].errors
         self.assertEquals(len(errors), 2)

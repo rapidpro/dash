@@ -44,9 +44,24 @@ class SetOrgMiddleware(object):
     Sets the org on the request, based on the subdomain
     """
     def process_request(self, request):
-        subdomain = self.get_subdomain(request)
+        host_parts = self.get_host_parts(request)
 
-        org = Org.objects.filter(subdomain__iexact=subdomain, is_active=True).first()
+        org = None
+        if len(host_parts) >= 2:
+            domain = ".".join(host_parts[-3:])
+            org = Org.objects.filter(domain__iexact=domain, is_active=True).first()
+
+            if not org:
+                domain = ".".join(host_parts[-2:])
+                org = Org.objects.filter(domain__iexact=domain, is_active=True).first()
+        elif host_parts:
+            domain = host_parts[0]
+            org = Org.objects.filter(domain__iexact=domain, is_active=True).first()
+
+        if not org:
+            subdomain = self.get_subdomain(request)
+
+            org = Org.objects.filter(subdomain__iexact=subdomain, is_active=True).first()
 
         if not request.user.is_anonymous():
             request.user.set_org(org)
@@ -90,21 +105,35 @@ class SetOrgMiddleware(object):
             if url_name not in whitelist:
                 return HttpResponseRedirect(reverse(chooser_view))
 
-    @staticmethod
-    def get_subdomain(request):
+
+    def get_host_parts(self, request):
         host = 'localhost'
         try:
             host = request.get_host()
         except DisallowedHost:
             traceback.print_exc()
 
-        subdomain = ""
-
         # does the host look like an IP? return ""
         if re.match("^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$", host):
-            return subdomain
+            return []
 
-        parts = host.split('.')
+        return host.split('.')
+
+
+    def get_subdomain(self, request):
+
+        subdomain = ""
+        parts = self.get_host_parts(request)
+        host_string = ".".join(parts)
+        top_domains = ['localhost:8000', 'localhost', getattr(settings, 'HOSTNAME', "")]
+        allowed_top_domain = False
+        for top in top_domains:
+            if host_string.endswith(top):
+                allowed_top_domain = True
+                break
+
+        if not parts or not allowed_top_domain:
+            return subdomain
 
         # for more than 2 parts
         if len(parts) > 2:
