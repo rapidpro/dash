@@ -406,6 +406,13 @@ class OrgTest(DashTest):
             with self.settings(SESSION_COOKIE_SECURE=True):
                 self.assertEqual(self.org.build_host_link(), 'https://localhost:8000')
 
+            self.org.domain = 'ureport.ug'
+
+            self.assertEqual(self.org.build_host_link(), 'http://ureport.ug')
+
+            with self.settings(SESSION_COOKIE_SECURE=True):
+                self.assertEqual(self.org.build_host_link(), 'https://ureport.ug')
+
     def test_build_boundaries(self):
         boundaries = dict()
         boundaries['geojson:%d' % self.org.pk] = dict(
