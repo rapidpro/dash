@@ -494,7 +494,16 @@ class OrgTest(DashTest):
 
         user_alice = User.objects.create_user("alicefox")
 
-        data = dict(name="kLab", subdomain="klab", timezone="Africa/Kigali", administrators=[user_alice.pk])
+        data = dict(name="kLab", subdomain="klab", domain="ureport.io",
+                    timezone="Africa/Kigali", administrators=[user_alice.pk])
+
+        response = self.client.post(create_url, data)
+        self.assertEquals(response.status_code, 200)
+        self.assertTrue(response.context['form'])
+        self.assertTrue(response.context['form'].errors)
+
+        data = dict(name="kLab", subdomain="klab", domain="klab.rw",
+                    timezone="Africa/Kigali", administrators=[user_alice.pk])
         response = self.client.post(create_url, data, follow=True)
         self.assertTrue('form' not in response.context)
         self.assertTrue(Org.objects.filter(name="kLab"))
@@ -519,8 +528,16 @@ class OrgTest(DashTest):
         self.assertFalse(Org.objects.filter(name="Burundi"))
         self.assertEquals(len(response.context['form'].fields), 10)
 
-        post_data = dict(name="Burundi", timezone="Africa/Bujumbura", subdomain="burundi", is_active=True,
-                         male_label="male", female_label='female', administrators=self.admin.pk)
+        post_data = dict(name="Burundi", timezone="Africa/Bujumbura", subdomain="burundi", domain='ureport.io',
+                         is_active=True, male_label="male", female_label='female', administrators=self.admin.pk)
+
+        response = self.client.post(update_url, post_data)
+        self.assertEquals(response.status_code, 200)
+        self.assertTrue(response.context['form'])
+        self.assertTrue(response.context['form'].errors)
+
+        post_data = dict(name="Burundi", timezone="Africa/Bujumbura", subdomain="burundi", domain='ureport.bi',
+                         is_active=True, male_label="male", female_label='female', administrators=self.admin.pk)
         response = self.client.post(update_url, post_data)
         self.assertEquals(response.status_code, 302)
 
@@ -529,6 +546,7 @@ class OrgTest(DashTest):
         org = Org.objects.get(pk=self.org.pk)
         self.assertEquals(org.name, "Burundi")
         self.assertEquals(org.subdomain, "burundi")
+        self.assertEquals(org.domain, "ureport.bi")
         self.assertEquals(org.timezone, "Africa/Bujumbura")
         self.assertEquals(response.request['PATH_INFO'], reverse('orgs.org_list'))
 

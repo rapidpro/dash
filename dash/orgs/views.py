@@ -145,6 +145,13 @@ class OrgForm(forms.ModelForm):
                 raise forms.ValidationError(_("Passwords must contain at least 8 letters."))
         return password
 
+    def clean_domain(self):
+        domain = self.cleaned_data['domain']
+        domain = domain.strip().lower()
+        if domain and domain == getattr(settings, 'HOSTNAME', ""):
+            raise forms.ValidationError(_("This domain is used for subdomains"))
+        return domain
+
     class Meta:
         fields = ('is_active', 'first_name', 'last_name', 'email', 'password',
                   'name', 'subdomain', 'domain', 'timezone', 'language',
