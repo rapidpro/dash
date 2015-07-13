@@ -62,6 +62,11 @@ class Org(SmartModel):
         error_messages=dict(unique=_("This subdomain is not available")),
         help_text=_("The subdomain for this U-Report instance"))
 
+    domain = models.CharField(
+        verbose_name=_("Domain"), null=True, blank=True, max_length=255, unique=True,
+        error_messages=dict(unique=_("This domain is not available")),
+        help_text=_("The custom domain for this U-Report instance"))
+
     timezone = models.CharField(
         verbose_name=_("Timezone"), max_length=64, default='UTC')
 
@@ -163,6 +168,9 @@ class Org(SmartModel):
         prefix = 'http://'
         if is_secure:
             prefix = 'https://'
+
+        if self.domain:
+            return prefix + str(self.domain)
 
         if self.subdomain == '':
             return prefix + host_tld
