@@ -44,20 +44,29 @@ class SetOrgMiddleware(object):
     Sets the org on the request, based on the subdomain
     """
     def process_request(self, request):
+
+        # try looking the domain level
         host_parts = self.get_host_parts(request)
 
         org = None
+        # the domain is something like 'ureport.bi' or 'ureport.co.ug'
         if len(host_parts) >= 2:
+            # we might have a three part domain like 'ureport.co.ug'
             domain = ".".join(host_parts[-3:])
             org = Org.objects.filter(domain__iexact=domain, is_active=True).first()
 
+
             if not org:
+                # try now the two last part for domains like 'ureport.bi'
                 domain = ".".join(host_parts[-2:])
                 org = Org.objects.filter(domain__iexact=domain, is_active=True).first()
+
         elif host_parts:
+            # we have a domain like 'localhost'
             domain = host_parts[0]
             org = Org.objects.filter(domain__iexact=domain, is_active=True).first()
 
+        # no custom domain found, try the subdomain
         if not org:
             subdomain = self.get_subdomain(request)
 
@@ -112,7 +121,7 @@ class SetOrgMiddleware(object):
         except DisallowedHost:
             traceback.print_exc()
 
-        # does the host look like an IP? return ""
+        # does the host look like an IP? return []
         if re.match("^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$", host):
             return []
 
@@ -123,6 +132,8 @@ class SetOrgMiddleware(object):
         subdomain = ""
         parts = self.get_host_parts(request)
         host_string = ".".join(parts)
+
+        # we only look up subdomains for localhost and the configured hostname only
         top_domains = ['localhost:8000', 'localhost', getattr(settings, 'HOSTNAME', "")]
         allowed_top_domain = False
         for top in top_domains:
@@ -130,10 +141,11 @@ class SetOrgMiddleware(object):
                 allowed_top_domain = True
                 break
 
+        # if empty parts or domain neither localhost nor hostname return ""
         if not parts or not allowed_top_domain:
             return subdomain
 
-        # for more than 2 parts
+        # if we have parts for domain like 'www.nigeria.ureport.in'
         if len(parts) > 2:
             subdomain = parts[0]
             parts = parts[1:]
@@ -145,10 +157,10 @@ class SetOrgMiddleware(object):
                 parts = parts[1:]
 
         elif len(parts) > 0:
-            # for less than or equal to 2 parts
-            # subdomain is the first word in the parts
+            # for domains like 'ureport.in' we just take the first part
             subdomain = parts[0]
 
+        # get the configured hostname
         hostname = getattr(settings, 'HOSTNAME', '')
         domain_first_part = hostname.lower().split('.')[0]
 
