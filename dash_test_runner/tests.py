@@ -279,6 +279,12 @@ class SetOrgMiddlewareTest(DashTest):
         empty_subdomain_org = Org.objects.create(subdomain="", name="global", language='en',
                                                  created_by=self.admin, modified_by=self.admin)
 
+        with self.settings(HOSTNAME='ureport.staging.nyaruka.com'):
+            response = self.simulate_process('ureport.staging.nyaruka.com', 'dash.test_test')
+            self.assertIsNone(response)
+            self.assertEqual(self.request.org, empty_subdomain_org)
+            self.assertEqual(self.request.user.get_org(), empty_subdomain_org)
+
         response = self.simulate_process('localhost', 'dash.test_test')
         self.assertIsNone(response)
         self.assertEqual(self.request.org, empty_subdomain_org)
