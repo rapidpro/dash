@@ -55,7 +55,6 @@ class SetOrgMiddleware(object):
             domain = ".".join(host_parts[-3:])
             org = Org.objects.filter(domain__iexact=domain, is_active=True).first()
 
-
             if not org:
                 # try now the two last part for domains like 'ureport.bi'
                 domain = ".".join(host_parts[-2:])
