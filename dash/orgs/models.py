@@ -169,7 +169,7 @@ class Org(SmartModel):
         if is_secure:
             prefix = 'https://'
 
-        if self.domain:
+        if self.domain and not is_secure:
             return prefix + str(self.domain)
 
         if self.subdomain == '':

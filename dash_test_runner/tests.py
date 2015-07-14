@@ -413,11 +413,13 @@ class OrgTest(DashTest):
                 self.assertEqual(self.org.build_host_link(), 'https://localhost:8000')
 
             self.org.domain = 'ureport.ug'
+            self.org.subdomain = 'uganda'
+            self.org.save()
 
             self.assertEqual(self.org.build_host_link(), 'http://ureport.ug')
 
             with self.settings(SESSION_COOKIE_SECURE=True):
-                self.assertEqual(self.org.build_host_link(), 'https://ureport.ug')
+                self.assertEqual(self.org.build_host_link(), 'https://uganda.localhost:8000')
 
     def test_build_boundaries(self):
         boundaries = dict()
