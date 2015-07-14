@@ -148,12 +148,13 @@ class SetOrgMiddleware(object):
             # for less than or equal to 2 parts
             # subdomain is the first word in the parts
             subdomain = parts[0]
-            hostname = getattr(settings, 'HOSTNAME', '')
-            domain_first_part = hostname.lower().split('.')[0]
 
-            # if the subdomain is the same as the first part of hostname
-            # ignore than and return ''
-            if subdomain.lower() in [domain_first_part, 'localhost']:
-                subdomain = ""
+        hostname = getattr(settings, 'HOSTNAME', '')
+        domain_first_part = hostname.lower().split('.')[0]
+
+        # if the subdomain is the same as the first part of hostname
+        # ignore than and return ''
+        if subdomain.lower() in [domain_first_part, 'localhost']:
+            subdomain = ""
 
         return subdomain
