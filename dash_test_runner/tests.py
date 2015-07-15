@@ -526,14 +526,14 @@ class OrgTest(DashTest):
         response = self.client.post(create_url, data, follow=True)
         self.assertTrue('form' not in response.context)
         self.assertTrue(Org.objects.filter(name="rwanda"))
-        org_rw = Org.objects.get(name="rwanda")
+        self.assertTrue(Org.objects.get(name="rwanda"))
 
         data = dict(name="burundi", subdomain="burundi", domain="",
                     timezone="Africa/Kigali", administrators=[user_alice.pk])
         response = self.client.post(create_url, data, follow=True)
         self.assertTrue('form' not in response.context)
         self.assertTrue(Org.objects.filter(name="burundi"))
-        org_rw = Org.objects.get(name="burundi")
+        self.assertTrue(Org.objects.get(name="burundi"))
 
     def test_org_update(self):
         update_url = reverse("orgs.org_update", args=[self.org.pk])
