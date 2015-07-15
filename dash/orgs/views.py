@@ -148,6 +148,9 @@ class OrgForm(forms.ModelForm):
     def clean_domain(self):
         domain = self.cleaned_data['domain']
         domain = domain.strip().lower()
+        if not domain:
+            return None
+
         if domain and domain == getattr(settings, 'HOSTNAME', ""):
             raise forms.ValidationError(_("This domain is used for subdomains"))
         return domain
