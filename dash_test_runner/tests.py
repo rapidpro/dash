@@ -535,7 +535,6 @@ class OrgTest(DashTest):
         self.assertTrue(Org.objects.filter(name="burundi"))
         org_rw = Org.objects.get(name="burundi")
 
-
     def test_org_update(self):
         update_url = reverse("orgs.org_update", args=[self.org.pk])
 
