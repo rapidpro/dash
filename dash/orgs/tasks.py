@@ -31,7 +31,7 @@ def build_boundaries():
     logger.debug("Task: build_boundaries took %ss" % (time.time() - start))
 
 
-@shared_task(track_started=True, name='fetch_poll')
+@shared_task(track_started=True, name='rebuild_org_boundaries')
 def rebuild_org_boundaries(org_id):
     try:
         # get our org
