@@ -176,6 +176,11 @@ class Org(SmartModel):
             return prefix + host_tld
         return prefix + force_text(self.subdomain) + "." + host_tld
 
+    @classmethod
+    def rebuild_org_boundaries_task(cls, org):
+        from dash.orgs.tasks import rebuild_org_boundaries
+        rebuild_org_boundaries.delay(org.pk)
+
     def build_boundaries(self):
 
         this_time = datetime.now()
@@ -224,6 +229,7 @@ class Org(SmartModel):
         cached_value = cache.get(key, None)
         if cached_value:
             return cached_value['results']
+        Org.rebuild_org_boundaries_task(self)
 
     def get_country_geojson(self):
         boundaries = self.get_boundaries()

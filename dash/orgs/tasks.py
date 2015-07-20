@@ -29,3 +29,13 @@ def build_boundaries():
                 logger.debug("=" * 40)
                 org.build_boundaries()
     logger.debug("Task: build_boundaries took %ss" % (time.time() - start))
+
+@shared_task(track_started=True, name='fetch_poll')
+def rebuild_org_boundaries(org_id):
+    try:
+        # get our poll
+        from .models import Org
+        org = Org.objects.get(pk=org_id)
+        org.build_boundaries()
+    except Exception as e:
+        logger.exception("Error building org boundaries refresh: %s" % str(e))
