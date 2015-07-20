@@ -279,7 +279,7 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 # Async tasks with django-celery
 # ----------------------------------------------------------------------------
 
-CELERY_RESULT_BACKEND = 'database'
+CELERY_RESULT_BACKEND = None
 
 BROKER_BACKEND = 'redis'
 BROKER_HOST = 'localhost'
