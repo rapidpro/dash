@@ -55,7 +55,7 @@ class Org(SmartModel):
 
     language = models.CharField(
         verbose_name=_("Language"), max_length=64, null=True, blank=True,
-        choices=settings.LANGUAGES, help_text=_("The main language used by this organization"))
+        help_text=_("The main language used by this organization"))
 
     subdomain = models.SlugField(
         verbose_name=_("Subdomain"), null=True, blank=True, max_length=255, unique=True,

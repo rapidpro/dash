@@ -130,6 +130,10 @@ class OrgForm(forms.ModelForm):
     administrators = forms.ModelMultipleChoiceField(
         queryset=User.objects.exclude(username="root").exclude(username="root2").exclude(pk__lt=0))
 
+    def __init__(self, *args, **kwargs):
+        super(OrgForm, self).__init__(*args, **kwargs)
+        self.fields['language'].choices = settings.LANGUAGES
+
     def clean_email(self):
         email = self.cleaned_data['email']
         if email:
