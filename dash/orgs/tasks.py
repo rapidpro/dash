@@ -34,7 +34,7 @@ def build_boundaries():
 @shared_task(track_started=True, name='fetch_poll')
 def rebuild_org_boundaries(org_id):
     try:
-        # get our poll
+        # get our org
         from .models import Org
         org = Org.objects.get(pk=org_id)
         org.build_boundaries()
