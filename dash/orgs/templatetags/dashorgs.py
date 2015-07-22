@@ -4,12 +4,9 @@ import phonenumbers
 import pytz
 
 from django import template
-from django.db import models
 
 
 register = template.Library()
-
-Org = models.get_model('orgs', 'Org')
 
 
 @register.simple_tag()
