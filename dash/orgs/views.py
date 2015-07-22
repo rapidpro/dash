@@ -4,7 +4,6 @@ import re
 from smartmin.views import (
     SmartCRUDL, SmartCreateView, SmartReadView, SmartUpdateView,
     SmartListView, SmartFormView, SmartTemplateView)
-from timezones.forms import TimeZoneField
 
 from django import forms
 from django.conf import settings
@@ -17,6 +16,7 @@ from django.core.validators import validate_email
 from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext_lazy as _
 
+from .forms import OrgForm
 from .models import Org, OrgBackground, Invitation
 
 
@@ -110,60 +110,6 @@ class OrgObjPermsMixin(OrgPermsMixin):
             return user.get_org() == self.get_object_org()
 
         return False
-
-
-class OrgForm(forms.ModelForm):
-    first_name = forms.CharField(help_text=_("Your first name"))
-    last_name = forms.CharField(help_text=_("Your last name"))
-    email = forms.EmailField(help_text=_("Your email address"))
-    password = forms.CharField(widget=forms.PasswordInput,
-                               help_text=_("Your password, at least eight letters please"))
-    name = forms.CharField(label=_("Organization"),
-                           help_text=_("The name of this organization"))
-
-    subdomain = forms.CharField(help_text=_("The subdomain of this organization"), required=False)
-
-    domain = forms.CharField(help_text=_("The subdomain of this organization"), required=False)
-
-    timezone = TimeZoneField(help_text=_("The timezone your organization is in"))
-
-    administrators = forms.ModelMultipleChoiceField(
-        queryset=User.objects.exclude(username="root").exclude(username="root2").exclude(pk__lt=0))
-
-    def __init__(self, *args, **kwargs):
-        super(OrgForm, self).__init__(*args, **kwargs)
-        self.fields['language'].choices = settings.LANGUAGES
-
-    def clean_email(self):
-        email = self.cleaned_data['email']
-        if email:
-            if User.objects.filter(username__iexact=email):
-                raise forms.ValidationError(_("That email address is already used"))
-
-        return email.lower()
-
-    def clean_password(self):
-        password = self.cleaned_data['password']
-        if password:
-            if not len(password) >= 8:
-                raise forms.ValidationError(_("Passwords must contain at least 8 letters."))
-        return password
-
-    def clean_domain(self):
-        domain = self.cleaned_data['domain']
-        domain = domain.strip().lower()
-        if not domain:
-            return None
-
-        if domain and domain == getattr(settings, 'HOSTNAME', ""):
-            raise forms.ValidationError(_("This domain is used for subdomains"))
-        return domain
-
-    class Meta:
-        fields = ('is_active', 'first_name', 'last_name', 'email', 'password',
-                  'name', 'subdomain', 'domain', 'timezone', 'language',
-                  'api_token', 'logo', 'administrators')
-        model = Org
 
 
 class InferOrgMixin(object):
