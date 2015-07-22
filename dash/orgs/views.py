@@ -16,7 +16,7 @@ from django.core.validators import validate_email
 from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext_lazy as _
 
-from .forms import OrgForm
+from .forms import CreateOrgLoginForm, OrgForm
 from .models import Org, OrgBackground, Invitation
 
 
@@ -141,13 +141,10 @@ class OrgCRUDL(SmartCRUDL):
 
     class Create(SmartCreateView):
         form_class = OrgForm
-        fields = ('name', 'language', 'subdomain', 'domain', 'timezone',
-                  'administrators', 'api_token')
+        exclude = ('is_active',)
 
     class Update(SmartUpdateView):
         form_class = OrgForm
-        fields = ('is_active', 'name', 'subdomain', 'domain', 'timezone', 'language',
-                  'api_token', 'logo', 'administrators')
 
     class List(SmartListView):
         fields = ('name', 'timezone', 'created_on', 'modified_on')
@@ -432,17 +429,15 @@ class OrgCRUDL(SmartCRUDL):
 
             return context
 
-    class CreateLogin(SmartUpdateView):
+    class CreateLogin(SmartFormView):
         title = ""
-        form_class = OrgForm
-        fields = ('first_name', 'last_name', 'email', 'password')
+        form_class = CreateOrgLoginForm
         success_message = ''
         submit_button_name = _("Create")
         permission = False
 
         def pre_process(self, request, *args, **kwargs):
             secret = self.kwargs.get('secret')
-
             org = self.get_object()
             if not org:
                 messages.info(
@@ -457,12 +452,9 @@ class OrgCRUDL(SmartCRUDL):
 
             return None
 
-        def pre_save(self, obj):
-            obj = super(OrgCRUDL.CreateLogin, self).pre_save(obj)
-
+        def form_valid(self, form):
             user = Org.create_user(self.form.cleaned_data['email'],
                                    self.form.cleaned_data['password'])
-
             user.first_name = self.form.cleaned_data['first_name']
             user.last_name = self.form.cleaned_data['last_name']
             user.save()
@@ -473,6 +465,8 @@ class OrgCRUDL(SmartCRUDL):
             user = authenticate(username=user.username,
                                 password=self.form.cleaned_data['password'])
             login(self.request, user)
+
+            obj = self.get_object()
             if invitation.user_group == 'A':
                 obj.administrators.add(user)
             elif invitation.user_group == 'E':
@@ -482,7 +476,7 @@ class OrgCRUDL(SmartCRUDL):
             invitation.is_active = False
             invitation.save()
 
-            return obj
+            return super(OrgCRUDL.CreateLogin, self).form_valid(form)
 
         @classmethod
         def derive_url_pattern(cls, path, action):

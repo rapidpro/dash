@@ -10,28 +10,19 @@ from django.utils.translation import ugettext_lazy as _
 from .models import Org
 
 
-class OrgForm(forms.ModelForm):
+class CreateOrgLoginForm(forms.Form):
     first_name = forms.CharField(help_text=_("Your first name"))
     last_name = forms.CharField(help_text=_("Your last name"))
     email = forms.EmailField(help_text=_("Your email address"))
-    password = forms.CharField(widget=forms.PasswordInput,
-                               help_text=_("Your password, at least eight letters please"))
-
-    timezone = TimeZoneField()
-
-    def __init__(self, *args, **kwargs):
-        super(OrgForm, self).__init__(*args, **kwargs)
-        administrators = User.objects.exclude(username__in=['root', 'root2'])
-        administrators = administrators.exclude(pk__lt=0)
-        self.fields['administrators'].queryset = administrators
-        self.fields['language'].choices = settings.LANGUAGES
+    password = forms.CharField(
+        widget=forms.PasswordInput,
+        help_text=_("Your password, at least eight letters please"))
 
     def clean_email(self):
         email = self.cleaned_data['email']
         if email:
             if User.objects.filter(username__iexact=email):
                 raise forms.ValidationError(_("That email address is already used"))
-
         return email.lower()
 
     def clean_password(self):
@@ -41,18 +32,25 @@ class OrgForm(forms.ModelForm):
                 raise forms.ValidationError(_("Passwords must contain at least 8 letters."))
         return password
 
+
+class OrgForm(forms.ModelForm):
+    timezone = TimeZoneField()
+
+    def __init__(self, *args, **kwargs):
+        super(OrgForm, self).__init__(*args, **kwargs)
+        administrators = User.objects.exclude(username__in=['root', 'root2'])
+        administrators = administrators.exclude(pk__lt=0)
+        self.fields['administrators'].queryset = administrators
+        self.fields['language'].choices = settings.LANGUAGES
+
     def clean_domain(self):
         domain = self.cleaned_data['domain']
-        domain = domain.strip().lower()
-        if not domain:
-            return None
-
+        domain = domain.strip().lower() or None
         if domain and domain == getattr(settings, 'HOSTNAME', ""):
-            raise forms.ValidationError(_("This domain is used for subdomains"))
+                raise forms.ValidationError(_("This domain is used for subdomains"))
         return domain
 
     class Meta:
-        fields = ('is_active', 'first_name', 'last_name', 'email', 'password',
-                  'name', 'subdomain', 'domain', 'timezone', 'language',
-                  'api_token', 'logo', 'administrators')
+        fields = ('is_active', 'name', 'subdomain', 'domain', 'timezone',
+                  'language', 'api_token', 'logo', 'administrators')
         model = Org
