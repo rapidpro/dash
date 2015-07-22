@@ -16,20 +16,14 @@ class OrgForm(forms.ModelForm):
     email = forms.EmailField(help_text=_("Your email address"))
     password = forms.CharField(widget=forms.PasswordInput,
                                help_text=_("Your password, at least eight letters please"))
-    name = forms.CharField(label=_("Organization"),
-                           help_text=_("The name of this organization"))
 
-    subdomain = forms.CharField(help_text=_("The subdomain of this organization"), required=False)
-
-    domain = forms.CharField(help_text=_("The subdomain of this organization"), required=False)
-
-    timezone = TimeZoneField(help_text=_("The timezone your organization is in"))
-
-    administrators = forms.ModelMultipleChoiceField(
-        queryset=User.objects.exclude(username="root").exclude(username="root2").exclude(pk__lt=0))
+    timezone = TimeZoneField()
 
     def __init__(self, *args, **kwargs):
         super(OrgForm, self).__init__(*args, **kwargs)
+        administrators = User.objects.exclude(username__in=['root', 'root2'])
+        administrators = administrators.exclude(pk__lt=0)
+        self.fields['administrators'].queryset = administrators
         self.fields['language'].choices = settings.LANGUAGES
 
     def clean_email(self):
