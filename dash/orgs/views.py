@@ -489,7 +489,6 @@ class OrgCRUDL(SmartCRUDL):
     class CreateLogin(SmartUpdateView):
         title = ""
         form_class = OrgForm
-        permission = None
         fields = ('first_name', 'last_name', 'email', 'password')
         success_message = ''
         submit_button_name = _("Create")
