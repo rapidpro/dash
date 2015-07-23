@@ -51,6 +51,5 @@ class OrgForm(forms.ModelForm):
         return domain
 
     class Meta:
-        fields = ('is_active', 'name', 'language', 'timezone', 'subdomain',
-                  'domain', 'api_token', 'logo', 'administrators')
+        fields = forms.ALL_FIELDS
         model = Org
