@@ -401,25 +401,32 @@ class OrgTest(DashTest):
     def test_build_host_link(self):
         with self.settings(HOSTNAME='localhost:8000'):
             self.assertEqual(self.org.build_host_link(), 'http://uganda.localhost:8000')
+            self.assertEqual(self.org.build_host_link(True), 'http://uganda.localhost:8000')
 
             with self.settings(SESSION_COOKIE_SECURE=True):
                 self.assertEqual(self.org.build_host_link(), 'https://uganda.localhost:8000')
+                self.assertEqual(self.org.build_host_link(True), 'https://uganda.localhost:8000')
+
             self.org.subdomain = ''
             self.org.save()
 
             self.assertEqual(self.org.build_host_link(), 'http://localhost:8000')
+            self.assertEqual(self.org.build_host_link(True), 'http://localhost:8000')
 
             with self.settings(SESSION_COOKIE_SECURE=True):
                 self.assertEqual(self.org.build_host_link(), 'https://localhost:8000')
+                self.assertEqual(self.org.build_host_link(True), 'https://localhost:8000')
 
             self.org.domain = 'ureport.ug'
             self.org.subdomain = 'uganda'
             self.org.save()
 
-            self.assertEqual(self.org.build_host_link(), 'http://ureport.ug')
+            self.assertEqual(self.org.build_host_link(), 'http://uganda.localhost:8000')
+            self.assertEqual(self.org.build_host_link(True), 'http://uganda.localhost:8000')
 
             with self.settings(SESSION_COOKIE_SECURE=True):
-                self.assertEqual(self.org.build_host_link(), 'https://uganda.localhost:8000')
+                self.assertEqual(self.org.build_host_link(), 'http://ureport.ug')
+                self.assertEqual(self.org.build_host_link(True), 'https://uganda.localhost:8000')
 
     def test_build_boundaries(self):
         boundaries = dict()

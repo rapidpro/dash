@@ -161,16 +161,17 @@ class Org(SmartModel):
     def get_api(self):
         return API(self)
 
-    def build_host_link(self):
+    def build_host_link(self, user_authenticated=False):
         host_tld = getattr(settings, "HOSTNAME", 'locahost')
         is_secure = getattr(settings, 'SESSION_COOKIE_SECURE', False)
 
         prefix = 'http://'
+
+        if self.domain and is_secure and not user_authenticated:
+            return prefix + str(self.domain)
+
         if is_secure:
             prefix = 'https://'
-
-        if self.domain and not is_secure:
-            return prefix + str(self.domain)
 
         if self.subdomain == '':
             return prefix + host_tld
