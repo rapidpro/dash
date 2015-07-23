@@ -42,12 +42,11 @@ Example usage::
 """
 from django import template
 from django.conf import settings
-from django.db import models
+
+from dash.dashblocks.models import DashBlockType, DashBlock
+
 
 register = template.Library()
-
-DashBlockType = models.get_model('dashblocks', 'dashblocktype')
-DashBlock = models.get_model('dashblocks', 'dashblock')
 
 
 @register.simple_tag(takes_context=True)

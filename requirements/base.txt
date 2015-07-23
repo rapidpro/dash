@@ -1,4 +1,4 @@
--e git+https://github.com/nyaruka/smartmin.git@master#egg=smartmin-1.7.0
+-e git+https://github.com/nyaruka/smartmin.git@master#egg=smartmin-1.8.1
 -e git+https://github.com/rapidpro/rapidpro-python.git@master#egg=rapidpro-python-1.0
 celery-with-redis
 django>=1.7.2

@@ -503,7 +503,7 @@ class OrgTest(DashTest):
         self.login(self.superuser)
         response = self.client.get(create_url)
         self.assertEquals(200, response.status_code)
-        self.assertEquals(len(response.context['form'].fields), 8)
+        self.assertEquals(len(response.context['form'].fields), 9)
         self.assertFalse(Org.objects.filter(name="kLab"))
         self.assertEquals(User.objects.all().count(), 4)
 

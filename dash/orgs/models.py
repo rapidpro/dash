@@ -60,15 +60,16 @@ class Org(SmartModel):
     subdomain = models.SlugField(
         verbose_name=_("Subdomain"), null=True, blank=True, max_length=255, unique=True,
         error_messages=dict(unique=_("This subdomain is not available")),
-        help_text=_("The subdomain for this U-Report instance"))
+        help_text=_("The subdomain for this organization"))
 
     domain = models.CharField(
         verbose_name=_("Domain"), null=True, blank=True, max_length=255, unique=True,
         error_messages=dict(unique=_("This domain is not available")),
-        help_text=_("The custom domain for this U-Report instance"))
+        help_text=_("The custom domain for this organization"))
 
     timezone = models.CharField(
-        verbose_name=_("Timezone"), max_length=64, default='UTC')
+        verbose_name=_("Timezone"), max_length=64, default='UTC',
+        help_text=_("The timezone your organization is in."))
 
     api_token = models.CharField(
         max_length=128, null=True, blank=True,
