@@ -34,6 +34,8 @@ class CreateOrgLoginForm(forms.Form):
 
 
 class OrgForm(forms.ModelForm):
+    language = forms.ChoiceField(
+        required=False, choices=[('', '')] + list(settings.LANGUAGES))
     timezone = TimeZoneField()
 
     def __init__(self, *args, **kwargs):
@@ -41,7 +43,6 @@ class OrgForm(forms.ModelForm):
         administrators = User.objects.exclude(username__in=['root', 'root2'])
         administrators = administrators.exclude(pk__lt=0)
         self.fields['administrators'].queryset = administrators
-        self.fields['language'].choices = settings.LANGUAGES
 
     def clean_domain(self):
         domain = self.cleaned_data['domain']
