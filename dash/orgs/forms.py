@@ -40,9 +40,10 @@ class OrgForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(OrgForm, self).__init__(*args, **kwargs)
-        administrators = User.objects.exclude(username__in=['root', 'root2'])
-        administrators = administrators.exclude(pk__lt=0)
-        self.fields['administrators'].queryset = administrators
+        if 'administrators' in self.fields:
+            administrators = User.objects.exclude(username__in=['root', 'root2'])
+            administrators = administrators.exclude(pk__lt=0)
+            self.fields['administrators'].queryset = administrators
 
     def clean_domain(self):
         domain = self.cleaned_data['domain']
