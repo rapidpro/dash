@@ -398,6 +398,20 @@ class OrgTest(DashTest):
         self.assertEquals(self.org.get_config('field_name'), 'field_value')
         self.assertEquals(self.org.get_config('other_field_name'), 'other_value')
 
+    def test_set_config_commit(self):
+        """By default, Org.set_config should commit change to database."""
+        self.org.set_config('test', 'hello')
+        self.assertEqual(self.org.get_config('test'), 'hello')
+        org = Org.objects.get(pk=self.org.pk)  # refresh from db
+        self.assertEqual(org.get_config('test'), 'hello')
+
+    def test_set_config_no_commit(self):
+        """If commit=False is passed to Org.set_config, changes should not be saved."""
+        self.org.set_config('test', 'hello', commit=False)
+        self.assertEqual(self.org.get_config('test'), 'hello')
+        org = Org.objects.get(pk=self.org.pk)  # refresh from db
+        self.assertIsNone(org.get_config('test'))
+
     def test_build_host_link(self):
         with self.settings(HOSTNAME='localhost:8000'):
             self.assertEqual(self.org.build_host_link(), 'http://uganda.localhost:8000')

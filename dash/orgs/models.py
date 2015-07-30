@@ -107,7 +107,7 @@ class Org(SmartModel):
 
         return config.get(name, None)
 
-    def set_config(self, name, value):
+    def set_config(self, name, value, commit=True):
         if not self.config:
             config = dict()
         else:
@@ -116,7 +116,9 @@ class Org(SmartModel):
         config[name] = value
         self.config = json.dumps(config)
         self._config = config
-        self.save()
+
+        if commit:
+            self.save()
 
     def get_org_admins(self):
         return self.administrators.all()
