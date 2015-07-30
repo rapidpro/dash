@@ -34,20 +34,21 @@ class CreateOrgLoginForm(forms.Form):
 
 
 class OrgForm(forms.ModelForm):
+    language = forms.ChoiceField(
+        required=False, choices=[('', '')] + list(settings.LANGUAGES))
     timezone = TimeZoneField()
 
     def __init__(self, *args, **kwargs):
         super(OrgForm, self).__init__(*args, **kwargs)
-        administrators = User.objects.exclude(username__in=['root', 'root2'])
-        administrators = administrators.exclude(pk__lt=0)
-        self.fields['administrators'].queryset = administrators
-        self.fields['language'].choices = settings.LANGUAGES
+        if 'administrators' in self.fields:
+            administrators = User.objects.exclude(username__in=['root', 'root2'])
+            administrators = administrators.exclude(pk__lt=0)
+            self.fields['administrators'].queryset = administrators
 
     def clean_domain(self):
-        domain = self.cleaned_data['domain']
-        domain = domain.strip().lower() or None
+        domain = self.cleaned_data['domain'].strip().lower() or None
         if domain and domain == getattr(settings, 'HOSTNAME', ""):
-                raise forms.ValidationError(_("This domain is used for subdomains"))
+            raise forms.ValidationError(_("This domain is used for subdomains"))
         return domain
 
     class Meta:
