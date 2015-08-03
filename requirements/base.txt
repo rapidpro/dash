@@ -12,7 +12,7 @@ Pillow
 phonenumbers
 psycopg2
 python-dateutil
-rapidpro-python==1.1
+rapidpro-python
 requests
 six
 sorl-thumbnail>=12.1c

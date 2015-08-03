@@ -1,11 +1,12 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
+
 import json
+import redis
 import urllib
 
 from mock import patch, Mock
-import redis
 from smartmin.tests import SmartminTest
-from temba import TembaClient
+from temba import TembaClient, __version__ as client_version
 from temba.types import Geometry, Boundary
 
 from django.conf import settings
@@ -341,13 +342,15 @@ class OrgTest(DashTest):
         client = self.org.get_temba_client()
         self.assertIsInstance(client, TembaClient)
         self.assertEqual(client.root_url, 'http://localhost:8001/api/v1')
-        self.assertEqual(client.token, self.org.api_token)
+        self.assertEqual(client.headers['Authorization'], 'Token %s' % self.org.api_token)
+        self.assertEqual(client.headers['User-Agent'], 'rapidpro-python/%s' % client_version)
 
-        with self.settings(SITE_API_HOST='rapidpro.io'):
+        with self.settings(SITE_API_HOST='rapidpro.io', SITE_API_USER_AGENT='test/0.1'):
             client = self.org.get_temba_client()
             self.assertIsInstance(client, TembaClient)
             self.assertEqual(client.root_url, 'https://rapidpro.io/api/v1')
-            self.assertEqual(client.token, self.org.api_token)
+            self.assertEqual(client.headers['Authorization'], 'Token %s' % self.org.api_token)
+            self.assertEqual(client.headers['User-Agent'], 'test/0.1 rapidpro-python/%s' % client_version)
 
         api = self.org.get_api()
         self.assertIsInstance(api, API)
