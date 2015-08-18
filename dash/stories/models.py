@@ -91,10 +91,13 @@ class Story(SmartModel):
         if not self.audio_link:
             return None
 
-        formatted_link = str(self.audio_link)
+        return str(self.audio_link)
+
+    def format_audio_link(self):
+        formatted_link = self.audio_link
         if not formatted_link.startswith('http://'):
             formatted_link = 'http://' + formatted_link
-        return formatted_link
+        self.audio_link = formatted_link
 
     def get_image(self):
         cat_image = None

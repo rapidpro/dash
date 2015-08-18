@@ -2011,11 +2011,6 @@ class StoryTest(DashTest):
 
         self.assertIsNone(self.story.get_audio_link())
 
-        self.story.audio_link = 'example.com/foo.mp3'
-        self.story.save()
-
-        self.assertEqual(self.story.get_audio_link(), 'http://example.com/foo.mp3')
-
         self.story.audio_link = 'http://example.com/foo.mp3'
         self.story.save()
 
@@ -2111,7 +2106,7 @@ class StoryTest(DashTest):
         self.assertTrue('category' in errors)
 
         post_data = dict(title='foo', content='bar', category=self.health_uganda.pk, featured=True, summary='baz',
-                         audio_link='http://example.com/foo.mp3', video_id='yt_id', tags='   first SECOND third')
+                         audio_link='example.com/foo.mp3', video_id='yt_id', tags='   first SECOND third')
 
         response = self.client.post(create_url, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
         story = Story.objects.get()

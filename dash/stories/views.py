@@ -37,6 +37,7 @@ class StoryCRUDL(SmartCRUDL):
 
         def pre_save(self, obj):
             obj = super(StoryCRUDL.Update, self).pre_save(obj)
+            obj.format_audio_link()
             obj.space_tags()
             return obj
 
@@ -128,6 +129,7 @@ class StoryCRUDL(SmartCRUDL):
             obj = super(StoryCRUDL.Create, self).pre_save(obj)
 
             obj.org = self.request.org
+            obj.format_audio_link()
             obj.space_tags()
             return obj
 
