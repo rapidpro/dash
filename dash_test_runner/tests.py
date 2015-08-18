@@ -2006,6 +2006,21 @@ class StoryTest(DashTest):
         self.assertEquals(self.story.long_teaser(), "summary " * 100 + "..")
         self.assertEquals(self.story.short_teaser(), "summary " * 40 + "..")
 
+        self.story.audio_link = ''
+        self.story.save()
+
+        self.assertIsNone(self.story.get_audio_link())
+
+        self.story.audio_link = 'example.com/foo.mp3'
+        self.story.save()
+
+        self.assertEqual(self.story.get_audio_link(), 'http://example.com/foo.mp3')
+
+        self.story.audio_link = 'http://example.com/foo.mp3'
+        self.story.save()
+
+        self.assertEqual(self.story.get_audio_link(), 'http://example.com/foo.mp3')
+
         story_image_1 = StoryImage.objects.create(name='image 1',
                                                   story=self.story,
                                                   image='',
@@ -2075,12 +2090,13 @@ class StoryTest(DashTest):
         self.assertEquals(response.status_code, 200)
         self.assertTrue('form' in response.context)
         fields = response.context['form'].fields
-        self.assertEquals(len(fields), 8)
+        self.assertEquals(len(fields), 9)
         self.assertTrue('loc' in fields)
         self.assertTrue('title' in fields)
         self.assertTrue('featured' in fields)
         self.assertTrue('summary' in fields)
         self.assertTrue('content' in fields)
+        self.assertTrue('audio_link' in fields)
         self.assertTrue('video_id' in fields)
         self.assertTrue('tags' in fields)
         self.assertTrue('category' in fields)
@@ -2095,7 +2111,7 @@ class StoryTest(DashTest):
         self.assertTrue('category' in errors)
 
         post_data = dict(title='foo', content='bar', category=self.health_uganda.pk, featured=True, summary='baz',
-                         video_id='yt_id', tags='   first SECOND third')
+                         audio_link='http://example.com/foo.mp3', video_id='yt_id', tags='   first SECOND third')
 
         response = self.client.post(create_url, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
         story = Story.objects.get()
@@ -2105,6 +2121,7 @@ class StoryTest(DashTest):
         self.assertEquals(story.category, self.health_uganda)
         self.assertTrue(story.featured)
         self.assertEquals(story.summary, 'baz')
+        self.assertEquals(story.audio_link, 'http://example.com/foo.mp3')
         self.assertEquals(story.video_id, 'yt_id')
         self.assertEquals(story.tags, ' first second third ')
 
@@ -2161,13 +2178,14 @@ class StoryTest(DashTest):
         self.assertTrue('form' in response.context)
         fields = response.context['form'].fields
 
-        self.assertEquals(len(fields), 9)
+        self.assertEquals(len(fields), 10)
         self.assertTrue('loc' in fields)
         self.assertTrue('is_active' in fields)
         self.assertTrue('title' in fields)
         self.assertTrue('featured' in fields)
         self.assertTrue('summary' in fields)
         self.assertTrue('content' in fields)
+        self.assertTrue('audio_link' in fields)
         self.assertTrue('video_id' in fields)
         self.assertTrue('tags' in fields)
         self.assertTrue('category' in fields)
@@ -2181,7 +2199,8 @@ class StoryTest(DashTest):
         self.assertTrue('content' in errors)
 
         post_data = dict(title='foo updated', content='bar updated', category=self.health_uganda.pk, featured=True,
-                         summary='baz updated', video_id='yt_idUpdated', tags='   first SECOND third UPDATED')
+                         summary='baz updated', video_id='yt_idUpdated', tags='   first SECOND third UPDATED',
+                         audio_link='http://example.com/bar.mp3')
         response = self.client.post(update_url_uganda, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
         updated_story = Story.objects.get(pk=story1.pk)
         self.assertEquals(response.request['PATH_INFO'], reverse('stories.story_list'))
@@ -2191,6 +2210,7 @@ class StoryTest(DashTest):
         self.assertEquals(updated_story.category, self.health_uganda)
         self.assertTrue(updated_story.featured)
         self.assertEquals(updated_story.summary, 'baz updated')
+        self.assertEquals(updated_story.audio_link, 'http://example.com/bar.mp3')
         self.assertEquals(updated_story.video_id, 'yt_idUpdated')
         self.assertEquals(updated_story.tags, ' first second third updated ')
 

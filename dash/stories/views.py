@@ -21,9 +21,8 @@ class StoryForm(forms.ModelForm):
 
     class Meta:
         model = Story
-        fields = (
-            'is_active', 'title', 'featured', 'summary', 'content',
-            'video_id', 'tags', 'category')
+        fields = ('is_active', 'title', 'featured', 'summary', 'content', 'audio_link',
+                  'video_id', 'tags', 'category')
 
 
 class StoryCRUDL(SmartCRUDL):
@@ -33,7 +32,7 @@ class StoryCRUDL(SmartCRUDL):
     class Update(OrgObjPermsMixin, SmartUpdateView):
         form_class = StoryForm
         fields = (
-            'is_active', 'title', 'featured', 'summary', 'content',
+            'is_active', 'title', 'featured', 'summary', 'content', 'audio_link',
             'video_id', 'tags', 'category')
 
         def pre_save(self, obj):
@@ -122,7 +121,7 @@ class StoryCRUDL(SmartCRUDL):
         form_class = StoryForm
         success_url = 'id@stories.story_images'
         fields = (
-            'title', 'featured', 'summary', 'content', 'video_id', 'tags',
+            'title', 'featured', 'summary', 'content', 'audio_link', 'video_id', 'tags',
             'category')
 
         def pre_save(self, obj):

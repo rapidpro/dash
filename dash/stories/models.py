@@ -23,6 +23,9 @@ class Story(SmartModel):
 
     content = models.TextField(help_text=_("The body of text for the story"))
 
+    audio_link = models.URLField(max_length=255, blank=True, null=True,
+                                  help_text="A link to an mp3 file to publish on this story")
+
     video_id = models.CharField(
         blank=True, null=True, max_length=255,
         help_text=_("The id of the YouTube video that should be linked to "
@@ -83,6 +86,15 @@ class Story(SmartModel):
                 cat_image = self.get_featured_images()[0].image
 
         return cat_image
+
+    def get_audio_link(self):
+        if not self.audio_link:
+            return None
+
+        formatted_link = str(self.audio_link)
+        if not formatted_link.startswith('http://'):
+            formatted_link = 'http://' + formatted_link
+        return formatted_link
 
     def get_image(self):
         cat_image = None
