@@ -24,7 +24,7 @@ class Story(SmartModel):
     content = models.TextField(help_text=_("The body of text for the story"))
 
     audio_link = models.URLField(max_length=255, blank=True, null=True,
-                                  help_text="A link to an mp3 file to publish on this story")
+                                 help_text=_("A link to an mp3 file to publish on this story"))
 
     video_id = models.CharField(
         blank=True, null=True, max_length=255,
