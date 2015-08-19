@@ -95,12 +95,6 @@ class Story(SmartModel):
 
         return cat_image
 
-    def get_audio_link(self):
-        if not self.audio_link:
-            return None
-
-        return str(self.audio_link)
-
     def get_image(self):
         cat_image = None
         if self.get_featured_images():
