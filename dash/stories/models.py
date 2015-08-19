@@ -52,7 +52,6 @@ class Story(SmartModel):
             formatted_link = 'http://' + formatted_link
         return formatted_link
 
-
     @classmethod
     def space_tags(cls, tags):
         """
