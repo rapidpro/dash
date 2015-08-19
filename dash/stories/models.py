@@ -45,13 +45,22 @@ class Story(SmartModel):
         Org,
         help_text=_("The organization this story belongs to"))
 
-    def space_tags(self):
+    @classmethod
+    def format_audio_link(cls, link):
+        formatted_link = link
+        if not formatted_link.startswith('http://'):
+            formatted_link = 'http://' + formatted_link
+        return formatted_link
+
+
+    @classmethod
+    def space_tags(cls, tags):
         """
         If we have tags set, then adds spaces before and after to allow for SQL
         querying for them.
         """
-        if self.tags and self.tags.strip():
-            self.tags = " " + self.tags.strip().lower() + " "
+        if tags and tags.strip():
+            return " " + tags.strip().lower() + " "
 
     def teaser(self, field, length):
         if not field:
@@ -92,12 +101,6 @@ class Story(SmartModel):
             return None
 
         return str(self.audio_link)
-
-    def format_audio_link(self):
-        formatted_link = self.audio_link
-        if not formatted_link.startswith('http://'):
-            formatted_link = 'http://' + formatted_link
-        self.audio_link = formatted_link
 
     def get_image(self):
         cat_image = None

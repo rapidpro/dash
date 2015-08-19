@@ -37,8 +37,8 @@ class StoryCRUDL(SmartCRUDL):
 
         def pre_save(self, obj):
             obj = super(StoryCRUDL.Update, self).pre_save(obj)
-            obj.format_audio_link()
-            obj.space_tags()
+            obj.audio_link = Story.format_audio_link(obj.audio_link)
+            obj.tags = Story.space_tags(obj.tags)
             return obj
 
         def get_form_kwargs(self):
@@ -129,8 +129,8 @@ class StoryCRUDL(SmartCRUDL):
             obj = super(StoryCRUDL.Create, self).pre_save(obj)
 
             obj.org = self.request.org
-            obj.format_audio_link()
-            obj.space_tags()
+            obj.audio_link = Story.format_audio_link(obj.audio_link)
+            obj.tags = Story.space_tags(obj.tags)
             return obj
 
         def get_form_kwargs(self):

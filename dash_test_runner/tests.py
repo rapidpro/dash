@@ -2006,16 +2006,6 @@ class StoryTest(DashTest):
         self.assertEquals(self.story.long_teaser(), "summary " * 100 + "..")
         self.assertEquals(self.story.short_teaser(), "summary " * 40 + "..")
 
-        self.story.audio_link = ''
-        self.story.save()
-
-        self.assertIsNone(self.story.get_audio_link())
-
-        self.story.audio_link = 'http://example.com/foo.mp3'
-        self.story.save()
-
-        self.assertEqual(self.story.get_audio_link(), 'http://example.com/foo.mp3')
-
         story_image_1 = StoryImage.objects.create(name='image 1',
                                                   story=self.story,
                                                   image='',
