@@ -1982,6 +1982,12 @@ class StoryTest(DashTest):
                                                          created_by=self.admin,
                                                          modified_by=self.admin)
 
+    def test_format_audio_link(self):
+        self.assertEqual(Story.format_audio_link(''), '')
+        self.assertEqual(Story.format_audio_link('http://'), '')
+        self.assertEqual(Story.format_audio_link('example.com/foo.mp3'), 'http://example.com/foo.mp3')
+        self.assertEqual(Story.format_audio_link('http://example.com/foo.mp3'), 'http://example.com/foo.mp3')
+
     def test_story_model(self):
         self.story = Story.objects.create(title="Story 1",
                                           content='content ' * 20,
