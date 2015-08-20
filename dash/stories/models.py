@@ -48,6 +48,12 @@ class Story(SmartModel):
     @classmethod
     def format_audio_link(cls, link):
         formatted_link = link
+        if not formatted_link:
+            return formatted_link
+
+        if formatted_link == 'http://':
+            return ''
+
         if not formatted_link.startswith('http://'):
             formatted_link = 'http://' + formatted_link
         return formatted_link
