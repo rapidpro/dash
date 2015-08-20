@@ -21,9 +21,8 @@ class StoryForm(forms.ModelForm):
 
     class Meta:
         model = Story
-        fields = (
-            'is_active', 'title', 'featured', 'summary', 'content',
-            'video_id', 'tags', 'category')
+        fields = ('is_active', 'title', 'featured', 'summary', 'content', 'audio_link',
+                  'video_id', 'tags', 'category')
 
 
 class StoryCRUDL(SmartCRUDL):
@@ -33,12 +32,13 @@ class StoryCRUDL(SmartCRUDL):
     class Update(OrgObjPermsMixin, SmartUpdateView):
         form_class = StoryForm
         fields = (
-            'is_active', 'title', 'featured', 'summary', 'content',
+            'is_active', 'title', 'featured', 'summary', 'content', 'audio_link',
             'video_id', 'tags', 'category')
 
         def pre_save(self, obj):
             obj = super(StoryCRUDL.Update, self).pre_save(obj)
-            obj.space_tags()
+            obj.audio_link = Story.format_audio_link(obj.audio_link)
+            obj.tags = Story.space_tags(obj.tags)
             return obj
 
         def get_form_kwargs(self):
@@ -122,14 +122,15 @@ class StoryCRUDL(SmartCRUDL):
         form_class = StoryForm
         success_url = 'id@stories.story_images'
         fields = (
-            'title', 'featured', 'summary', 'content', 'video_id', 'tags',
+            'title', 'featured', 'summary', 'content', 'audio_link', 'video_id', 'tags',
             'category')
 
         def pre_save(self, obj):
             obj = super(StoryCRUDL.Create, self).pre_save(obj)
 
             obj.org = self.request.org
-            obj.space_tags()
+            obj.audio_link = Story.format_audio_link(obj.audio_link)
+            obj.tags = Story.space_tags(obj.tags)
             return obj
 
         def get_form_kwargs(self):
