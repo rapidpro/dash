@@ -2012,6 +2012,23 @@ class StoryTest(DashTest):
         self.assertEquals(self.story.long_teaser(), "summary " * 100 + "..")
         self.assertEquals(self.story.short_teaser(), "summary " * 40 + "..")
 
+        self.assertIsNone(self.story.get_written_by())
+
+        self.admin.last_name = "Musk"
+        self.admin.save()
+
+        self.assertEqual(self.story.get_written_by(), "Musk")
+
+        self.admin.first_name = "Elon"
+        self.admin.save()
+
+        self.assertEqual(self.story.get_written_by(), "Elon Musk")
+
+        self.story.written_by = "Trevor Noah"
+        self.story.save()
+
+        self.assertEqual(self.story.get_written_by(), "Trevor Noah")
+
         story_image_1 = StoryImage.objects.create(name='image 1',
                                                   story=self.story,
                                                   image='',

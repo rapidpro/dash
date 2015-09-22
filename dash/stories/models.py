@@ -89,6 +89,14 @@ class Story(SmartModel):
             return self.teaser(self.summary, 40)
         return self.teaser(self.content, 40)
 
+    def get_written_by(self):
+        if self.written_by:
+            return self.written_by
+
+        if self.created_by.first_name or self.created_by.last_name:
+            full_name = self.created_by.first_name + " " + self.created_by.last_name
+            return full_name.strip()
+
     def get_featured_images(self):
         return self.images.filter(is_active=True).exclude(image='')
 
