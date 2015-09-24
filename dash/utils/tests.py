@@ -3,7 +3,7 @@ from datetime import datetime
 import json
 
 import pytz
-from temba.types import Contact as TembaContact
+from temba_client.types import Contact as TembaContact
 
 from django.core.cache import cache
 from django.test import TestCase

@@ -6,8 +6,9 @@ import urllib
 
 from mock import patch, Mock
 from smartmin.tests import SmartminTest
-from temba import TembaClient, __version__ as client_version
-from temba.types import Geometry, Boundary
+from temba_client import __version__ as client_version
+from temba_client.client import TembaClient
+from temba_client.types import Geometry, Boundary
 
 from django.conf import settings
 from django.contrib.auth.models import User, Group
