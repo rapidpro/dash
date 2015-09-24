@@ -15,7 +15,6 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_text, python_2_unicode_compatible
 
-from dash.api import API
 from dash.dash_email import send_dash_email
 from dash.utils import datetime_to_ms
 
@@ -160,9 +159,6 @@ class Org(SmartModel):
             host = '%s/api/v1' % settings.API_ENDPOINT  # UReport sites use this
 
         return TembaClient(host, self.api_token, user_agent=agent)
-
-    def get_api(self):
-        return API(self)
 
     def build_host_link(self, user_authenticated=False):
         host_tld = getattr(settings, "HOSTNAME", 'locahost')
