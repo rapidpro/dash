@@ -2,7 +2,6 @@ from __future__ import absolute_import, unicode_literals
 
 import json
 import redis
-import urllib
 
 from mock import patch, Mock
 from smartmin.tests import SmartminTest
@@ -352,7 +351,6 @@ class OrgTest(DashTest):
             self.assertEqual(client.root_url, 'https://rapidpro.io/api/v1')
             self.assertEqual(client.headers['Authorization'], 'Token %s' % self.org.api_token)
             self.assertEqual(client.headers['User-Agent'], 'test/0.1 rapidpro-python/%s' % client_version)
-
 
         self.assertEquals(self.org.get_user(), self.admin)
 
