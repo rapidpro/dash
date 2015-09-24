@@ -5,7 +5,7 @@ import random
 
 import pytz
 from smartmin.models import SmartModel
-from temba import TembaClient
+from temba_client.client import TembaClient
 
 from django.conf import settings
 from django.contrib.auth.models import User, Group
