@@ -95,17 +95,17 @@ class Org(SmartModel):
 
         return tzinfo
 
-    def get_config(self, name):
+    def get_config(self, name, default=None):
         config = getattr(self, '_config', None)
 
         if config is None:
             if not self.config:
-                return None
+                return default
 
             config = json.loads(self.config)
             self._config = config
 
-        return config.get(name, None)
+        return config.get(name, default)
 
     def set_config(self, name, value, commit=True):
         if not self.config:

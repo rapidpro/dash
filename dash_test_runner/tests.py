@@ -391,6 +391,7 @@ class OrgTest(DashTest):
         self.assertIn(viewer, org_viewers)
 
         self.assertIsNone(self.org.get_config('field_name'))
+        self.assertEqual(self.org.get_config('field_name', 'default'), 'default')
         self.org.set_config('field_name', 'field_value')
         self.assertEquals(self.org.get_config('field_name'), 'field_value')
 
