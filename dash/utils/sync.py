@@ -74,6 +74,7 @@ def sync_pull_contacts(org, contact_class, fields=None, groups=None, last_time=N
     """
     # get all remote contacts
     client = org.get_temba_client()
+    updated_incoming_contacts = []
     if last_time:
         updated_incoming_contacts = client.get_contacts(after=last_time)
 
