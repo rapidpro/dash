@@ -77,6 +77,8 @@ def sync_pull_contacts(org, contact_class, fields=None, groups=None, last_time=N
     updated_incoming_contacts = []
     if last_time:
         updated_incoming_contacts = client.get_contacts(after=last_time)
+    else:
+        updated_incoming_contacts = client.get_contacts()
 
     # get all existing contacts and organize by their UUID
     existing_contacts = contact_class.objects.filter(org=org)
