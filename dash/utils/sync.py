@@ -62,14 +62,15 @@ def sync_push_contact(org, contact, change_type, mutex_group_sets):
 
 def sync_pull_contacts(org, contact_class, fields=None, groups=None, last_time=None):
     """
-    Pulls all contacts from RapidPro and syncs with local contacts. Contact
-    class must define a class method called kwargs_from_temba which generates
+    Pulls updated contacts or all contacts from RapidPro and syncs with local contacts.
+    Contact class must define a class method called kwargs_from_temba which generates
     field kwargs from a fetched temba contact.
 
     :param org: the org
     :param contact_class: the contact class type
     :param fields: the contact field keys used - used to determine if local contact differs
     :param groups: the contact group UUIDs used - used to determine if local contact differs
+    :param last_time: the last time we pulled contacts, if None, sync all contacts
     :return: tuple containing list of UUIDs for created, updated, deleted and failed contacts
     """
     # get all remote contacts
