@@ -85,8 +85,6 @@ def sync_pull_contacts(org, contact_class, fields=None, groups=None, last_time=N
     existing_contacts = contact_class.objects.filter(org=org)
     existing_by_uuid = {contact.uuid: contact for contact in existing_contacts}
 
-    synced_uuids = set()
-
     created_uuids = []
     updated_uuids = []
     deleted_uuids = []
@@ -127,8 +125,6 @@ def sync_pull_contacts(org, contact_class, fields=None, groups=None, last_time=N
 
             contact_class.objects.create(**kwargs)
             created_uuids.append(kwargs['uuid'])
-
-        synced_uuids.add(updated_incoming.uuid)
 
     # any existing contact not in all rapidpro contacts, is now deleted if not
     # already deleted
