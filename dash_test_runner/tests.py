@@ -58,6 +58,41 @@ class UserTest(SmartminTest):
         self.assertEquals(new_admin.email, 'washington@nyaruka.com')
         self.assertFalse(User.objects.filter(username='denzel@nyaruka.com'))
 
+    def test_user_create(self):
+        create_url = reverse('users.user_create')
+
+        response = self.client.get(create_url)
+        self.assertLoginRedirect(response)
+
+        self.login(self.admin)
+
+        response = self.client.get(create_url)
+        self.assertLoginRedirect(response)
+
+        self.login(self.superuser)
+        response = self.client.get(create_url)
+
+        self.assertEquals(response.status_code, 200)
+        self.assertTrue('form' in response.context)
+        self.assertEqual(len(response.context['form'].fields), 7)
+
+    def test_user_update(self):
+        update_url = reverse('users.user_update', args=[self.admin.pk])
+
+        response = self.client.get(update_url)
+        self.assertLoginRedirect(response)
+
+        self.login(self.admin)
+
+        response = self.client.get(update_url)
+        self.assertLoginRedirect(response)
+
+        self.login(self.superuser)
+        response = self.client.get(update_url)
+
+        self.assertEquals(response.status_code, 200)
+        self.assertTrue('form' in response.context)
+        self.assertEqual(len(response.context['form'].fields), 8)
 
 class DashTest(SmartminTest):
 
