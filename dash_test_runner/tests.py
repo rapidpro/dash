@@ -94,6 +94,7 @@ class UserTest(SmartminTest):
         self.assertTrue('form' in response.context)
         self.assertEqual(len(response.context['form'].fields), 8)
 
+
 class DashTest(SmartminTest):
 
     def setUp(self):
