@@ -97,7 +97,10 @@ def sync_pull_contacts(org, contact_class, fields=None, groups=None, last_time=N
             failed_uuids.append(updated_incoming.uuid)
             continue
 
-        if updated_incoming.uuid in existing_by_uuid:
+        if updated_incoming.blocked:
+            deleted_uuids.append(updated_incoming.uuid)
+
+        elif updated_incoming.uuid in existing_by_uuid:
             existing = existing_by_uuid[updated_incoming.uuid]
 
             diff = temba_compare_contacts(updated_incoming, existing.as_temba(), fields, groups)
@@ -126,14 +129,15 @@ def sync_pull_contacts(org, contact_class, fields=None, groups=None, last_time=N
             contact_class.objects.create(**kwargs)
             created_uuids.append(kwargs['uuid'])
 
-    # any existing contact not in all rapidpro contacts, is now deleted if not
-    # already deleted
-    incoming_contacts = client.get_contacts()
-    incoming_uuids = [incoming.uuid for incoming in incoming_contacts]
-    for existing_uuid, existing in six.iteritems(existing_by_uuid):
-        if existing_uuid not in incoming_uuids and existing.is_active:
-            deleted_uuids.append(existing_uuid)
-
+    # any contact that has been deleted from rapidpro
+    # should also be deleted from dash
+    # if last_time was passed in, just get contacts deleted after the last time we synced
+    if last_time:
+        deleted_incoming_contacts = client.get_contacts(deleted=True, after=last_time)
+    else:
+        deleted_incoming_contacts = client.get_contacts(deleted=True)
+    for deleted_incoming in deleted_incoming_contacts:
+        deleted_uuids.append(deleted_incoming.uuid)
     existing_contacts.filter(uuid__in=deleted_uuids).update(is_active=False)
 
     return created_uuids, updated_uuids, deleted_uuids, failed_uuids
