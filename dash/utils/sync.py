@@ -60,50 +60,53 @@ def sync_push_contact(org, contact, change_type, mutex_group_sets):
         client.delete_contact(contact.uuid)
 
 
-def sync_pull_contacts(org, contact_class, fields=None, groups=None):
+def sync_pull_contacts(org, contact_class, fields=None, groups=None,
+                       last_time=None, delete_blocked=False):
     """
-    Pulls all contacts from RapidPro and syncs with local contacts. Contact
-    class must define a class method called kwargs_from_temba which generates
+    Pulls updated contacts or all contacts from RapidPro and syncs with local contacts.
+    Contact class must define a class method called kwargs_from_temba which generates
     field kwargs from a fetched temba contact.
 
     :param org: the org
     :param contact_class: the contact class type
     :param fields: the contact field keys used - used to determine if local contact differs
     :param groups: the contact group UUIDs used - used to determine if local contact differs
+    :param last_time: the last time we pulled contacts, if None, sync all contacts
+    :param delete_blocked: if True, delete the blocked contacts
     :return: tuple containing list of UUIDs for created, updated, deleted and failed contacts
     """
     # get all remote contacts
     client = org.get_temba_client()
-    incoming_contacts = client.get_contacts()
+    updated_incoming_contacts = []
+    if last_time:
+        updated_incoming_contacts = client.get_contacts(after=last_time)
+    else:
+        updated_incoming_contacts = client.get_contacts()
 
     # get all existing contacts and organize by their UUID
     existing_contacts = contact_class.objects.filter(org=org)
     existing_by_uuid = {contact.uuid: contact for contact in existing_contacts}
-
-    synced_uuids = set()
 
     created_uuids = []
     updated_uuids = []
     deleted_uuids = []
     failed_uuids = []
 
-    for incoming in incoming_contacts:
-        # ignore contacts with no URN
-        if not incoming.urns:
-            logger.warning("Ignoring contact %s with no URN" % incoming.uuid)
-            failed_uuids.append(incoming.uuid)
-            continue
+    for updated_incoming in updated_incoming_contacts:
+        # delete blocked contacts if deleted_blocked=True
+        if updated_incoming.blocked and delete_blocked:
+            deleted_uuids.append(updated_incoming.uuid)
 
-        if incoming.uuid in existing_by_uuid:
-            existing = existing_by_uuid[incoming.uuid]
+        elif updated_incoming.uuid in existing_by_uuid:
+            existing = existing_by_uuid[updated_incoming.uuid]
 
-            diff = temba_compare_contacts(incoming, existing.as_temba(), fields, groups)
+            diff = temba_compare_contacts(updated_incoming, existing.as_temba(), fields, groups)
 
             if diff or not existing.is_active:
                 try:
-                    kwargs = contact_class.kwargs_from_temba(org, incoming)
+                    kwargs = contact_class.kwargs_from_temba(org, updated_incoming)
                 except ValueError:
-                    failed_uuids.append(incoming.uuid)
+                    failed_uuids.append(updated_incoming.uuid)
                     continue
 
                 for field, value in six.iteritems(kwargs):
@@ -112,25 +115,26 @@ def sync_pull_contacts(org, contact_class, fields=None, groups=None):
                 existing.is_active = True
                 existing.save()
 
-                updated_uuids.append(incoming.uuid)
+                updated_uuids.append(updated_incoming.uuid)
         else:
             try:
-                kwargs = contact_class.kwargs_from_temba(org, incoming)
+                kwargs = contact_class.kwargs_from_temba(org, updated_incoming)
             except ValueError:
-                failed_uuids.append(incoming.uuid)
+                failed_uuids.append(updated_incoming.uuid)
                 continue
 
             contact_class.objects.create(**kwargs)
             created_uuids.append(kwargs['uuid'])
 
-        synced_uuids.add(incoming.uuid)
-
-    # any existing contact not in the synched set, is now deleted if not
-    # already deleted
-    for existing_uuid, existing in six.iteritems(existing_by_uuid):
-        if existing_uuid not in synced_uuids and existing.is_active:
-            deleted_uuids.append(existing_uuid)
-
+    # any contact that has been deleted from rapidpro
+    # should also be deleted from dash
+    # if last_time was passed in, just get contacts deleted after the last time we synced
+    if last_time:
+        deleted_incoming_contacts = client.get_contacts(deleted=True, after=last_time)
+    else:
+        deleted_incoming_contacts = client.get_contacts(deleted=True)
+    for deleted_incoming in deleted_incoming_contacts:
+        deleted_uuids.append(deleted_incoming.uuid)
     existing_contacts.filter(uuid__in=deleted_uuids).update(is_active=False)
 
     return created_uuids, updated_uuids, deleted_uuids, failed_uuids
