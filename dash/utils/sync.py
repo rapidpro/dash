@@ -61,7 +61,7 @@ def sync_push_contact(org, contact, change_type, mutex_group_sets):
 
 
 def sync_pull_contacts(org, contact_class, fields=None, groups=None,
-                       last_time=None, delete_blocked=False, ignore_urnless_contacts=False):
+                       last_time=None, delete_blocked=False):
     """
     Pulls updated contacts or all contacts from RapidPro and syncs with local contacts.
     Contact class must define a class method called kwargs_from_temba which generates
@@ -73,7 +73,6 @@ def sync_pull_contacts(org, contact_class, fields=None, groups=None,
     :param groups: the contact group UUIDs used - used to determine if local contact differs
     :param last_time: the last time we pulled contacts, if None, sync all contacts
     :param delete_blocked: if True, delete the blocked contacts
-    :param ignore_urnless_contacts: if True, do not log a warning
     :return: tuple containing list of UUIDs for created, updated, deleted and failed contacts
     """
     # get all remote contacts
@@ -95,7 +94,7 @@ def sync_pull_contacts(org, contact_class, fields=None, groups=None,
 
     for updated_incoming in updated_incoming_contacts:
         # ignore contacts with no URN
-        if not updated_incoming.urns and not ignore_urnless_contacts:
+        if not updated_incoming.urns:
             logger.warning("Ignoring contact %s with no URN" % updated_incoming.uuid)
             failed_uuids.append(updated_incoming.uuid)
             continue
