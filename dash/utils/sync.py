@@ -93,12 +93,7 @@ def sync_pull_contacts(org, contact_class, fields=None, groups=None,
     failed_uuids = []
 
     for updated_incoming in updated_incoming_contacts:
-        # ignore contacts with no URN
-        if not updated_incoming.urns:
-            logger.warning("Ignoring contact %s with no URN" % updated_incoming.uuid)
-            failed_uuids.append(updated_incoming.uuid)
-            continue
-
+        # delete blocked contacts if deleted_blocked=True
         if updated_incoming.blocked and delete_blocked:
             deleted_uuids.append(updated_incoming.uuid)
 
