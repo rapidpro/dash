@@ -74,21 +74,21 @@ class SetOrgMiddleware(object):
         if not request.user.is_anonymous():
             request.user.set_org(org)
 
+        request.org = org
+
+        self.set_language(request, org)
+        self.set_timezone(request, org)
+
+    def set_language(self, request, org):
+        """Set the current language from the org configuration."""
         if org:
-            request.org = org
+            lang = org.language or settings.DEFAULT_LANGUAGE
+            translation.activate(lang)
 
-            # activate the default language for this org
-            language = settings.DEFAULT_LANGUAGE
-            if org.language:
-                language = org.language
-
-            translation.activate(language)
-
-            # activate timezone for this org
-            if org.timezone:
-                timezone.activate(org.timezone)
-        else:
-            request.org = None
+    def set_timezone(self, request, org):
+        """Set the current timezone from the org configuration."""
+        if org and org.timezone:
+            timezone.activate(org.timezone)
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         if not request.org:
