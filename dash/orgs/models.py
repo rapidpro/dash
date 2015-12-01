@@ -19,16 +19,14 @@ from dash.api import API
 from dash.dash_email import send_dash_email
 from dash.utils import datetime_to_ms
 
-
-STATE = 1
-DISTRICT = 2
-
 # we cache boundary data for a month at a time
 BOUNDARY_CACHE_TIME = getattr(settings, 'API_BOUNDARY_CACHE_TIME', 60 * 60 * 24 * 30)
 
 BOUNDARY_CACHE_KEY = 'org:%d:boundaries'
-BOUNDARY_LEVEL_1_KEY = 'geojson:%d'
-BOUNDARY_LEVEL_2_KEY = 'geojson:%d:%s'
+BOUNDARY_LEVEL_START_KEY = 'geojson:%d'
+BOUNDARY_LEVEL_END_KEY = 'geojson:%d:%s'
+BOUNDARY_START_LEVEL = getattr(settings, 'BOUNDARY_START_LEVEL', 1)
+BOUNDARY_END_LEVEL = getattr(settings, 'BOUNDARY_END_LEVEL', 3)
 
 
 @python_2_unicode_compatible
@@ -194,16 +192,16 @@ class Org(SmartModel):
         # we now build our cached versions of level 1 (all states) and level 2
         # (all districts for each state) geojson
         states = []
-        districts_by_state = dict()
+        other_levels_by_parent = dict()
         for boundary in client_boundaries:
-            if boundary.level == STATE:
+            if boundary.level == BOUNDARY_START_LEVEL:
                 states.append(boundary)
-            elif boundary.level == DISTRICT:
+            elif boundary.level <= BOUNDARY_END_LEVEL and boundary.parent:
                 osm_id = boundary.parent
-                if osm_id not in districts_by_state:
-                    districts_by_state[osm_id] = []
+                if osm_id not in other_levels_by_parent:
+                    other_levels_by_parent[osm_id] = []
 
-                districts = districts_by_state[osm_id]
+                districts = other_levels_by_parent[osm_id]
                 districts.append(boundary)
 
         # mini function to convert a list of boundary objects to geojson
@@ -216,11 +214,11 @@ class Org(SmartModel):
             return dict(type='FeatureCollection', features=features)
 
         boundaries = dict()
-        boundaries[BOUNDARY_LEVEL_1_KEY % self.id] = to_geojson(states)
+        boundaries[BOUNDARY_LEVEL_START_KEY % self.id] = to_geojson(states)
 
-        for state_id in districts_by_state.keys():
-            boundaries[BOUNDARY_LEVEL_2_KEY % (self.id, state_id)] = to_geojson(
-                districts_by_state[state_id])
+        for parent_id in other_levels_by_parent.keys():
+            boundaries[BOUNDARY_LEVEL_END_KEY % (self.id, parent_id)] = to_geojson(
+                other_levels_by_parent[parent_id])
 
         key = BOUNDARY_CACHE_KEY % self.pk
         value = {'time': datetime_to_ms(this_time), 'results': boundaries}
@@ -238,13 +236,13 @@ class Org(SmartModel):
     def get_country_geojson(self):
         boundaries = self.get_boundaries()
         if boundaries:
-            key = BOUNDARY_LEVEL_1_KEY % self.id
+            key = BOUNDARY_LEVEL_START_KEY % self.id
             return boundaries.get(key, None)
 
     def get_state_geojson(self, state_id):
         boundaries = self.get_boundaries()
         if boundaries:
-            key = BOUNDARY_LEVEL_2_KEY % (self.id, state_id)
+            key = BOUNDARY_LEVEL_END_KEY % (self.id, state_id)
             return boundaries.get(key, None)
 
     def get_top_level_geojson_ids(self):

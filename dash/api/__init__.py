@@ -16,9 +16,10 @@ from django.utils.text import slugify
 logger = logging.getLogger(__name__)
 
 COUNTRY = 0
-STATE = 1
-DISTRICT = 2
 
+BOUNDARY_START_LEVEL = getattr(settings, 'BOUNDARY_START_LEVEL', 1)
+
+BOUNDARY_END_LEVEL = getattr(settings, 'BOUNDARY_END_LEVEL', 3)
 # we cache boundary data for a month at a time
 BOUNDARY_CACHE_TIME = getattr(settings, 'API_BOUNDARY_CACHE_TIME', 60 * 60 * 24 * 30)
 
@@ -293,16 +294,16 @@ class API(object):
         # we now build our cached versions of level 1 (all states) and level 2
         # (all districts for each state) geojson
         states = []
-        districts_by_state = dict()
+        other_levels_by_parent = dict()
         for boundary in boundaries:
-            if boundary['level'] == STATE:
+            if boundary['level'] == BOUNDARY_START_LEVEL:
                 states.append(boundary)
-            elif boundary['level'] == DISTRICT:
+            elif boundary['level'] >= BOUNDARY_END_LEVEL and boundary['parent']:
                 osm_id = boundary['parent']
-                if osm_id not in districts_by_state:
-                    districts_by_state[osm_id] = []
+                if osm_id not in other_levels_by_parent:
+                    other_levels_by_parent[osm_id] = []
 
-                districts = districts_by_state[osm_id]
+                districts = other_levels_by_parent[osm_id]
                 districts.append(boundary)
 
         # mini function to convert a list of boundary objects to geojson
@@ -321,14 +322,14 @@ class API(object):
 
         cached['geojson:%d' % self.org.id] = to_geojson(states)
 
-        for state_id in districts_by_state.keys():
-            cache.set('geojson:%d:%s' % (self.org.id, state_id),
-                      to_geojson(districts_by_state[state_id]), BOUNDARY_CACHE_TIME)
-            cache.set('fallback:geojson:%d:%s' % (self.org.id, state_id),
-                      to_geojson(districts_by_state[state_id]), timeout=None)
+        for parent_id in other_levels_by_parent.keys():
+            cache.set('geojson:%d:%s' % (self.org.id, parent_id),
+                      to_geojson(other_levels_by_parent[parent_id]), BOUNDARY_CACHE_TIME)
+            cache.set('fallback:geojson:%d:%s' % (self.org.id, parent_id),
+                      to_geojson(other_levels_by_parent[parent_id]), timeout=None)
 
-            cached['geojson:%d:%s' % (self.org.id, state_id)] = to_geojson(
-                districts_by_state[state_id])
+            cached['geojson:%d:%s' % (self.org.id, parent_id)] = to_geojson(
+                other_levels_by_parent[parent_id])
 
             logger.debug("- built boundaries in %f" % (time.time() - start))
 
