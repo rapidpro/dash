@@ -191,11 +191,11 @@ class Org(SmartModel):
 
         # we now build our cached versions of level 1 (all states) and level 2
         # (all districts for each state) geojson
-        states = []
+        start_level = []
         other_levels_by_parent = dict()
         for boundary in client_boundaries:
             if boundary.level == BOUNDARY_START_LEVEL:
-                states.append(boundary)
+                start_level.append(boundary)
             elif boundary.level <= BOUNDARY_END_LEVEL and boundary.parent:
                 osm_id = boundary.parent
                 if osm_id not in other_levels_by_parent:
@@ -214,7 +214,7 @@ class Org(SmartModel):
             return dict(type='FeatureCollection', features=features)
 
         boundaries = dict()
-        boundaries[BOUNDARY_LEVEL_START_KEY % self.id] = to_geojson(states)
+        boundaries[BOUNDARY_LEVEL_START_KEY % self.id] = to_geojson(start_level)
 
         for parent_id in other_levels_by_parent.keys():
             boundaries[BOUNDARY_LEVEL_END_KEY % (self.id, parent_id)] = to_geojson(
@@ -239,10 +239,10 @@ class Org(SmartModel):
             key = BOUNDARY_LEVEL_START_KEY % self.id
             return boundaries.get(key, None)
 
-    def get_state_geojson(self, state_id):
+    def get_geojson_by_parent_id(self, parent_id):
         boundaries = self.get_boundaries()
         if boundaries:
-            key = BOUNDARY_LEVEL_END_KEY % (self.id, state_id)
+            key = BOUNDARY_LEVEL_END_KEY % (self.id, parent_id)
             return boundaries.get(key, None)
 
     def get_top_level_geojson_ids(self):
