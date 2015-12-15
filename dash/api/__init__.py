@@ -298,7 +298,7 @@ class API(object):
         for boundary in boundaries:
             if boundary['level'] == BOUNDARY_START_LEVEL:
                 start_level.append(boundary)
-            elif boundary['level'] >= BOUNDARY_END_LEVEL and boundary['parent']:
+            elif boundary['level'] <= BOUNDARY_END_LEVEL and boundary['parent']:
                 osm_id = boundary['parent']
                 if osm_id not in other_levels_by_parent:
                     other_levels_by_parent[osm_id] = []
