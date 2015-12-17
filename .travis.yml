@@ -9,7 +9,10 @@ env:
   - TOXENV=py2.7-django1.8
 install:
   - pip install -q --use-mirrors tox
+  - pip install coveralls
 before_script:
   - createdb -E UTF-8 dash -U postgres -O $USER
 script:
   - tox -- --settings=dash_test_runner.settings_travis
+after_success:
+  - coveralls
