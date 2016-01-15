@@ -1,21 +1,19 @@
 from __future__ import absolute_import, unicode_literals
-from datetime import datetime
+
 import json
-
 import pytz
-from temba_client.types import Contact as TembaContact
 
+from datetime import datetime
 from django.core.cache import cache
 from django.test import TestCase
 from django.utils import timezone
-
-from . import (
-    intersection, union, random_string, filter_dict, get_cacheable,
-    get_obj_cacheable, get_month_range, chunks)
+from temba_client.types import Contact as TembaContact
+from . import intersection, union, random_string, filter_dict, get_cacheable, get_obj_cacheable, get_month_range, chunks
 from .sync import temba_compare_contacts, temba_merge_contacts
+from ..test import DashTest
 
 
-class InitTest(TestCase):
+class InitTest(DashTest):
     def test_intersection(self):
         self.assertEqual(intersection(), [])
         self.assertEqual(intersection([1]), [1])

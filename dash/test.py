@@ -21,6 +21,11 @@ class DashTest(TestCase):
         cls.superuser = User.objects.create_superuser(
             username="root", email="super@user.com", password="root")
 
+    def setUp(self):
+        super(DashTest, self).setUp()
+
+        self.clear_cache()
+
     @classmethod
     def clear_cache(cls):
         # we are extra paranoid here and actually hardcode redis to 'localhost' and '10'
