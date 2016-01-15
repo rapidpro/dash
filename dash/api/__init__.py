@@ -1,16 +1,16 @@
 from __future__ import unicode_literals
+
 import json
 import logging
-import time
-
-from redis_cache import get_redis_connection
 import requests
-from six.moves import urllib
+import time
 
 from django.conf import settings
 from django.core.cache import cache
 from django.utils.encoding import force_text
 from django.utils.text import slugify
+from redis_cache import get_redis_connection
+from six.moves import urllib
 
 
 logger = logging.getLogger(__name__)

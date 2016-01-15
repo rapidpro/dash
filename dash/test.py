@@ -1,14 +1,13 @@
-from __future__ import absolute_import, unicode_literals
+from __future__ import unicode_literals
+
 import json
-
 import redis
-
-from django.contrib.auth.models import User
-from django.http import JsonResponse
-from django.test import TestCase
 
 from dash.orgs.models import Org
 from dash.utils import random_string
+from django.contrib.auth.models import User
+from django.http import JsonResponse
+from django.test import TestCase
 
 
 class DashTest(TestCase):

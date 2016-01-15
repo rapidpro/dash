@@ -1,14 +1,14 @@
-from __future__ import absolute_import, unicode_literals
+from __future__ import unicode_literals
+
 import calendar
-from collections import OrderedDict
 import datetime
 import json
-import random
-
-from dateutil.relativedelta import relativedelta
 import pytz
+import random
 import six
 
+from collections import OrderedDict
+from dateutil.relativedelta import relativedelta
 from django.core.cache import cache
 from django.utils import timezone
 

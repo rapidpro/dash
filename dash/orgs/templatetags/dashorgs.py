@@ -1,8 +1,9 @@
-from datetime import datetime
+from __future__ import unicode_literals
 
 import phonenumbers
 import pytz
 
+from datetime import datetime
 from django import template
 
 

@@ -1,10 +1,10 @@
-from __future__ import absolute_import, unicode_literals
+from __future__ import unicode_literals
+
 import logging
+import six
 
 from enum import Enum
-import six
 from temba_client.types import Contact as TembaContact
-
 from . import union, intersection, filter_dict
 
 

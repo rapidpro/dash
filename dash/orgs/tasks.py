@@ -1,9 +1,10 @@
+from __future__ import unicode_literals
+
 import logging
 import time
 
 from celery import shared_task
 from django_redis import get_redis_connection
-
 from .models import Invitation, Org
 
 

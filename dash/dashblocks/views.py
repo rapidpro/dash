@@ -1,11 +1,10 @@
-from smartmin.views import SmartCRUDL, SmartListView, SmartUpdateView, SmartCreateView
+from __future__ import unicode_literals
 
+from dash.orgs.views import OrgObjPermsMixin, OrgPermsMixin
 from django.core.urlresolvers import reverse
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
-
-from dash.orgs.views import OrgObjPermsMixin, OrgPermsMixin
-
+from smartmin.views import SmartCRUDL, SmartListView, SmartUpdateView, SmartCreateView
 from .models import DashBlockType, DashBlock, DashBlockImage
 
 

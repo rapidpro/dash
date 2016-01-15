@@ -1,12 +1,13 @@
-from __future__ import absolute_import, unicode_literals
-from datetime import datetime
+from __future__ import unicode_literals
+
 import json
 import random
-
 import pytz
-from smartmin.models import SmartModel
-from temba_client.client import TembaClient
 
+from dash.api import API
+from dash.dash_email import send_dash_email
+from dash.utils import datetime_to_ms
+from datetime import datetime
 from django.conf import settings
 from django.contrib.auth.models import User, Group
 from django.core.cache import cache
@@ -14,10 +15,8 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_text, python_2_unicode_compatible
-
-from dash.api import API
-from dash.dash_email import send_dash_email
-from dash.utils import datetime_to_ms
+from smartmin.models import SmartModel
+from temba_client.client import TembaClient
 
 
 STATE = 1

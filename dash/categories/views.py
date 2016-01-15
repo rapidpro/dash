@@ -1,9 +1,8 @@
-from smartmin.views import SmartCRUDL, SmartCreateView, SmartListView, SmartUpdateView
-
-from django import forms
+from __future__ import unicode_literals
 
 from dash.orgs.views import OrgPermsMixin, OrgObjPermsMixin
-
+from django import forms
+from smartmin.views import SmartCRUDL, SmartCreateView, SmartListView, SmartUpdateView
 from .models import Category, CategoryImage
 
 

@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 """
 WSGI config for dash_test_runner project.
 

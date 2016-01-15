@@ -1,4 +1,5 @@
-from __future__ import absolute_import, unicode_literals
+from __future__ import unicode_literals
+
 import re
 import traceback
 
@@ -7,8 +8,7 @@ from django.core.exceptions import DisallowedHost
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.utils import translation, timezone
-
-from dash.orgs.models import Org
+from .models import Org
 
 
 ALLOW_NO_ORG = (
