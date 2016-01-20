@@ -24,8 +24,9 @@ from django.utils.encoding import force_text
 from mock import patch, Mock
 from smartmin.tests import SmartminTest
 from temba_client import __version__ as client_version
-from temba_client.client import TembaClient
-from temba_client.types import Geometry, Boundary
+from temba_client.v1 import TembaClient as TembaClient1
+from temba_client.v1.types import Geometry, Boundary
+from temba_client.v2 import TembaClient as TembaClient2
 
 
 class UserTest(SmartminTest):
@@ -375,17 +376,23 @@ class OrgTest(DashTest):
         self.assertTrue(new_user.check_password("secretpassword"))
 
         client = self.org.get_temba_client()
-        self.assertIsInstance(client, TembaClient)
+        self.assertIsInstance(client, TembaClient1)
         self.assertEqual(client.root_url, 'http://localhost:8001/api/v1')
         self.assertEqual(client.headers['Authorization'], 'Token %s' % self.org.api_token)
         self.assertEqual(client.headers['User-Agent'], 'rapidpro-python/%s' % client_version)
 
         with self.settings(SITE_API_HOST='rapidpro.io', SITE_API_USER_AGENT='test/0.1'):
             client = self.org.get_temba_client()
-            self.assertIsInstance(client, TembaClient)
+            self.assertIsInstance(client, TembaClient1)
             self.assertEqual(client.root_url, 'https://rapidpro.io/api/v1')
             self.assertEqual(client.headers['Authorization'], 'Token %s' % self.org.api_token)
             self.assertEqual(client.headers['User-Agent'], 'test/0.1 rapidpro-python/%s' % client_version)
+
+        client = self.org.get_temba_client(api_version=2)
+        self.assertIsInstance(client, TembaClient2)
+        self.assertEqual(client.root_url, 'http://localhost:8001/api/v1')
+        self.assertEqual(client.headers['Authorization'], 'Token %s' % self.org.api_token)
+        self.assertEqual(client.headers['User-Agent'], 'rapidpro-python/%s' % client_version)
 
         api = self.org.get_api()
         self.assertIsInstance(api, API)
@@ -501,7 +508,7 @@ class OrgTest(DashTest):
             with patch('django.core.cache.cache.set') as cache_set_mock:
                 cache_set_mock.return_value = "Set"
 
-                with patch('dash.orgs.models.TembaClient.get_boundaries') as mock_client:
+                with patch('dash.orgs.models.TembaClient1.get_boundaries') as mock_client:
                     geometry1 = Geometry.create(type='MultiPolygon', coordinates=[[1, 2], [3, 4]])
                     geometry2 = Geometry.create(type='MultiPolygon', coordinates=[[5, 6], [7, 8]])
                     level_1_boundary = Boundary.create(boundary='R195269', name='Burundi', level=1, parent="",

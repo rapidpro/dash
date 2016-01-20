@@ -16,7 +16,8 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_text, python_2_unicode_compatible
 from smartmin.models import SmartModel
-from temba_client.client import TembaClient
+from temba_client.v1 import TembaClient as TembaClient1
+from temba_client.v2 import TembaClient as TembaClient2
 
 
 STATE = 1
@@ -151,14 +152,19 @@ class Org(SmartModel):
             org_user.set_org(self)
             return org_user
 
-    def get_temba_client(self):
+    def get_temba_client(self, api_version=1):
+        if api_version not in (1, 2):
+            raise ValueError("Unsupported RapidPro API version: %d" % api_version)
+
         host = getattr(settings, 'SITE_API_HOST', None)
         agent = getattr(settings, 'SITE_API_USER_AGENT', None)
 
         if not host:
             host = '%s/api/v1' % settings.API_ENDPOINT  # UReport sites use this
 
-        return TembaClient(host, self.api_token, user_agent=agent)
+        client_cls = TembaClient1 if api_version == 1 else TembaClient2
+
+        return client_cls(host, self.api_token, user_agent=agent)
 
     def get_api(self):
         return API(self)

@@ -4,7 +4,7 @@ import logging
 import six
 
 from enum import Enum
-from temba_client.types import Contact as TembaContact
+from temba_client.v1.types import Contact as TembaContact
 from . import union, intersection, filter_dict
 
 

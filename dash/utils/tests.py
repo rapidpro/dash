@@ -7,7 +7,7 @@ from datetime import datetime
 from django.core.cache import cache
 from django.test import TestCase
 from django.utils import timezone
-from temba_client.types import Contact as TembaContact
+from temba_client.v1.types import Contact as TembaContact
 from . import intersection, union, random_string, filter_dict, get_cacheable, get_obj_cacheable, get_month_range, chunks
 from .sync import temba_compare_contacts, temba_merge_contacts
 from ..test import DashTest
