@@ -1,7 +1,8 @@
 -e git+https://github.com/nyaruka/smartmin.git@master#egg=smartmin-1.8.1
+-e git+https://github.com/rapidpro/rapidpro-python.git@master#egg=rapidpro-python-2.0
 celery-with-redis
-django>=1.7.2
-django-compressor
+django>=1.7.2,<1.9
+django-compressor<2.0
 django-guardian
 django-nose
 django-redis==3.8.4
@@ -12,7 +13,6 @@ Pillow
 phonenumbers
 psycopg2
 python-dateutil
-rapidpro-python
 requests
 six
 sorl-thumbnail>=12.1c

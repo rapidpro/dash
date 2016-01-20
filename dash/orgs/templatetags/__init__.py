@@ -1,1 +1,1 @@
-__author__ = 'norkans7'
+from __future__ import unicode_literals

@@ -1,12 +1,10 @@
 from __future__ import unicode_literals
 
-from timezones.forms import TimeZoneField
-
 from django import forms
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
-
+from timezones.forms import TimeZoneField
 from .models import Org
 
 

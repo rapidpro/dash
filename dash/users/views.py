@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from smartmin.users.views import UserCRUDL as SmartUserCRUDL
 
 

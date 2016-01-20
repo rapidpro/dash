@@ -1,16 +1,16 @@
 from __future__ import unicode_literals
+
 import json
 import logging
-import time
-
-from redis_cache import get_redis_connection
 import requests
-from six.moves import urllib
+import time
 
 from django.conf import settings
 from django.core.cache import cache
 from django.utils.encoding import force_text
 from django.utils.text import slugify
+from redis_cache import get_redis_connection
+from six.moves import urllib
 
 
 logger = logging.getLogger(__name__)
@@ -129,7 +129,7 @@ class API(object):
         Returns the most recent messages for a given flow.
         """
         try:
-            url = '%s/api/v1/messages.json' % settings.API_ENDPOINT
+            url = '%s/api/v1/messages.json' % settings.SITE_API_HOST
             params = dict(flow=flow)
             if direction:
                 params['direction'] = direction
@@ -225,7 +225,7 @@ class API(object):
 
     def _fetch_group(self, name):
         start = time.time()
-        response = requests.get('%s/api/v1/groups.json' % settings.API_ENDPOINT,
+        response = requests.get('%s/api/v1/groups.json' % settings.SITE_API_HOST,
                                 params={'name': name},
                                 headers={'Content-type': 'application/json',
                                          'Accept': 'application/json',
@@ -241,7 +241,7 @@ class API(object):
         return group
 
     def _fetch_contacts(self, group=None):
-        next = '%s/api/v1/contacts.json' % settings.API_ENDPOINT
+        next = '%s/api/v1/contacts.json' % settings.SITE_API_HOST
         contacts = []
 
         while next:
@@ -271,7 +271,7 @@ class API(object):
     def _build_boundaries(self):
         start = time.time()
 
-        next = '%s/api/v1/boundaries.json' % settings.API_ENDPOINT
+        next = '%s/api/v1/boundaries.json' % settings.SITE_API_HOST
         boundaries = []
 
         while next:
@@ -338,7 +338,7 @@ class API(object):
         start = time.time()
 
         url = '%s/api/v1/results.json?ruleset=%d&segment=%s' % (
-            settings.API_ENDPOINT, ruleset_id,
+            settings.SITE_API_HOST, ruleset_id,
             urllib.parse.quote(force_text(json.dumps(segment)).encode('utf8')))
 
         logger.debug(url)
@@ -361,7 +361,7 @@ class API(object):
         start = time.time()
 
         url = '%s/api/v1/results.json?contact_field=%s&segment=%s' % (
-            settings.API_ENDPOINT,
+            settings.SITE_API_HOST,
             contact_field_label,
             urllib.parse.quote(force_text(json.dumps(segment)).encode('utf8')))
         logger.debug(url)
@@ -383,7 +383,7 @@ class API(object):
     def _fetch_flows(self, filter=None):
         start = time.time()
 
-        next = '%s/api/v1/flows.json' % settings.API_ENDPOINT
+        next = '%s/api/v1/flows.json' % settings.SITE_API_HOST
         if filter:
             next += "?" + filter
 

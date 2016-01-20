@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 """
 Django settings for dash_test_runner project.
 
@@ -271,7 +273,7 @@ BROKER_PORT = 6379
 BROKER_VHOST = '4'
 
 # RapidPRO
-API_ENDPOINT = 'http://localhost:8001'
+SITE_API_HOST = 'http://localhost:8001'
 HOSTNAME = 'ureport.io'
 SITE_CHOOSER_TEMPLATE = 'orgs/org_chooser.html'
 SITE_CHOOSER_URL_NAME = 'orgs.org_chooser'
