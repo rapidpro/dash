@@ -159,8 +159,8 @@ class Org(SmartModel):
         host = getattr(settings, 'SITE_API_HOST', None)
         agent = getattr(settings, 'SITE_API_USER_AGENT', None)
 
-        if not host:
-            host = '%s/api/v1' % settings.API_ENDPOINT  # UReport sites use this
+        if host.endswith('api/v1') or host.endswith('api/v1/'):
+            raise ValueError("API host should not include API version, e.g. http://example.com instead of http://example.com/api/v1")
 
         client_cls = TembaClient1 if api_version == 1 else TembaClient2
 
