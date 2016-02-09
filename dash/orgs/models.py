@@ -257,6 +257,9 @@ class Org(SmartModel):
         org_country_boundaries = self.get_country_geojson()
         return [elt['properties']['id'] for elt in org_country_boundaries['features']]
 
+    def get_task_state(self, task_key):
+        return TaskState.get_or_create(self, task_key)
+
     @classmethod
     def create_user(cls, email, password):
         user = User.objects.create_user(username=email, email=email, password=password)
@@ -370,11 +373,10 @@ class Invitation(SmartModel):
         send_dash_email(to_email, subject, template, context)
 
 
-BACKGROUND_TYPES = (('B', _("Banner")),
-                    ('P', _("Pattern")))
-
-
 class OrgBackground(SmartModel):
+    BACKGROUND_TYPES = (('B', _("Banner")),
+                        ('P', _("Pattern")))
+
     org = models.ForeignKey(
         Org, verbose_name=_("Org"), related_name="backgrounds",
         help_text=_("The organization in which the image will be used"))
@@ -387,3 +389,50 @@ class OrgBackground(SmartModel):
         max_length=1, choices=BACKGROUND_TYPES, default='P', verbose_name=_("Background type"))
 
     image = models.ImageField(upload_to='org_bgs', help_text=_("The image file"))
+
+
+class TaskState(models.Model):
+    """
+    Holds org specific state for a scheduled task
+    """
+    org = models.ForeignKey(Org, related_name='task_states')
+
+    task_key = models.CharField(max_length=32)
+
+    started_on = models.DateTimeField(null=True)
+
+    ended_on = models.DateTimeField(null=True)
+
+    last_successfully_started_on = models.DateTimeField(null=True)
+
+    last_results = models.TextField(null=True)
+
+    is_failing = models.BooleanField(default=False)
+
+    @classmethod
+    def get_or_create(cls, org, task_key):
+        existing = cls.objects.filter(org=org, task_key=task_key).first()
+        if existing:
+            return existing
+
+        return cls.objects.create(org=org, task_key=task_key)
+
+    @classmethod
+    def get_failing(cls):
+        return cls.objects.filter(org__is_active=True, is_failing=True)
+
+    def is_running(self):
+        return self.started_on and not self.ended_on
+
+    def has_ever_run(self):
+        return self.started_on is not None
+
+    def get_last_results(self):
+        return json.loads(self.last_results) if self.last_results else None
+
+    def get_time_taken(self):
+        until = self.ended_on if self.ended_on else timezone.now()
+        return (until - self.started_on).total_seconds()
+
+    class Meta:
+        unique_together = ('org', 'task_key')
