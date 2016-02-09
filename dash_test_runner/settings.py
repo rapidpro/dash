@@ -48,8 +48,6 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'django_nose',
-
     'guardian',
 
     # compress our CSS and js
@@ -254,12 +252,6 @@ ANONYMOUS_USER_ID = -1
 LOGIN_URL = '/users/login/'
 LOGIN_REDIRECT_URL = "/manage/org/choose/"
 LOGOUT_REDIRECT_URL = "/"
-
-# ----------------------------------------------------------------------------
-# Django-Nose config
-# ----------------------------------------------------------------------------
-
-TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 # ----------------------------------------------------------------------------
 # Async tasks with django-celery
