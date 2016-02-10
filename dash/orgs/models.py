@@ -4,7 +4,6 @@ import json
 import random
 import pytz
 
-from dash.api import API
 from dash.dash_email import send_dash_email
 from dash.utils import datetime_to_ms
 from datetime import datetime
@@ -166,9 +165,6 @@ class Org(SmartModel):
         client_cls = TembaClient1 if api_version == 1 else TembaClient2
 
         return client_cls(host, self.api_token, user_agent=agent)
-
-    def get_api(self):
-        return API(self)
 
     def build_host_link(self, user_authenticated=False):
         host_tld = getattr(settings, "HOSTNAME", 'locahost')
