@@ -64,7 +64,6 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 
-
     # dash
     'dash.orgs',
     'dash.categories',
@@ -72,6 +71,7 @@ INSTALLED_APPS = (
     'dash.stories',
     'dash.utils',
 
+    'dash_test_runner.testapp'
 )
 
 MIDDLEWARE_CLASSES = (

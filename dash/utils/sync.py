@@ -15,6 +15,7 @@ class SyncOutcome(Enum):
     created = 1
     updated = 2
     deleted = 3
+    ignored = 4
 
 
 class BaseSyncer(object):
@@ -139,6 +140,8 @@ def sync_from_remote(org, syncer, remote):
             syncer.model.objects.create(**local_kwargs)
             return SyncOutcome.created
 
+    return SyncOutcome.ignored
+
 
 def sync_local_to_set(org, syncer, remote_set):
     """
@@ -148,7 +151,7 @@ def sync_local_to_set(org, syncer, remote_set):
     :param org: the org
     :param * syncer: the local model syncer
     :param remote_set: the set of remote objects
-    :return: tuple of number of local objects created, updated and deleted
+    :return: tuple of number of local objects created, updated, deleted and ignored
     """
     outcome_counts = defaultdict(int)
 
@@ -169,7 +172,12 @@ def sync_local_to_set(org, syncer, remote_set):
             syncer.delete_local(local)
             outcome_counts[SyncOutcome.deleted] += 1
 
-    return outcome_counts[SyncOutcome.created], outcome_counts[SyncOutcome.updated], outcome_counts[SyncOutcome.deleted]
+    return (
+        outcome_counts[SyncOutcome.created],
+        outcome_counts[SyncOutcome.updated],
+        outcome_counts[SyncOutcome.deleted],
+        outcome_counts[SyncOutcome.ignored]
+    )
 
 
 def sync_local_to_changes(org, syncer, fetches, deleted_fetches, progress_callback=None):
@@ -209,4 +217,9 @@ def sync_local_to_changes(org, syncer, fetches, deleted_fetches, progress_callba
         if progress_callback:
             progress_callback(num_synced)
 
-    return outcome_counts[SyncOutcome.created], outcome_counts[SyncOutcome.updated], outcome_counts[SyncOutcome.deleted]
+    return (
+        outcome_counts[SyncOutcome.created],
+        outcome_counts[SyncOutcome.updated],
+        outcome_counts[SyncOutcome.deleted],
+        outcome_counts[SyncOutcome.ignored]
+    )
