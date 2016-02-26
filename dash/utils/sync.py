@@ -1,213 +1,225 @@
 from __future__ import unicode_literals
 
-import logging
+"""
+Sync support
+"""
+
 import six
 
+from abc import ABCMeta, abstractmethod
+from collections import defaultdict
 from enum import Enum
-from temba_client.v1.types import Contact as TembaContact
-from . import union, intersection, filter_dict
 
 
-logger = logging.getLogger(__name__)
-
-
-class ChangeType(Enum):
+class SyncOutcome(Enum):
     created = 1
     updated = 2
     deleted = 3
+    ignored = 4
 
 
-def sync_push_contact(org, contact, change_type, mutex_group_sets):
+class BaseSyncer(object):
     """
-    Pushes a local change to a contact. mutex_group_sets is a list of UUID sets
-    of groups whose membership is mutually exclusive. Contact class must define
-    an as_temba instance method.
+    Base class for classes that describe how to synchronize particular local models against incoming data
     """
-    client = org.get_temba_client()
+    __metaclass__ = ABCMeta
 
-    if change_type == ChangeType.created:
-        temba_contact = contact.as_temba()
-        temba_contact = client.create_contact(temba_contact.name,
-                                              temba_contact.urns,
-                                              temba_contact.fields,
-                                              temba_contact.groups)
-        # update our contact with the new UUID from RapidPro
-        contact.uuid = temba_contact.uuid
-        contact.save()
+    model = None
+    local_id_attr = 'uuid'
+    remote_id_attr = 'uuid'
+    select_related = ()
+    prefetch_related = ()
 
-    elif change_type == ChangeType.updated:
-        # fetch contact so that we can merge with its URNs, fields and groups
-        remote_contact = client.get_contact(contact.uuid)
-        local_contact = contact.as_temba()
+    def identify_local(self, local):
+        """
+        Gets the unique identity of the local model instance
+        :param local: the local model instance
+        :return: the unique identity
+        """
+        return getattr(local, self.local_id_attr)
 
-        if temba_compare_contacts(remote_contact, local_contact):
-            merged_contact = temba_merge_contacts(
-                local_contact, remote_contact, mutex_group_sets)
+    def identify_remote(self, remote):
+        """
+        Gets the unique identity of the remote object
+        :param remote: the remote object
+        :return: the unique identity
+        """
+        return getattr(remote, self.remote_id_attr)
 
-            # fetched contacts may have fields with null values but we can't
-            # push these so we remove them
-            merged_contact.fields = {k: v
-                                     for k, v in six.iteritems(merged_contact.fields)
-                                     if v is not None}
+    def lock(self, org, identity):
+        """
+        Gets a lock on the given identity value
+        :param org: the org
+        :param identity: the unique identity
+        :return: the lock
+        """
+        return self.model.lock(org, identity)
 
-            client.update_contact(merged_contact.uuid,
-                                  merged_contact.name,
-                                  merged_contact.urns,
-                                  merged_contact.fields,
-                                  merged_contact.groups)
+    def fetch_local(self, org, identity):
+        """
+        Fetches the local model instance with the given identity, returning none if it doesn't exist
+        :param org: the org
+        :param identity: the unique identity
+        :return: the instance or none
+        """
+        qs = self.model.objects.filter(org=org).filter(**{self.local_id_attr: identity})
 
-    elif change_type == ChangeType.deleted:
-        client.delete_contact(contact.uuid)
+        if self.select_related:
+            qs = qs.select_related(*self.select_related)
+        if self.prefetch_related:
+            qs = qs.prefetch_related(*self.prefetch_related)
+
+        return qs.first()
+
+    @abstractmethod
+    def local_kwargs(self, org, remote):
+        """
+        Generates kwargs for creating or updating a local model instance from a remote object. Returning none from this
+        method means that the remote object doesn't belong locally.
+        :param org: the org
+        :param remote: the incoming remote object
+        :return: the kwargs or none
+        """
+        pass
+
+    def update_required(self, local, remote):
+        """
+        Determines whether local instance differs from the remote object and so needs to be updated. By default this
+        will always update the local instance which is obviously inefficient.
+        :param local: the local instance
+        :param remote: the incoming remote object
+        :return: whether the local instance must be updated
+        """
+        return True
+
+    def delete_local(self, local):
+        """
+        Deletes a local instance
+        :param local:
+        :return:
+        """
+        local.is_active = False
+        local.save(update_fields=('is_active',))
 
 
-def sync_pull_contacts(org, contact_class, fields=None, groups=None,
-                       last_time=None, delete_blocked=False):
+def sync_from_remote(org, syncer, remote):
     """
-    Pulls updated contacts or all contacts from RapidPro and syncs with local contacts.
-    Contact class must define a class method called kwargs_from_temba which generates
-    field kwargs from a fetched temba contact.
+    Sync local instance against a single remote object
+
+    :param * org: the org
+    :param * syncer: the local model syncer
+    :param * remote: the remote object
+    :return: the outcome (created, updated or deleted)
+    """
+    identity = syncer.identify_remote(remote)
+
+    with syncer.lock(org, identity):
+        existing = syncer.fetch_local(org, identity)
+
+        # derive kwargs for the local model (none return here means don't keep)
+        local_kwargs = syncer.local_kwargs(org, remote)
+
+        # exists locally
+        if existing:
+            existing.org = org  # saves pre-fetching since we already have the org
+
+            if local_kwargs:
+                if syncer.update_required(existing, remote) or not existing.is_active:
+                    for field, value in six.iteritems(local_kwargs):
+                        setattr(existing, field, value)
+
+                    existing.is_active = True
+                    existing.save()
+                    return SyncOutcome.updated
+
+            elif existing.is_active:  # exists locally, but shouldn't now to due to model changes
+                syncer.delete_local(existing)
+                return SyncOutcome.deleted
+
+        elif local_kwargs:
+            syncer.model.objects.create(**local_kwargs)
+            return SyncOutcome.created
+
+    return SyncOutcome.ignored
+
+
+def sync_local_to_set(org, syncer, remote_set):
+    """
+    Syncs an org's set of local instances of a model to match the set of remote objects. Local objects not in the remote
+    set are deleted.
 
     :param org: the org
-    :param contact_class: the contact class type
-    :param fields: the contact field keys used - used to determine if local contact differs
-    :param groups: the contact group UUIDs used - used to determine if local contact differs
-    :param last_time: the last time we pulled contacts, if None, sync all contacts
-    :param delete_blocked: if True, delete the blocked contacts
-    :return: tuple containing list of UUIDs for created, updated, deleted and failed contacts
+    :param * syncer: the local model syncer
+    :param remote_set: the set of remote objects
+    :return: tuple of number of local objects created, updated, deleted and ignored
     """
-    # get all remote contacts
-    client = org.get_temba_client()
-    updated_incoming_contacts = []
-    if last_time:
-        updated_incoming_contacts = client.get_contacts(after=last_time)
-    else:
-        updated_incoming_contacts = client.get_contacts()
+    outcome_counts = defaultdict(int)
 
-    # get all existing contacts and organize by their UUID
-    existing_contacts = contact_class.objects.filter(org=org)
-    existing_by_uuid = {contact.uuid: contact for contact in existing_contacts}
+    remote_identities = set()
 
-    created_uuids = []
-    updated_uuids = []
-    deleted_uuids = []
-    failed_uuids = []
+    for remote in remote_set:
+        outcome = sync_from_remote(org, syncer, remote)
+        outcome_counts[outcome] += 1
 
-    for updated_incoming in updated_incoming_contacts:
-        # delete blocked contacts if deleted_blocked=True
-        if updated_incoming.blocked and delete_blocked:
-            deleted_uuids.append(updated_incoming.uuid)
+        remote_identities.add(syncer.identify_remote(remote))
 
-        elif updated_incoming.uuid in existing_by_uuid:
-            existing = existing_by_uuid[updated_incoming.uuid]
+    # active local objects which weren't in the remote set need to be deleted
+    active_locals = syncer.model.objects.filter(org=org, is_active=True)
+    delete_locals = active_locals.exclude(**{syncer.local_id_attr + '__in': remote_identities})
 
-            diff = temba_compare_contacts(updated_incoming, existing.as_temba(), fields, groups)
+    for local in delete_locals:
+        with syncer.lock(org, syncer.identify_local(local)):
+            syncer.delete_local(local)
+            outcome_counts[SyncOutcome.deleted] += 1
 
-            if diff or not existing.is_active:
-                try:
-                    kwargs = contact_class.kwargs_from_temba(org, updated_incoming)
-                except ValueError:
-                    failed_uuids.append(updated_incoming.uuid)
-                    continue
-
-                for field, value in six.iteritems(kwargs):
-                    setattr(existing, field, value)
-
-                existing.is_active = True
-                existing.save()
-
-                updated_uuids.append(updated_incoming.uuid)
-        else:
-            try:
-                kwargs = contact_class.kwargs_from_temba(org, updated_incoming)
-            except ValueError:
-                failed_uuids.append(updated_incoming.uuid)
-                continue
-
-            contact_class.objects.create(**kwargs)
-            created_uuids.append(kwargs['uuid'])
-
-    # any contact that has been deleted from rapidpro
-    # should also be deleted from dash
-    # if last_time was passed in, just get contacts deleted after the last time we synced
-    if last_time:
-        deleted_incoming_contacts = client.get_contacts(deleted=True, after=last_time)
-    else:
-        deleted_incoming_contacts = client.get_contacts(deleted=True)
-    for deleted_incoming in deleted_incoming_contacts:
-        deleted_uuids.append(deleted_incoming.uuid)
-    existing_contacts.filter(uuid__in=deleted_uuids).update(is_active=False)
-
-    return created_uuids, updated_uuids, deleted_uuids, failed_uuids
+    return (
+        outcome_counts[SyncOutcome.created],
+        outcome_counts[SyncOutcome.updated],
+        outcome_counts[SyncOutcome.deleted],
+        outcome_counts[SyncOutcome.ignored]
+    )
 
 
-def temba_compare_contacts(first, second, fields=None, groups=None):
+def sync_local_to_changes(org, syncer, fetches, deleted_fetches, progress_callback=None):
     """
-    Compares two Temba contacts to determine if there are differences. Returns
-    first difference found.
+    Sync local instances against iterators which return fetches of changed and deleted remote objects.
+
+    :param * org: the org
+    :param * syncer: the local model syncer
+    :param * fetches: an iterator returning fetches of modified remote objects
+    :param * deleted_fetches: an iterator returning fetches of deleted remote objects
+    :param * progress_callback: callable for tracking progress - called for each fetch with number of contacts fetched
+    :return: tuple containing counts of created, updated and deleted local instances
     """
-    if first.uuid != second.uuid:  # pragma: no cover
-        raise ValueError("Can't compare contacts with different UUIDs")
+    num_synced = 0
+    outcome_counts = defaultdict(int)
 
-    if first.name != second.name:
-        return 'name'
+    for fetch in fetches:
+        for remote in fetch:
+            outcome = sync_from_remote(org, syncer, remote)
+            outcome_counts[outcome] += 1
 
-    if sorted(first.urns) != sorted(second.urns):
-        return 'urns'
+        num_synced += len(fetch)
+        if progress_callback:
+            progress_callback(num_synced)
 
-    if groups is None and (sorted(first.groups) != sorted(second.groups)):
-        return 'groups'
-    if groups:
-        a = sorted(intersection(first.groups, groups))
-        b = sorted(intersection(second.groups, groups))
-        if a != b:
-            return 'groups'
+    # any item that has been deleted remotely should also be released locally
+    for deleted_fetch in deleted_fetches:
+        for deleted_remote in deleted_fetch:
+            identity = syncer.identify_remote(deleted_remote)
+            with syncer.lock(org, identity):
+                existing = syncer.fetch_local(org, identity)
+                if existing:
+                    syncer.delete_local(existing)
+                    outcome_counts[SyncOutcome.deleted] += 1
 
-    if fields is None and (first.fields != second.fields):
-        return 'fields'
-    if fields and (filter_dict(first.fields, fields) != filter_dict(second.fields, fields)):
-        return 'fields'
+        num_synced += len(deleted_fetch)
+        if progress_callback:
+            progress_callback(num_synced)
 
-    return None
-
-
-def temba_merge_contacts(first, second, mutex_group_sets):
-    """
-    Merges two Temba contacts, with priority given to the first contact
-    """
-    if first.uuid != second.uuid:  # pragma: no cover
-        raise ValueError("Can't merge contacts with different UUIDs")
-
-    # URNs are merged by scheme
-    first_urns_by_scheme = {u[0]: u[1] for u in [urn.split(':', 1) for urn in first.urns]}
-    urns_by_scheme = {u[0]: u[1] for u in [urn.split(':', 1) for urn in second.urns]}
-    urns_by_scheme.update(first_urns_by_scheme)
-    merged_urns = ['%s:%s' % (scheme, path) for scheme, path in six.iteritems(urns_by_scheme)]
-
-    # fields are simple key based merge
-    merged_fields = second.fields.copy()
-    merged_fields.update(first.fields)
-
-    # first merge mutually exclusive group sets
-    first_groups = list(first.groups)
-    second_groups = list(second.groups)
-    merged_mutex_groups = []
-    for group_set in mutex_group_sets:
-        from_first = intersection(first_groups, group_set)
-        if from_first:
-            merged_mutex_groups.append(from_first[0])
-        else:
-            from_second = intersection(second_groups, group_set)
-            if from_second:
-                merged_mutex_groups.append(from_second[0])
-
-        for group in group_set:
-            if group in first_groups:
-                first_groups.remove(group)
-            if group in second_groups:
-                second_groups.remove(group)
-
-    # then merge the remaining groups
-    merged_groups = merged_mutex_groups + union(first_groups, second_groups)
-
-    return TembaContact.create(uuid=first.uuid, name=first.name,
-                               urns=merged_urns, fields=merged_fields, groups=merged_groups)
+    return (
+        outcome_counts[SyncOutcome.created],
+        outcome_counts[SyncOutcome.updated],
+        outcome_counts[SyncOutcome.deleted],
+        outcome_counts[SyncOutcome.ignored]
+    )

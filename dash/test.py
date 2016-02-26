@@ -16,14 +16,10 @@ class DashTest(TestCase):
     """
     Base class for dashboard test cases
     """
-    @classmethod
-    def setUpTestData(cls):
-        cls.clear_cache()
-        cls.superuser = User.objects.create_superuser(
-            username="root", email="super@user.com", password="root")
-
     def setUp(self):
         super(DashTest, self).setUp()
+
+        self.superuser = User.objects.create_superuser(username="root", email="super@user.com", password="root")
 
         self.clear_cache()
 
