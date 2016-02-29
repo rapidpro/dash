@@ -94,6 +94,9 @@ def maybe_run_for_org(org, task_func, task_key):
     else:
         with r.lock(key):
             state = org.get_task_state(task_key)
+            if state.is_disabled:
+                logger.info("Skipping for org #%d as task is marked disabled" % org.pk)
+                return
 
             logger.info("Started for org #%d..." % org.pk)
 
