@@ -1327,6 +1327,52 @@ class OrgTaskTest(DashTest):
         mock_over_time_window.assert_called_once_with(self.org, state2.started_on, state4.started_on)
         mock_over_time_window.reset_mock()
 
+        mock_over_time_window.side_effect = None
+        mock_over_time_window.return_value = {'foo': "bar", 'zed': 123}
+
+        # disable the task for our org
+        TaskState.objects.filter(org=self.org, task_key='test-task').update(is_disabled=True)
+
+        test_org_task(self.org.pk)
+
+        state5 = TaskState.objects.get(org=self.org, task_key='test-task')
+
+        self.assertEqual(state5.started_on, state4.started_on)
+        self.assertEqual(state5.last_successfully_started_on, state2.started_on)
+
+        mock_over_time_window.assert_not_called()
+
+        # and finally re-enable the task for our org
+        TaskState.objects.filter(org=self.org, task_key='test-task').update(is_disabled=False)
+
+        test_org_task(self.org.pk)
+
+        state6 = TaskState.objects.get(org=self.org, task_key='test-task')
+
+        self.assertGreater(state6.started_on, state4.started_on)
+        self.assertGreater(state6.last_successfully_started_on, state2.started_on)
+
+        mock_over_time_window.assert_called_once_with(self.org, state2.started_on, state6.started_on)
+
+
+class TaskCRUDLTest(DashTest):
+    def setUp(self):
+        super(TaskCRUDLTest, self).setUp()
+
+        self.org = self.create_org("uganda", self.admin)
+
+    def test_list(self):
+        url = reverse('orgs.task_list', args=[])
+
+        TaskState.get_or_create(self.org, 'test-task-1')
+        TaskState.get_or_create(self.org, 'test-task-2')
+
+        self.login(self.superuser)
+
+        response = self.client.get(url)
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(len(response.context['object_list']), 2)
+
 
 class MockResponse(object):
 

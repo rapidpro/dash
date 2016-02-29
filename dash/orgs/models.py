@@ -409,6 +409,8 @@ class TaskState(models.Model):
 
     is_failing = models.BooleanField(default=False)
 
+    is_disabled = models.BooleanField(default=False)
+
     @classmethod
     def get_or_create(cls, org, task_key):
         existing = cls.objects.filter(org=org, task_key=task_key).first()

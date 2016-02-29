@@ -269,6 +269,7 @@ SITE_API_HOST = 'http://localhost:8001'
 HOSTNAME = 'ureport.io'
 SITE_CHOOSER_TEMPLATE = 'orgs/org_chooser.html'
 SITE_CHOOSER_URL_NAME = 'orgs.org_chooser'
+SITE_ALLOW_NO_ORG = ('orgs.task_list',)
 
 CACHES = {
     'default': {

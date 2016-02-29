@@ -16,7 +16,7 @@ from smartmin.views import (
     SmartCRUDL, SmartCreateView, SmartReadView, SmartUpdateView,
     SmartListView, SmartFormView, SmartTemplateView)
 from .forms import CreateOrgLoginForm, OrgForm
-from .models import Org, OrgBackground, Invitation
+from .models import Org, OrgBackground, Invitation, TaskState
 
 
 class OrgPermsMixin(object):
@@ -632,3 +632,21 @@ class OrgBackgroundCRUDL(SmartCRUDL):
                     obj.org = org
 
             return obj
+
+
+class TaskCRUDL(SmartCRUDL):
+    actions = ('list',)
+    model = TaskState
+    model_name = _("Task")
+    path = 'task'
+
+    class List(SmartListView):
+        title = _("Tasks")
+        link_fields = ('org',)
+        default_order = ('org__name', 'task_key')
+
+        def lookup_field_link(self, context, field, obj):
+            if field == 'org':
+                return reverse('orgs.org_update', args=[obj.org_id])
+            else:
+                return super(TaskCRUDL.List, self).lookup_field_link(context, field, obj)
