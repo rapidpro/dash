@@ -535,7 +535,7 @@ class OrgTest(DashTest):
             mock_get_boundaries.return_value = None
 
             self.assertIsNone(self.org.get_country_geojson())
-            self.assertIsNone(self.org.get_state_geojson("R195269"))
+            self.assertIsNone(self.org.get_geojson_by_parent_id("R195269"))
 
             mock_get_boundaries.return_value = boundaries
             self.assertEqual(self.org.get_country_geojson(),
@@ -543,13 +543,13 @@ class OrgTest(DashTest):
                                   features=[dict(type="Feature",
                                                  geometry=dict(type='MultiPolygon', coordinates=[[1, 2], [3, 4]]),
                                                  properties=dict(name='Burundi', id="R195269", level=1))]))
-            self.assertEqual(self.org.get_state_geojson("R195269"),
+            self.assertEqual(self.org.get_geojson_by_parent_id("R195269"),
                              dict(type="FeatureCollection",
                                   features=[dict(type="Feature",
                                                  geometry=dict(type='MultiPolygon', coordinates=[[5, 6], [7, 8]]),
                                                  properties=dict(name='Bujumbura', id="R195270", level=2))]))
             # we get None if no value in dict
-            self.assertIsNone(self.org.get_state_geojson("R11"))
+            self.assertIsNone(self.org.get_geojson_by_parent_id("R11"))
 
     def test_org_create(self):
         create_url = reverse("orgs.org_create")
@@ -1812,7 +1812,6 @@ class APITest(DashTest):
                                                                                                name="B_NAME_4",
                                                                                                id="B_BOUNDARY_4",
                                                                                                level=2))])
-
             self.assertEquals(self.api._build_boundaries(), boundary_cached)
 
         with patch('requests.get') as mock_request_get:
@@ -1915,7 +1914,7 @@ class APITest(DashTest):
                                                                                                id="B_BOUNDARY_4",
                                                                                                level=2))])
 
-            self.assertEquals(self.api.get_state_geojson('B_BOUNDARY_2'),
+            self.assertEquals(self.api.get_geojson_by_parent_id('B_BOUNDARY_2'),
                               boundary_cached['geojson:%d:B_BOUNDARY_2' % self.org.id])
 
 
