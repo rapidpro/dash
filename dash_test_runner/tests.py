@@ -1355,6 +1355,25 @@ class OrgTaskTest(DashTest):
         mock_over_time_window.assert_called_once_with(self.org, state2.started_on, state6.started_on)
 
 
+class TaskCRUDLTest(DashTest):
+    def setUp(self):
+        super(TaskCRUDLTest, self).setUp()
+
+        self.org = self.create_org("uganda", self.admin)
+
+    def test_list(self):
+        url = reverse('orgs.task_list', args=[])
+
+        TaskState.get_or_create(self.org, 'test-task-1')
+        TaskState.get_or_create(self.org, 'test-task-2')
+
+        self.login(self.superuser)
+
+        response = self.client.get(url)
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(len(response.context['object_list']), 2)
+
+
 class MockResponse(object):
 
     def __init__(self, status_code, content=''):
