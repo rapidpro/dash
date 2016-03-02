@@ -26,9 +26,11 @@ class Command(BaseCommand):
         action = options['action']
         task_key = options['task']
 
-        orgs = Org.objects.filter(is_active=True).order_by('pk')
+        orgs = Org.objects.order_by('pk')
         if org_ids:
             orgs = orgs.filter(pk__in=org_ids)
+        else:
+            orgs = orgs.filter(is_active=True)
 
         if action in (self.ENABLE, self.DISABLE) and not task_key:
             raise CommandError("Must provide a task key")
