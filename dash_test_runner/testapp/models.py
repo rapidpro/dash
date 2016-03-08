@@ -35,5 +35,5 @@ class ContactSyncer(BaseSyncer):
             'name': remote.name
         }
 
-    def update_required(self, local, remote):
+    def update_required(self, local, remote, local_kwargs):
         return local.name != remote.name

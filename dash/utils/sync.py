@@ -82,12 +82,13 @@ class BaseSyncer(object):
         """
         pass
 
-    def update_required(self, local, remote):
+    def update_required(self, local, remote, local_kwargs):
         """
         Determines whether local instance differs from the remote object and so needs to be updated. By default this
         will always update the local instance which is obviously inefficient.
         :param local: the local instance
         :param remote: the incoming remote object
+        :param local_kwargs: the generated kwargs from remote object
         :return: whether the local instance must be updated
         """
         return True
@@ -124,7 +125,7 @@ def sync_from_remote(org, syncer, remote):
             existing.org = org  # saves pre-fetching since we already have the org
 
             if local_kwargs:
-                if syncer.update_required(existing, remote) or not existing.is_active:
+                if syncer.update_required(existing, remote, local_kwargs) or not existing.is_active:
                     for field, value in six.iteritems(local_kwargs):
                         setattr(existing, field, value)
 
