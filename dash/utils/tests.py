@@ -5,7 +5,10 @@ import pytz
 
 from datetime import datetime
 from django.core.cache import cache
-from . import intersection, union, random_string, filter_dict, get_cacheable, get_obj_cacheable, get_month_range, chunks
+from . import (
+    intersection, union, random_string, filter_dict, get_cacheable, get_obj_cacheable, get_month_range,
+    chunks, is_dict_equal
+)
 from ..test import DashTest
 
 
@@ -69,3 +72,14 @@ class InitTest(DashTest):
     def test_chunks(self):
         self.assertEqual(list(chunks([], 2)), [])
         self.assertEqual(list(chunks([1, 2, 3, 4, 5], 2)), [[1, 2], [3, 4], [5]])
+
+    def test_is_dict_equal(self):
+        self.assertTrue(is_dict_equal({'a': 1, 'b': 2}, {'b': 2, 'a': 1}))
+        self.assertFalse(is_dict_equal({'a': 1, 'b': 2}, {'a': 1, 'b': 3}))
+        self.assertFalse(is_dict_equal({'a': 1, 'b': 2}, {'a': 1, 'c': 2}))
+        self.assertFalse(is_dict_equal({'a': 1, 'b': 2}, {'a': 1, 'b': 2, 'c': 3}))
+
+        self.assertTrue(is_dict_equal({'a': 1, 'b': 2, 'c': 3}, {'a': 1, 'b': 2, 'c': 4}, keys=('a', 'b')))
+
+        self.assertTrue(is_dict_equal({'a': 1, 'b': 2}, {'a': 1, 'b': 2, 'c': None}, ignore_none_values=True))
+        self.assertFalse(is_dict_equal({'a': 1, 'b': 2}, {'a': 1, 'b': 2, 'c': None}, ignore_none_values=False))
