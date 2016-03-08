@@ -5,8 +5,10 @@ import pytz
 
 from datetime import datetime
 from django.core.cache import cache
-from . import intersection, union, random_string, filter_dict, get_cacheable, get_obj_cacheable, get_month_range, \
+from . import (
+    intersection, union, random_string, filter_dict, get_cacheable, get_obj_cacheable, get_month_range,
     chunks, is_dict_equal
+)
 from ..test import DashTest
 
 

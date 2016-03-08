@@ -82,13 +82,13 @@ class BaseSyncer(object):
         """
         pass
 
-    def update_required(self, local, remote, local_kwargs):
+    def update_required(self, local, remote, remote_as_kwargs):
         """
         Determines whether local instance differs from the remote object and so needs to be updated. By default this
         will always update the local instance which is obviously inefficient.
         :param local: the local instance
         :param remote: the incoming remote object
-        :param local_kwargs: the generated kwargs from remote object
+        :param remote_as_kwargs: the generated kwargs from remote object
         :return: whether the local instance must be updated
         """
         return True
@@ -118,15 +118,15 @@ def sync_from_remote(org, syncer, remote):
         existing = syncer.fetch_local(org, identity)
 
         # derive kwargs for the local model (none return here means don't keep)
-        local_kwargs = syncer.local_kwargs(org, remote)
+        remote_as_kwargs = syncer.local_kwargs(org, remote)
 
         # exists locally
         if existing:
             existing.org = org  # saves pre-fetching since we already have the org
 
-            if local_kwargs:
-                if syncer.update_required(existing, remote, local_kwargs) or not existing.is_active:
-                    for field, value in six.iteritems(local_kwargs):
+            if remote_as_kwargs:
+                if syncer.update_required(existing, remote, remote_as_kwargs) or not existing.is_active:
+                    for field, value in six.iteritems(remote_as_kwargs):
                         setattr(existing, field, value)
 
                     existing.is_active = True
@@ -137,8 +137,8 @@ def sync_from_remote(org, syncer, remote):
                 syncer.delete_local(existing)
                 return SyncOutcome.deleted
 
-        elif local_kwargs:
-            syncer.model.objects.create(**local_kwargs)
+        elif remote_as_kwargs:
+            syncer.model.objects.create(**remote_as_kwargs)
             return SyncOutcome.created
 
     return SyncOutcome.ignored
