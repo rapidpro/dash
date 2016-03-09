@@ -165,7 +165,7 @@ def sync_local_to_set(org, syncer, remote_set):
         remote_identities.add(syncer.identify_remote(remote))
 
     # active local objects which weren't in the remote set need to be deleted
-    active_locals = syncer.model.objects.filter(org=org, is_active=True)
+    active_locals = syncer.model.objects.filter(org=org)
     delete_locals = active_locals.exclude(**{syncer.local_id_attr + '__in': remote_identities})
 
     for local in delete_locals:
