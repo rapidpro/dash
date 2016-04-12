@@ -66,14 +66,15 @@ def trigger_org_task(task_name, queue='celery'):
     logger.info("Requested task '%s' for %d active orgs" % (task_name, len(active_orgs)))
 
 
-def org_task(task_key):
+def org_task(task_key, prefetch_related=()):
     """
     Decorator to create an org task.
     :param task_key: the task key used for state storage and locking, e.g. 'do-stuff'
+    :param prefetch_related: items to be pre-fetched when fetching the org
     """
     def _org_task(task_func):
         def _decorator(org_id):
-            org = apps.get_model('orgs', 'Org').objects.get(pk=org_id)
+            org = apps.get_model('orgs', 'Org').objects.prefetch_related(*prefetch_related).get(pk=org_id)
             maybe_run_for_org(org, task_func, task_key)
 
         return shared_task(wraps(task_func)(_decorator))
