@@ -116,7 +116,7 @@ def maybe_run_for_org(org, task_func, task_key):
                 elif num_task_args == 1:
                     results = task_func(org)
                 else:
-                    raise ValueError("Task function signature must be foo(org) or foo(org, since, until)")
+                    raise ValueError("Task signature must be foo(org) or foo(org, since, until)")  # pragma: no cover
 
                 state.ended_on = timezone.now()
                 state.last_successfully_started_on = this_started_on
