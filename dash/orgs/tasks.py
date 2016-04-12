@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import inspect
 import json
 import logging
 import six
@@ -66,14 +67,15 @@ def trigger_org_task(task_name, queue='celery'):
     logger.info("Requested task '%s' for %d active orgs" % (task_name, len(active_orgs)))
 
 
-def org_task(task_key):
+def org_task(task_key, prefetch_related=()):
     """
     Decorator to create an org task.
     :param task_key: the task key used for state storage and locking, e.g. 'do-stuff'
+    :param prefetch_related: items to be pre-fetched when fetching the org
     """
     def _org_task(task_func):
         def _decorator(org_id):
-            org = apps.get_model('orgs', 'Org').objects.get(pk=org_id)
+            org = apps.get_model('orgs', 'Org').objects.prefetch_related(*prefetch_related).get(pk=org_id)
             maybe_run_for_org(org, task_func, task_key)
 
         return shared_task(wraps(task_func)(_decorator))
@@ -107,8 +109,15 @@ def maybe_run_for_org(org, task_func, task_key):
             state.ended_on = None
             state.save(update_fields=('started_on', 'ended_on'))
 
+            num_task_args = len(inspect.getargspec(task_func).args)
+
             try:
-                results = task_func(org, prev_started_on, this_started_on)
+                if num_task_args == 3:
+                    results = task_func(org, prev_started_on, this_started_on)
+                elif num_task_args == 1:
+                    results = task_func(org)
+                else:
+                    raise ValueError("Task signature must be foo(org) or foo(org, since, until)")  # pragma: no cover
 
                 state.ended_on = timezone.now()
                 state.last_successfully_started_on = this_started_on

@@ -9,7 +9,7 @@ from redis_cache import get_redis_connection
 
 
 class Contact(models.Model):
-    org = models.ForeignKey(Org)
+    org = models.ForeignKey(Org, related_name='contacts')
 
     uuid = models.CharField(max_length=36, unique=True)
 
