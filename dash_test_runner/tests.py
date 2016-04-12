@@ -1246,9 +1246,9 @@ def test_over_time_window(org, started_on, prev_started_on):
     return {}
 
 
-@org_task('test-task-1')
+@org_task('test-task-1', prefetch_related=('contacts',))
 def test_org_task_1(org):
-    pass
+    return {'foo': len(org.contacts.all()) + len(org.contacts.all())}
 
 
 @org_task('test-task-2')
@@ -1266,8 +1266,9 @@ class OrgTaskTest(DashTest):
     def test_org_task(self, mock_over_time_window):
         mock_over_time_window.return_value = {'foo': "bar", 'zed': 123}
 
-        # org tasks are invoked with a single org id
-        test_org_task_1(self.org.pk)
+        with self.assertNumQueries(6):  # to check that contacts are actually pre-fetched
+            test_org_task_1(self.org.pk)
+
         test_org_task_2(self.org.pk)
 
         # should now have task states for that org
@@ -1280,7 +1281,7 @@ class OrgTaskTest(DashTest):
         self.assertIsNotNone(task1_state1.ended_on)
         self.assertEqual(task1_state1.last_successfully_started_on, task1_state1.started_on)
         self.assertFalse(task1_state1.is_running())
-        self.assertEqual(task1_state1.get_last_results(), None)
+        self.assertEqual(task1_state1.get_last_results(), {'foo': 0})
         self.assertEqual(task2_state1.get_time_taken(), task1_timetaken)
         self.assertFalse(task1_state1.is_failing)
 
