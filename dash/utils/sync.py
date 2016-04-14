@@ -62,7 +62,7 @@ class BaseSyncer(object):
         :param identity: the unique identity
         :return: the instance or none
         """
-        qs = self.model.objects.filter(org=org).filter(**{self.local_id_attr: identity})
+        qs = self.fetch_all(org=org).filter(**{self.local_id_attr: identity})
 
         if self.select_related:
             qs = qs.select_related(*self.select_related)
@@ -70,6 +70,14 @@ class BaseSyncer(object):
             qs = qs.prefetch_related(*self.prefetch_related)
 
         return qs.first()
+
+    def fetch_all(self, org):
+        """
+        Fetches all local objects
+        :param org: the org
+        :return: the queryset
+        """
+        return self.model.objects.filter(org=org)
 
     @abstractmethod
     def local_kwargs(self, org, remote):
@@ -165,7 +173,7 @@ def sync_local_to_set(org, syncer, remote_set):
         remote_identities.add(syncer.identify_remote(remote))
 
     # active local objects which weren't in the remote set need to be deleted
-    active_locals = syncer.model.objects.filter(org=org, is_active=True)
+    active_locals = syncer.fetch_all(org).filter(is_active=True)
     delete_locals = active_locals.exclude(**{syncer.local_id_attr + '__in': remote_identities})
 
     for local in delete_locals:
