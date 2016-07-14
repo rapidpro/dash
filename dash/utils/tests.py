@@ -43,6 +43,7 @@ class InitTest(DashTest):
         self.assertEqual(get_cacheable('test_key:1', 60, calculate1), "CALCULATED")
         cache.set('test_key:1', json.dumps("CACHED"), 60)
         self.assertEqual(get_cacheable('test_key:1', 60, calculate1), "CACHED")
+        self.assertEqual(get_cacheable('test_key:1', 60, calculate1, recalculate=True), "CALCULATED")
 
         # falsey values shouldn't trigger re-calculation
         cache.set('test_key:1', json.dumps(0), 60)
@@ -62,6 +63,7 @@ class InitTest(DashTest):
         self.assertEqual(get_obj_cacheable(self, '_test_value', calculate), "CALCULATED")
         self._test_value = "CACHED"
         self.assertEqual(get_obj_cacheable(self, '_test_value', calculate), "CACHED")
+        self.assertEqual(get_obj_cacheable(self, '_test_value', calculate, recalculate=True), "CALCULATED")
 
     def test_get_month_range(self):
         self.assertEqual(
