@@ -5,7 +5,7 @@ from dash.orgs.models import Org
 from dash.utils.sync import BaseSyncer
 from django.db import models
 from django.utils.translation import ugettext as _
-from redis_cache import get_redis_connection
+from django_redis import get_redis_connection
 
 
 class Contact(models.Model):

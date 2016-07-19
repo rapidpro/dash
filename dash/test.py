@@ -39,22 +39,23 @@ class DashTest(TestCase):
         result = self.client.login(username=user.username, password=user.username)
         self.assertTrue(result, "Couldn't login as %(user)s / %(user)s" % dict(user=user.username))
 
-    def url_get(self, subdomain, url, params=None):
-        return self._url_request(subdomain, 'get', url, params)
+    def url_get(self, subdomain, url, params=None, **extra):
+        return self._url_request(subdomain, 'get', url, params, **extra)
 
-    def url_post(self, subdomain, url, data=None):
-        return self._url_request(subdomain, 'post', url, data)
+    def url_post(self, subdomain, url, data=None, **extra):
+        return self._url_request(subdomain, 'post', url, data, **extra)
 
     def assertLoginRedirect(self, response, subdomain, next_url):
         self.assertRedirects(response,
                              'http://%s.localhost/users/login/?next=%s' % (subdomain, next_url))
 
-    def _url_request(self, subdomain, method, url, data):
+    def _url_request(self, subdomain, method, url, data, **extra):
         if data is None:
             data = {}
-        extra = {}
+
         if subdomain:
             extra['HTTP_HOST'] = '%s.localhost' % subdomain
+
         func = getattr(self.client, method)
         response = func(url, data, **extra)
         if isinstance(response, JsonResponse):

@@ -1247,8 +1247,13 @@ def test_over_time_window(org, started_on, prev_started_on):
     return {}
 
 
-@org_task('test-task')
-def test_org_task(org, started_on, prev_started_on):
+@org_task('test-task-1')
+def test_org_task_1(org):
+    pass
+
+
+@org_task('test-task-2')
+def test_org_task_2(org, started_on, prev_started_on):
     return test_over_time_window(org, started_on, prev_started_on)
 
 
@@ -1263,40 +1268,52 @@ class OrgTaskTest(DashTest):
         mock_over_time_window.return_value = {'foo': "bar", 'zed': 123}
 
         # org tasks are invoked with a single org id
-        test_org_task(self.org.pk)
+        test_org_task_1(self.org.pk)
+        test_org_task_2(self.org.pk)
 
-        # should now have task state for that org
-        state1 = TaskState.objects.get(org=self.org, task_key='test-task')
+        # should now have task states for that org
+        task1_state1 = TaskState.objects.get(org=self.org, task_key='test-task-1')
+        task2_state1 = TaskState.objects.get(org=self.org, task_key='test-task-2')
 
-        self.assertIsNotNone(state1.started_on)
-        self.assertIsNotNone(state1.ended_on)
-        self.assertEqual(state1.last_successfully_started_on, state1.started_on)
-        self.assertFalse(state1.is_running())
-        self.assertEqual(state1.get_last_results(), {'foo': "bar", 'zed': 123})
-        self.assertEqual(state1.get_time_taken(), (state1.ended_on - state1.started_on).total_seconds())
-        self.assertFalse(state1.is_failing)
+        task1_timetaken = (task2_state1.ended_on - task2_state1.started_on).total_seconds()
+
+        self.assertIsNotNone(task1_state1.started_on)
+        self.assertIsNotNone(task1_state1.ended_on)
+        self.assertEqual(task1_state1.last_successfully_started_on, task1_state1.started_on)
+        self.assertFalse(task1_state1.is_running())
+        self.assertEqual(task1_state1.get_last_results(), None)
+        self.assertEqual(task2_state1.get_time_taken(), task1_timetaken)
+        self.assertFalse(task1_state1.is_failing)
+
+        self.assertIsNotNone(task2_state1.started_on)
+        self.assertIsNotNone(task2_state1.ended_on)
+        self.assertEqual(task2_state1.last_successfully_started_on, task2_state1.started_on)
+        self.assertFalse(task2_state1.is_running())
+        self.assertEqual(task2_state1.get_last_results(), {'foo': "bar", 'zed': 123})
+
+        self.assertFalse(task2_state1.is_failing)
 
         self.assertEqual(list(TaskState.get_failing()), [])
 
-        mock_over_time_window.assert_called_once_with(self.org, None, state1.started_on)
+        mock_over_time_window.assert_called_once_with(self.org, None, task2_state1.started_on)
         mock_over_time_window.reset_mock()
 
         # running again will update state
-        test_org_task(self.org.pk)
-        state2 = TaskState.objects.get(org=self.org, task_key='test-task')
+        test_org_task_2(self.org.pk)
+        state2 = TaskState.objects.get(org=self.org, task_key='test-task-2')
 
-        self.assertGreater(state2.started_on, state1.started_on)
+        self.assertGreater(state2.started_on, task2_state1.started_on)
         self.assertEqual(state2.last_successfully_started_on, state2.started_on)
 
-        mock_over_time_window.assert_called_once_with(self.org, state1.started_on, state2.started_on)
+        mock_over_time_window.assert_called_once_with(self.org, task2_state1.started_on, state2.started_on)
         mock_over_time_window.reset_mock()
 
         mock_over_time_window.side_effect = ValueError("DOH!")
 
         # test when task throw exception
-        self.assertRaises(ValueError, test_org_task, self.org.pk)
+        self.assertRaises(ValueError, test_org_task_2, self.org.pk)
 
-        state3 = TaskState.objects.get(org=self.org, task_key='test-task')
+        state3 = TaskState.objects.get(org=self.org, task_key='test-task-2')
 
         self.assertGreater(state3.started_on, state2.started_on)
         self.assertGreater(state3.ended_on, state2.ended_on)
@@ -1311,9 +1328,9 @@ class OrgTaskTest(DashTest):
         mock_over_time_window.reset_mock()
 
         # test when called, again, start time is from last successful run
-        self.assertRaises(ValueError, test_org_task, self.org.pk)
+        self.assertRaises(ValueError, test_org_task_2, self.org.pk)
 
-        state4 = TaskState.objects.get(org=self.org, task_key='test-task')
+        state4 = TaskState.objects.get(org=self.org, task_key='test-task-2')
 
         self.assertGreater(state4.started_on, state3.started_on)
         self.assertGreater(state4.ended_on, state3.ended_on)
@@ -1326,11 +1343,11 @@ class OrgTaskTest(DashTest):
         mock_over_time_window.return_value = {'foo': "bar", 'zed': 123}
 
         # disable the task for our org
-        TaskState.objects.filter(org=self.org, task_key='test-task').update(is_disabled=True)
+        TaskState.objects.filter(org=self.org, task_key='test-task-2').update(is_disabled=True)
 
-        test_org_task(self.org.pk)
+        test_org_task_2(self.org.pk)
 
-        state5 = TaskState.objects.get(org=self.org, task_key='test-task')
+        state5 = TaskState.objects.get(org=self.org, task_key='test-task-2')
 
         self.assertEqual(state5.started_on, state4.started_on)
         self.assertEqual(state5.last_successfully_started_on, state2.started_on)
@@ -1338,11 +1355,11 @@ class OrgTaskTest(DashTest):
         mock_over_time_window.assert_not_called()
 
         # and finally re-enable the task for our org
-        TaskState.objects.filter(org=self.org, task_key='test-task').update(is_disabled=False)
+        TaskState.objects.filter(org=self.org, task_key='test-task-2').update(is_disabled=False)
 
-        test_org_task(self.org.pk)
+        test_org_task_2(self.org.pk)
 
-        state6 = TaskState.objects.get(org=self.org, task_key='test-task')
+        state6 = TaskState.objects.get(org=self.org, task_key='test-task-2')
 
         self.assertGreater(state6.started_on, state4.started_on)
         self.assertGreater(state6.last_successfully_started_on, state2.started_on)

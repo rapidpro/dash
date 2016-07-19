@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import inspect
 import json
 import logging
 import six
@@ -107,8 +108,15 @@ def maybe_run_for_org(org, task_func, task_key):
             state.ended_on = None
             state.save(update_fields=('started_on', 'ended_on'))
 
+            num_task_args = len(inspect.getargspec(task_func).args)
+
             try:
-                results = task_func(org, prev_started_on, this_started_on)
+                if num_task_args == 3:
+                    results = task_func(org, prev_started_on, this_started_on)
+                elif num_task_args == 1:
+                    results = task_func(org)
+                else:
+                    raise ValueError("Task signature must be foo(org) or foo(org, since, until)")  # pragma: no cover
 
                 state.ended_on = timezone.now()
                 state.last_successfully_started_on = this_started_on
