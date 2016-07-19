@@ -8,7 +8,7 @@ from .models import Category, CategoryImage
 
 class CategoryChoiceField(forms.ModelChoiceField):
 
-    def label_from_instace(self, obj):
+    def label_from_instance(self, obj):
         label = "%s - %s" % (obj.org, obj.name)
         if not obj.is_active:
             label += " (Inactive)"

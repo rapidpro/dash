@@ -1616,6 +1616,21 @@ class CategoryTest(DashTest):
         cat_image = CategoryImage.objects.filter(pk=cat_image.pk)[0]
         self.assertEquals(cat_image.name, 'health image')
 
+        nigeria_law = Category.objects.create(name="Law", org=self.nigeria, is_active=False,
+                                              created_by=self.admin, modified_by=self.admin)
+
+        response = self.client.get(create_url, SERVER_NAME='nigeria.ureport.io')
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(len(response.context['form'].fields), 4)
+        self.assertEquals(response.context['form'].fields['category'].choices.queryset.count(), 2)
+        self.assertIsInstance(response.context['form'].fields['category'].choices.field, CategoryChoiceField)
+        self.assertEquals(nigeria_health, response.context['form'].fields['category'].choices.queryset[0])
+        self.assertEquals(nigeria_law, response.context['form'].fields['category'].choices.queryset[1])
+        self.assertEquals(list(response.context['form'].fields['category'].choices),
+                          [('', '---------'),
+                           (nigeria_health.pk, 'nigeria - Health'),
+                           (nigeria_law.pk, 'nigeria - Law (Inactive)')])
+
         self.clear_uploads()
 
 
