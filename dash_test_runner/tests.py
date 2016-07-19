@@ -1805,6 +1805,20 @@ class StoryTest(DashTest):
         self.assertEquals(story.video_id, 'yt_id')
         self.assertEquals(story.tags, ' first second third ')
 
+        nigeria_law = Category.objects.create(name="Law", org=self.nigeria, is_active=False,
+                                              created_by=self.admin, modified_by=self.admin)
+
+        response = self.client.get(create_url, SERVER_NAME='nigeria.ureport.io')
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(response.context['form'].fields['category'].choices.queryset.count(), 2)
+        self.assertIsInstance(response.context['form'].fields['category'].choices.field, CategoryChoiceField)
+        self.assertEquals(self.education_nigeria, response.context['form'].fields['category'].choices.queryset[0])
+        self.assertEquals(nigeria_law, response.context['form'].fields['category'].choices.queryset[1])
+        self.assertEquals(list(response.context['form'].fields['category'].choices),
+                          [('', '---------'),
+                           (self.education_nigeria.pk, 'nigeria - Education'),
+                           (nigeria_law.pk, 'nigeria - Law (Inactive)')])
+
     def test_update_story(self):
         story1 = Story.objects.create(title='foo',
                                       content='bar',

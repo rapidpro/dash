@@ -22,7 +22,7 @@ class CategoryImageForm(forms.ModelForm):
         del kwargs['org']
 
         super(CategoryImageForm, self).__init__(*args, **kwargs)
-        self.fields['category'].queryset = Category.objects.filter(org=self.org)
+        self.fields['category'].queryset = Category.objects.filter(org=self.org).order_by('org__name', 'name')
 
     category = CategoryChoiceField(Category.objects.filter(id__lte=-1))
 

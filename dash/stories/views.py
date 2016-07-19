@@ -14,7 +14,9 @@ class StoryForm(forms.ModelForm):
         self.org = kwargs['org']
         del kwargs['org']
         super(StoryForm, self).__init__(*args, **kwargs)
-        qs = Category.objects.filter(org=self.org, is_active=True)
+
+        # We show all categories even inactive one in the dropdown
+        qs = Category.objects.filter(org=self.org).order_by('org__name', 'name')
         self.fields['category'].queryset = qs
 
     category = CategoryChoiceField(Category.objects.filter(id__lte=-1))
