@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+from dash.categories.views import CategoryChoiceField
 from dash.orgs.views import OrgPermsMixin, OrgObjPermsMixin
 from django import forms
 from django.core.urlresolvers import reverse
@@ -16,7 +17,7 @@ class StoryForm(forms.ModelForm):
         qs = Category.objects.filter(org=self.org, is_active=True)
         self.fields['category'].queryset = qs
 
-    category = forms.ModelChoiceField(Category.objects.filter(id__lte=-1))
+    category = CategoryChoiceField(Category.objects.filter(id__lte=-1))
 
     class Meta:
         model = Story
