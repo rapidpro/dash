@@ -8,7 +8,7 @@ from .models import Category, CategoryImage
 
 
 class CategoryImageForm(forms.ModelForm):
-    category = CategoryChoiceField(Category.objects.none()
+    category = CategoryChoiceField(Category.objects.none())
 
     def __init__(self, *args, **kwargs):
         self.org = kwargs['org']
