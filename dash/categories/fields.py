@@ -9,4 +9,3 @@ class CategoryChoiceField(forms.ModelChoiceField):
             label += " (Inactive)"
 
         return label
-

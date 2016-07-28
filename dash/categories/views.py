@@ -7,7 +7,6 @@ from smartmin.views import SmartCRUDL, SmartCreateView, SmartListView, SmartUpda
 from .models import Category, CategoryImage
 
 
-
 class CategoryImageForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.org = kwargs['org']
