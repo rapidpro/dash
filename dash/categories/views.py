@@ -1,19 +1,11 @@
 from __future__ import unicode_literals
 
+from dash.categories.fields import CategoryChoiceField
 from dash.orgs.views import OrgPermsMixin, OrgObjPermsMixin
 from django import forms
 from smartmin.views import SmartCRUDL, SmartCreateView, SmartListView, SmartUpdateView
 from .models import Category, CategoryImage
 
-
-class CategoryChoiceField(forms.ModelChoiceField):
-
-    def label_from_instance(self, obj):
-        label = "%s - %s" % (obj.org, obj.name)
-        if not obj.is_active:
-            label += " (Inactive)"
-
-        return label
 
 
 class CategoryImageForm(forms.ModelForm):

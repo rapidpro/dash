@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from dash.categories.views import CategoryChoiceField
+from dash.categories.fields import CategoryChoiceField
 from dash.orgs.views import OrgPermsMixin, OrgObjPermsMixin
 from django import forms
 from django.core.urlresolvers import reverse

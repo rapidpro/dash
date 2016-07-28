@@ -4,7 +4,7 @@ import json
 import redis
 
 from dash.categories.models import Category, CategoryImage
-from dash.categories.views import CategoryChoiceField
+from dash.categories.fields import CategoryChoiceField
 from dash.dashblocks.models import DashBlockType, DashBlock, DashBlockImage
 from dash.dashblocks.templatetags.dashblocks import load_qbs
 from dash.orgs.middleware import SetOrgMiddleware
