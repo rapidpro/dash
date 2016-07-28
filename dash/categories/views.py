@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+from dash.categories.fields import CategoryChoiceField
 from dash.orgs.views import OrgPermsMixin, OrgObjPermsMixin
 from django import forms
 from smartmin.views import SmartCRUDL, SmartCreateView, SmartListView, SmartUpdateView
@@ -7,14 +8,14 @@ from .models import Category, CategoryImage
 
 
 class CategoryImageForm(forms.ModelForm):
+    category = CategoryChoiceField(Category.objects.none())
+
     def __init__(self, *args, **kwargs):
         self.org = kwargs['org']
         del kwargs['org']
 
         super(CategoryImageForm, self).__init__(*args, **kwargs)
-        self.fields['category'].queryset = Category.objects.filter(org=self.org)
-
-    category = forms.ModelChoiceField(Category.objects.filter(id__lte=-1))
+        self.fields['category'].queryset = Category.objects.filter(org=self.org).order_by('name')
 
     class Meta:
         model = CategoryImage
