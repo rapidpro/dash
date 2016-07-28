@@ -6,15 +6,25 @@ from smartmin.views import SmartCRUDL, SmartCreateView, SmartListView, SmartUpda
 from .models import Category, CategoryImage
 
 
+class CategoryChoiceField(forms.ModelChoiceField):
+
+    def label_from_instance(self, obj):
+        label = "%s - %s" % (obj.org, obj.name)
+        if not obj.is_active:
+            label += " (Inactive)"
+
+        return label
+
+
 class CategoryImageForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.org = kwargs['org']
         del kwargs['org']
 
         super(CategoryImageForm, self).__init__(*args, **kwargs)
-        self.fields['category'].queryset = Category.objects.filter(org=self.org)
+        self.fields['category'].queryset = Category.objects.filter(org=self.org).order_by('org__name', 'name')
 
-    category = forms.ModelChoiceField(Category.objects.filter(id__lte=-1))
+    category = CategoryChoiceField(Category.objects.filter(id__lte=-1))
 
     class Meta:
         model = CategoryImage
