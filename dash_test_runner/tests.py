@@ -19,6 +19,7 @@ from django.core.exceptions import DisallowedHost
 from django.core.urlresolvers import reverse, ResolverMatch
 from django.db.utils import IntegrityError
 from django.http import HttpRequest
+from django.test import override_settings
 from django.utils.encoding import force_text
 from mock import patch, Mock
 from smartmin.tests import SmartminTest
@@ -483,6 +484,7 @@ class OrgTest(DashTest):
                 self.assertEqual(self.org.build_host_link(), 'http://ureport.ug')
                 self.assertEqual(self.org.build_host_link(True), 'https://uganda.localhost:8000')
 
+    @override_settings(CELERY_ALWAYS_EAGER=True)
     def test_build_boundaries(self):
         boundaries = dict()
         boundaries['geojson:%d' % self.org.pk] = dict(
