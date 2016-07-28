@@ -4,6 +4,7 @@ import json
 import redis
 
 from dash.categories.models import Category, CategoryImage
+from dash.categories.views import CategoryChoiceField
 from dash.dashblocks.models import DashBlockType, DashBlock, DashBlockImage
 from dash.dashblocks.templatetags.dashblocks import load_qbs
 from dash.orgs.middleware import SetOrgMiddleware
@@ -1576,6 +1577,7 @@ class CategoryTest(DashTest):
         self.assertEquals(response.status_code, 200)
         self.assertEquals(len(response.context['form'].fields), 4)
         self.assertEquals(response.context['form'].fields['category'].choices.queryset.count(), 1)
+        self.assertIsInstance(response.context['form'].fields['category'].choices.field, CategoryChoiceField)
         self.assertEquals(nigeria_health, response.context['form'].fields['category'].choices.queryset[0])
 
         response = self.client.get(create_url, SERVER_NAME='uganda.ureport.io')
@@ -1615,6 +1617,21 @@ class CategoryTest(DashTest):
         self.assertEquals(response.request['PATH_INFO'], reverse('categories.categoryimage_list'))
         cat_image = CategoryImage.objects.filter(pk=cat_image.pk)[0]
         self.assertEquals(cat_image.name, 'health image')
+
+        nigeria_law = Category.objects.create(name="Law", org=self.nigeria, is_active=False,
+                                              created_by=self.admin, modified_by=self.admin)
+
+        response = self.client.get(create_url, SERVER_NAME='nigeria.ureport.io')
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(len(response.context['form'].fields), 4)
+        self.assertEquals(response.context['form'].fields['category'].choices.queryset.count(), 2)
+        self.assertIsInstance(response.context['form'].fields['category'].choices.field, CategoryChoiceField)
+        self.assertEquals(nigeria_health, response.context['form'].fields['category'].choices.queryset[0])
+        self.assertEquals(nigeria_law, response.context['form'].fields['category'].choices.queryset[1])
+        self.assertEquals(list(response.context['form'].fields['category'].choices),
+                          [('', '---------'),
+                           (nigeria_health.pk, 'nigeria - Health'),
+                           (nigeria_law.pk, 'nigeria - Law (Inactive)')])
 
         self.clear_uploads()
 
@@ -1763,6 +1780,7 @@ class StoryTest(DashTest):
         self.assertTrue('tags' in fields)
         self.assertTrue('category' in fields)
 
+        self.assertIsInstance(fields['category'].choices.field, CategoryChoiceField)
         self.assertEquals(len(fields['category'].choices.queryset), 1)
 
         response = self.client.post(create_url, dict(), SERVER_NAME='uganda.ureport.io')
@@ -1788,6 +1806,20 @@ class StoryTest(DashTest):
         self.assertEquals(story.audio_link, 'http://example.com/foo.mp3')
         self.assertEquals(story.video_id, 'yt_id')
         self.assertEquals(story.tags, ' first second third ')
+
+        nigeria_law = Category.objects.create(name="Law", org=self.nigeria, is_active=False,
+                                              created_by=self.admin, modified_by=self.admin)
+
+        response = self.client.get(create_url, SERVER_NAME='nigeria.ureport.io')
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(response.context['form'].fields['category'].choices.queryset.count(), 2)
+        self.assertIsInstance(response.context['form'].fields['category'].choices.field, CategoryChoiceField)
+        self.assertEquals(self.education_nigeria, response.context['form'].fields['category'].choices.queryset[0])
+        self.assertEquals(nigeria_law, response.context['form'].fields['category'].choices.queryset[1])
+        self.assertEquals(list(response.context['form'].fields['category'].choices),
+                          [('', '---------'),
+                           (self.education_nigeria.pk, 'nigeria - Education'),
+                           (nigeria_law.pk, 'nigeria - Law (Inactive)')])
 
     def test_update_story(self):
         story1 = Story.objects.create(title='foo',

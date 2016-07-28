@@ -74,6 +74,7 @@ INSTALLED_APPS = (
     'dash_test_runner.testapp'
 )
 
+
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

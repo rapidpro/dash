@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+from dash.categories.views import CategoryChoiceField
 from dash.orgs.views import OrgPermsMixin, OrgObjPermsMixin
 from django import forms
 from django.core.urlresolvers import reverse
@@ -13,10 +14,12 @@ class StoryForm(forms.ModelForm):
         self.org = kwargs['org']
         del kwargs['org']
         super(StoryForm, self).__init__(*args, **kwargs)
-        qs = Category.objects.filter(org=self.org, is_active=True)
+
+        # We show all categories even inactive one in the dropdown
+        qs = Category.objects.filter(org=self.org).order_by('org__name', 'name')
         self.fields['category'].queryset = qs
 
-    category = forms.ModelChoiceField(Category.objects.filter(id__lte=-1))
+    category = CategoryChoiceField(Category.objects.filter(id__lte=-1))
 
     class Meta:
         model = Story

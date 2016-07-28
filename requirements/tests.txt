@@ -2,3 +2,7 @@ coverage
 mock
 flake8
 funcsigs
+configparser
+mccabe
+pycodestyle
+pyflakes
