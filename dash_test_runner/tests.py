@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
 import json
@@ -1417,6 +1418,22 @@ class CategoryTest(DashTest):
                                             modified_by=self.admin)
 
         self.assertEquals(force_text(category1), 'uganda - category 1')
+        self.assertEquals(category1.get_label_from_instance(), 'uganda - category 1')
+
+        category2 = Category.objects.create(name="Освіта",
+                                            org=self.uganda,
+                                            image='categories/image.jpg',
+                                            created_by=self.admin,
+                                            modified_by=self.admin)
+
+        label = category2.get_label_from_instance()
+        self.assertEquals(label, "uganda - Освіта")
+
+        Category.objects.filter(pk=category2.pk).update(is_active=False)
+
+        category2 = Category.objects.filter(pk=category2.pk).first()
+        label = category2.get_label_from_instance()
+        self.assertEquals(label, "uganda - Освіта (Inactive)")
 
         with self.assertRaises(IntegrityError):
             Category.objects.create(name='category 1',

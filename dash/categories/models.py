@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
 from dash.orgs.models import Org
@@ -26,6 +27,13 @@ class Category(SmartModel):
         cat_images = self.images.filter(is_active=True).exclude(image='')
         if cat_images and cat_images.first().image:
             return cat_images.first().image
+
+    def get_label_from_instance(self):
+        label = str(self)
+        label = label.decode('utf-8')
+        if not self.is_active:
+            label = "%s %s" % (label, "(Inactive)")
+        return label
 
     def __str__(self):
         return "%s - %s" % (self.org, self.name)
