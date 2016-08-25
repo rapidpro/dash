@@ -79,13 +79,13 @@ class MockClientQuery(six.Iterator):
     def __init__(self, *fetches):
         self.fetches = list(fetches)
 
-    def iterfetches(self, retry_on_rate_exceed=False):
+    def iterfetches(self, *args, **kwargs):
         return self
 
-    def all(self, retry_on_rate_exceed=False):
+    def all(self, *args, **kwargs):
         return list(itertools.chain.from_iterable(self.fetches))
 
-    def first(self, retry_on_rate_exceed=False):
+    def first(self, *args, **kwargs):
         return self.fetches[0][0] if self.fetches[0] else None
 
     def __iter__(self):
