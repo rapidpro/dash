@@ -6,3 +6,4 @@ omit =
     *__init__*,
     *settings*,
     *management/commands*
+    dash/test.py
