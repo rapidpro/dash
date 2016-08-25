@@ -88,6 +88,9 @@ class MockClientQuery(six.Iterator):
     def first(self, *args, **kwargs):
         return self.fetches[0][0] if self.fetches[0] else None
 
+    def get_cursor(self):
+        return 'cursor-string'
+
     def __iter__(self):
         return self
 
