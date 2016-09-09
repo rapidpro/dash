@@ -2331,6 +2331,13 @@ class DashBlockTest(DashTest):
         self.assertEquals(new_dashblock.title, 'kigali')
         self.assertEquals(new_dashblock.content, 'kacyiru')
 
+        response = self.client.get(create_url + "?slug=inexistent", SERVER_NAME='uganda.ureport.io')
+        self.assertEquals(response.status_code, 200)
+        self.assertTrue('form' in response.context)
+        fields = response.context['form'].fields
+        self.assertTrue('dashblock_type' in fields)
+        self.assertFalse(response.context['type'])
+
     def test_update_dashblock(self):
         dashblock1 = DashBlock.objects.create(dashblock_type=self.type_foo,
                                               org=self.uganda,

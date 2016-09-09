@@ -23,7 +23,7 @@ class DashBlockFormMixin(object):
     def get_type(self):
         block_type = self.request.POST.get('type', self.request.GET.get('type', None))
         if block_type:
-            return DashBlockType.objects.get(id=block_type)
+            return DashBlockType.objects.filter(id=block_type).first()
         return None
 
     def get_context_data(self, *args, **kwargs):
@@ -122,10 +122,10 @@ class DashBlockCRUDL(SmartCRUDL):
         def get_type(self):
             block_type = self.request.POST.get('type', self.request.GET.get('type', None))
             if block_type and block_type != '0':
-                return DashBlockType.objects.get(id=block_type)
+                return DashBlockType.objects.filter(id=block_type).first()
             slug = self.request.POST.get('slug', self.request.GET.get('slug', None))
             if slug:
-                return DashBlockType.objects.get(slug=slug)
+                return DashBlockType.objects.filter(slug=slug).first()
             return None
 
         def get_queryset(self, **kwargs):
@@ -222,5 +222,5 @@ class DashBlockImageCRUDL(SmartCRUDL):
         def pre_save(self, obj):
             obj = super(DashBlockImageCRUDL.Create, self).pre_save(obj)
             block_id = self.request.POST.get('dashblock', self.request.GET.get('dashblock', None))
-            obj.dashblock = DashBlock.objects.get(pk=block_id)
+            obj.dashblock = DashBlock.objects.filter(pk=block_id).first()
             return obj
