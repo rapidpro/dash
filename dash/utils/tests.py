@@ -78,6 +78,7 @@ class InitTest(DashTest):
 
         # if data is a list, chunking still works but with non-deterministic ordering
         batches = list(chunks({1, 2, 3, 4, 5}, 2))
+        self.assertEqual(len(batches), 3)
         self.assertEqual(set(chain(*batches)), {1, 2, 3, 4, 5})
 
     def test_is_dict_equal(self):
