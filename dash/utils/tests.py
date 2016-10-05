@@ -76,7 +76,7 @@ class InitTest(DashTest):
         self.assertEqual(list(chunks([], 2)), [])
         self.assertEqual(list(chunks([1, 2, 3, 4, 5], 2)), [[1, 2], [3, 4], [5]])
 
-        # if data is a list, chunking still works but with non-deterministic ordering
+        # if data is a set, chunking still works but with non-deterministic ordering
         batches = list(chunks({1, 2, 3, 4, 5}, 2))
         self.assertEqual(len(batches), 3)
         self.assertEqual(set(chain(*batches)), {1, 2, 3, 4, 5})
