@@ -5,6 +5,7 @@ import pytz
 
 from datetime import datetime
 from django.core.cache import cache
+from itertools import chain
 from . import (
     intersection, union, random_string, filter_dict, get_cacheable, get_obj_cacheable, get_month_range,
     chunks, is_dict_equal
@@ -74,6 +75,10 @@ class InitTest(DashTest):
     def test_chunks(self):
         self.assertEqual(list(chunks([], 2)), [])
         self.assertEqual(list(chunks([1, 2, 3, 4, 5], 2)), [[1, 2], [3, 4], [5]])
+
+        # if data is a list, chunking still works but with non-deterministic ordering
+        batches = list(chunks({1, 2, 3, 4, 5}, 2))
+        self.assertEqual(set(chain(*batches)), {1, 2, 3, 4, 5})
 
     def test_is_dict_equal(self):
         self.assertTrue(is_dict_equal({'a': 1, 'b': 2}, {'b': 2, 'a': 1}))

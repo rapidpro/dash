@@ -122,6 +122,9 @@ def chunks(data, size):
     """
     Yield successive chunks from the given slice-able collection
     """
+    if not isinstance(data, list):
+        data = list(data)
+
     for i in six.moves.xrange(0, len(data), size):
         yield data[i:(i + size)]
 
