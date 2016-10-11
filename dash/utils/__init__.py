@@ -94,14 +94,14 @@ def datetime_to_ms(dt):
     Converts a datetime to a millisecond accuracy timestamp
     """
     seconds = calendar.timegm(dt.utctimetuple())
-    return seconds * 1000 + dt.microsecond / 1000
+    return seconds * 1000 + int(dt.microsecond / 1000)
 
 
 def ms_to_datetime(ms):
     """
     Converts a millisecond accuracy timestamp to a datetime
     """
-    dt = datetime.datetime.utcfromtimestamp(ms/1000)
+    dt = datetime.datetime.utcfromtimestamp(ms / 1000)
     return dt.replace(microsecond=(ms % 1000) * 1000).replace(tzinfo=pytz.utc)
 
 
