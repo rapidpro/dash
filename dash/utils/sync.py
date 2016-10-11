@@ -18,12 +18,11 @@ class SyncOutcome(Enum):
     ignored = 4
 
 
+@six.add_metaclass(ABCMeta)
 class BaseSyncer(object):
     """
     Base class for classes that describe how to synchronize particular local models against incoming data
     """
-    __metaclass__ = ABCMeta
-
     model = None
     local_id_attr = 'uuid'
     remote_id_attr = 'uuid'
