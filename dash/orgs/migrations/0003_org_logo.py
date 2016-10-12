@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='org',
             name='logo',
-            field=models.ImageField(help_text='The logo that should be used for this organization', null=True, upload_to=b'logos', blank=True),
+            field=models.ImageField(help_text='The logo that should be used for this organization', null=True, upload_to='logos', blank=True),
             preserve_default=True,
         ),
     ]

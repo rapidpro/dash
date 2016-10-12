@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='story',
             name='image',
-            field=models.ImageField(help_text='Any image that should be displayed with this story', null=True, upload_to=b'stories', blank=True),
+            field=models.ImageField(help_text='Any image that should be displayed with this story', null=True, upload_to='stories', blank=True),
         ),
     ]

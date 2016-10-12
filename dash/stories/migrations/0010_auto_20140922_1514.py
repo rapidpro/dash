@@ -15,12 +15,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='story',
             name='created_by',
-            field=models.ForeignKey(related_name=b'stories_story_creations', to=settings.AUTH_USER_MODEL, help_text=b'The user which originally created this item'),
+            field=models.ForeignKey(related_name='stories_story_creations', to=settings.AUTH_USER_MODEL, help_text='The user which originally created this item'),
         ),
         migrations.AlterField(
             model_name='story',
             name='modified_by',
-            field=models.ForeignKey(related_name=b'stories_story_modifications', to=settings.AUTH_USER_MODEL, help_text=b'The user which last modified this item'),
+            field=models.ForeignKey(related_name='stories_story_modifications', to=settings.AUTH_USER_MODEL, help_text='The user which last modified this item'),
         ),
         migrations.AlterField(
             model_name='story',
@@ -30,16 +30,16 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='storyimage',
             name='created_by',
-            field=models.ForeignKey(related_name=b'stories_storyimage_creations', to=settings.AUTH_USER_MODEL, help_text=b'The user which originally created this item'),
+            field=models.ForeignKey(related_name='stories_storyimage_creations', to=settings.AUTH_USER_MODEL, help_text='The user which originally created this item'),
         ),
         migrations.AlterField(
             model_name='storyimage',
             name='modified_by',
-            field=models.ForeignKey(related_name=b'stories_storyimage_modifications', to=settings.AUTH_USER_MODEL, help_text=b'The user which last modified this item'),
+            field=models.ForeignKey(related_name='stories_storyimage_modifications', to=settings.AUTH_USER_MODEL, help_text='The user which last modified this item'),
         ),
         migrations.AlterField(
             model_name='storyimage',
             name='story',
-            field=models.ForeignKey(related_name=b'images', to='stories.Story', help_text='The story to associate to'),
+            field=models.ForeignKey(related_name='images', to='stories.Story', help_text='The story to associate to'),
         ),
     ]

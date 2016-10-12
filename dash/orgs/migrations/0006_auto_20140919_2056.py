@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='org',
             name='language',
-            field=models.CharField(choices=[(b'en', b'English'), (b'fr', b'French')], max_length=64, blank=True, help_text='The main language used by this organization', null=True, verbose_name='Language'),
+            field=models.CharField(choices=[('en', 'English'), ('fr', 'French')], max_length=64, blank=True, help_text='The main language used by this organization', null=True, verbose_name='Language'),
         ),
     ]

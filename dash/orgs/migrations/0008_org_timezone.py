@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='org',
             name='timezone',
-            field=models.CharField(default=b'UTC', max_length=64, verbose_name='Timezone'),
+            field=models.CharField(default='UTC', max_length=64, verbose_name='Timezone'),
             preserve_default=True,
         ),
     ]

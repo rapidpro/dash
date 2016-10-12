@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='org',
             name='subdomain',
-            field=models.SlugField(null=True, error_messages={b'unique': 'This subdomain is not available'}, max_length=255, blank=True, help_text='The subdomain for this U-Report instance', unique=True, verbose_name='Subdomain'),
+            field=models.SlugField(null=True, error_messages={'unique': 'This subdomain is not available'}, max_length=255, blank=True, help_text='The subdomain for this U-Report instance', unique=True, verbose_name='Subdomain'),
             preserve_default=True,
         ),
     ]
