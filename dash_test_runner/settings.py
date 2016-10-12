@@ -258,7 +258,7 @@ SITE_ALLOW_NO_ORG = ('orgs.task_list',)
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': '127.0.0.1:6379:10',
+        'LOCATION': 'redis://127.0.0.1:6379/10',
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }

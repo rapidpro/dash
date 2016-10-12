@@ -1,4 +1,3 @@
--e git+https://github.com/nyaruka/smartmin.git@master#egg=smartmin-1.8.1
 celery-with-redis
 django>=1.8.0,<1.10
 django-compressor<2.0
@@ -14,6 +13,7 @@ python-dateutil
 rapidpro-python
 requests
 six
-sorl-thumbnail>=12.1c
+smartmin
+sorl-thumbnail
 xlrd
 xlwt
