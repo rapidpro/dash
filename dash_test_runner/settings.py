@@ -49,6 +49,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
 
     'guardian',
+    'timezone_field',
 
     # compress our CSS and js
     'compressor',
