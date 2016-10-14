@@ -755,21 +755,21 @@ class OrgTest(DashTest):
 
         self.login(self.admin)
         response = self.client.get(home_url, SERVER_NAME="uganda.ureport.io")
-        self.assertEquals(200, response.status_code)
-        self.assertEquals(response.context['object'], self.org)
-        self.assertEquals(response.context['org'], self.org)
-        self.assertTrue('Not Set' in response.content)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['object'], self.org)
+        self.assertEqual(response.context['org'], self.org)
+        self.assertContains(response, "Not Set")
 
         self.org.api_token = '0' * 64
         self.org.save()
 
         self.login(self.admin)
         response = self.client.get(home_url, SERVER_NAME="uganda.ureport.io")
-        self.assertEquals(200, response.status_code)
-        self.assertEquals(response.context['object'], self.org)
-        self.assertEquals(response.context['org'], self.org)
-        self.assertFalse('Not Set' in response.content)
-        self.assertTrue('*' * 32 in response.content)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['object'], self.org)
+        self.assertEqual(response.context['org'], self.org)
+        self.assertNotContains(response, "Not Set")
+        self.assertContains(response, '*' * 32)
 
     def test_org_edit(self):
 
@@ -1159,7 +1159,7 @@ class OrgBackgroundTest(DashTest):
         self.assertEquals(len(response.context['form'].fields), 4)
         self.assertTrue('org' not in response.context['form'].fields)
 
-        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "r")
+        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "rb")
 
         post_data = dict(name="Orange Pattern", background_type="P", image=upload)
         response = self.client.post(create_url, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
@@ -1173,7 +1173,7 @@ class OrgBackgroundTest(DashTest):
         self.assertEquals(len(response.context['form'].fields), 4)
         self.assertTrue('org' not in response.context['form'].fields)
 
-        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "r")
+        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "rb")
 
         post_data = dict(name="Orange Pattern", background_type="P", image=upload)
         response = self.client.post(create_url, post_data, follow=True, SERVER_NAME='nigeria.ureport.io')
@@ -1206,7 +1206,7 @@ class OrgBackgroundTest(DashTest):
         self.assertEquals(len(response.context['form'].fields), 5)
         self.assertTrue('org' not in response.context['form'].fields)
 
-        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "r")
+        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "rb")
         post_data = dict(name="Orange Pattern Updated", background_type="P", image=upload)
         response = self.client.post(uganda_bg_update_url, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
         self.assertEquals(response.request['PATH_INFO'], list_url)
@@ -1219,14 +1219,14 @@ class OrgBackgroundTest(DashTest):
         self.assertEquals(len(response.context['form'].fields), 5)
         self.assertTrue('org' in response.context['form'].fields)
 
-        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "r")
+        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "rb")
 
         post_data = dict(name="Blue Pattern", background_type="P", image=upload)
         response = self.client.post(create_url, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
         self.assertTrue('form' in response.context)
         self.assertTrue('org' in response.context['form'].errors)
 
-        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "r")
+        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "rb")
 
         post_data = dict(name="Blue Pattern", background_type="P", image=upload, org=self.uganda.pk)
 
@@ -1603,7 +1603,7 @@ class CategoryTest(DashTest):
         self.assertEquals(response.context['form'].fields['category'].choices.queryset.count(), 1)
         self.assertEquals(uganda_health, response.context['form'].fields['category'].choices.queryset[0])
 
-        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "r")
+        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "rb")
         post_data = dict(name="health hero", image=upload, category=uganda_health.pk)
         response = self.client.post(create_url, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
         cat_image = CategoryImage.objects.order_by('-pk')[0]
@@ -1628,7 +1628,7 @@ class CategoryTest(DashTest):
         response = self.client.get(update_url, SERVER_NAME='uganda.ureport.io')
         self.assertEquals(len(response.context['form'].fields), 5)
 
-        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "r")
+        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "rb")
         post_data = dict(name='health image', image=upload, category=uganda_health.pk, is_active=True)
         response = self.client.post(update_url, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
         self.assertEquals(response.request['PATH_INFO'], reverse('categories.categoryimage_list'))
@@ -1960,10 +1960,10 @@ class StoryTest(DashTest):
         response = self.client.get(list_url, SERVER_NAME='uganda.ureport.io')
         self.assertEquals(response.status_code, 200)
         self.assertEquals(len(response.context['object_list']), 1)
-        self.assertTrue(story1 in response.context['object_list'])
-        self.assertFalse(story2 in response.context['object_list'])
+        self.assertIn(story1, response.context['object_list'])
+        self.assertNotIn(story2, response.context['object_list'])
 
-        self.assertTrue(reverse('stories.story_images', args=[story1.pk]) in response.content)
+        self.assertContains(response, reverse('stories.story_images', args=[story1.pk]))
 
     def test_images_story(self):
         story1 = Story.objects.create(title='foo',
@@ -2012,7 +2012,7 @@ class StoryTest(DashTest):
 
         self.assertFalse(StoryImage.objects.filter(story=story1))
 
-        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "r")
+        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "rb")
         post_data = dict(image_1=upload)
         response = self.client.post(images_url_uganda, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
         self.assertTrue(StoryImage.objects.filter(story=story1))
@@ -2022,7 +2022,7 @@ class StoryTest(DashTest):
         self.assertEquals(len(response.context['form'].fields), 3)
         self.assertTrue(response.context['form'].fields['image_1'].initial)
 
-        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "r")
+        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "rb")
         post_data = dict(image_1=upload)
         response = self.client.post(images_url_uganda, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
         self.assertTrue(StoryImage.objects.filter(story=story1))
@@ -2447,71 +2447,71 @@ class DashBlockTest(DashTest):
 
         self.login(self.admin)
         response = self.client.get(list_url, SERVER_NAME='uganda.ureport.io')
-        self.assertEquals(response.status_code, 200)
-        self.assertEquals(len(response.context['object_list']), 2)
-        self.assertTrue(dashblock1 in response.context['object_list'])
-        self.assertTrue(dashblock2 in response.context['object_list'])
-        self.assertFalse(dashblock3 in response.context['object_list'])
-        self.assertEquals(len(response.context['fields']), 4)
-        self.assertTrue('tags' in response.context['fields'])
-        self.assertTrue('title' in response.context['fields'])
-        self.assertTrue('dashblock_type' in response.context['fields'])
-        self.assertTrue('priority' in response.context['fields'])
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 2)
+        self.assertIn(dashblock1, response.context['object_list'])
+        self.assertIn(dashblock2, response.context['object_list'])
+        self.assertNotIn(dashblock3, response.context['object_list'])
+        self.assertEqual(len(response.context['fields']), 4)
+        self.assertIn('tags', response.context['fields'])
+        self.assertIn('title', response.context['fields'])
+        self.assertIn('dashblock_type', response.context['fields'])
+        self.assertIn('priority', response.context['fields'])
 
-        self.assertEquals(len(response.context['types']), 2)
-        self.assertTrue(self.type_foo in response.context['types'])
-        self.assertTrue(self.type_bar in response.context['types'])
+        self.assertEqual(len(response.context['types']), 2)
+        self.assertIn(self.type_foo, response.context['types'])
+        self.assertIn(self.type_bar, response.context['types'])
 
         response = self.client.get(list_url + "?type=%d" % self.type_bar.pk, SERVER_NAME='uganda.ureport.io')
-        self.assertEquals(response.status_code, 200)
-        self.assertEquals(len(response.context['object_list']), 1)
-        self.assertFalse(dashblock1 in response.context['object_list'])
-        self.assertTrue(dashblock2 in response.context['object_list'])
-        self.assertFalse(dashblock3 in response.context['object_list'])
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 1)
+        self.assertNotIn(dashblock1, response.context['object_list'])
+        self.assertIn(dashblock2, response.context['object_list'])
+        self.assertNotIn(dashblock3, response.context['object_list'])
 
-        self.assertTrue(force_text(dashblock2) in response.content)
+        self.assertContains(response, force_text(dashblock2))
 
-        self.assertEquals(len(response.context['fields']), 4)
-        self.assertTrue('tags' in response.context['fields'])
-        self.assertTrue('title' in response.context['fields'])
-        self.assertTrue('dashblock_type' in response.context['fields'])
-        self.assertTrue('priority' in response.context['fields'])
-        self.assertEquals(len(response.context['types']), 2)
-        self.assertTrue(self.type_foo in response.context['types'])
-        self.assertTrue(self.type_bar in response.context['types'])
+        self.assertEqual(len(response.context['fields']), 4)
+        self.assertIn('tags', response.context['fields'])
+        self.assertIn('title', response.context['fields'])
+        self.assertIn('dashblock_type', response.context['fields'])
+        self.assertIn('priority', response.context['fields'])
+        self.assertEqual(len(response.context['types']), 2)
+        self.assertIn(self.type_foo, response.context['types'])
+        self.assertIn(self.type_bar, response.context['types'])
 
         self.type_bar.has_tags = False
         self.type_bar.save()
 
         response = self.client.get(list_url + "?type=%d" % self.type_bar.pk, SERVER_NAME='uganda.ureport.io')
-        self.assertEquals(len(response.context['fields']), 3)
-        self.assertFalse('tags' in response.context['fields'])
-        self.assertTrue('title' in response.context['fields'])
-        self.assertTrue('dashblock_type' in response.context['fields'])
-        self.assertTrue('priority' in response.context['fields'])
+        self.assertEqual(len(response.context['fields']), 3)
+        self.assertNotIn('tags', response.context['fields'])
+        self.assertIn('title', response.context['fields'])
+        self.assertIn('dashblock_type', response.context['fields'])
+        self.assertIn('priority', response.context['fields'])
 
         self.type_bar.is_active = False
         self.type_bar.save()
 
         response = self.client.get(list_url + "?type=%d" % self.type_bar.pk, SERVER_NAME='uganda.ureport.io')
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertFalse(response.context['object_list'])
-        self.assertFalse(dashblock1 in response.context['object_list'])
-        self.assertFalse(dashblock2 in response.context['object_list'])
-        self.assertFalse(dashblock3 in response.context['object_list'])
-        self.assertEquals(len(response.context['types']), 1)
-        self.assertTrue(self.type_foo in response.context['types'])
-        self.assertFalse(self.type_bar in response.context['types'])
+        self.assertNotIn(dashblock1, response.context['object_list'])
+        self.assertNotIn(dashblock2, response.context['object_list'])
+        self.assertNotIn(dashblock3, response.context['object_list'])
+        self.assertEqual(len(response.context['types']), 1)
+        self.assertIn(self.type_foo, response.context['types'])
+        self.assertNotIn(self.type_bar, response.context['types'])
 
         response = self.client.get(list_url + "?slug=%s" % self.type_foo.slug, SERVER_NAME='uganda.ureport.io')
-        self.assertEquals(len(response.context['object_list']), 1)
-        self.assertTrue(dashblock1 in response.context['object_list'])
-        self.assertFalse(dashblock2 in response.context['object_list'])
-        self.assertFalse(dashblock3 in response.context['object_list'])
-        self.assertEquals(response.context['filtered_type'], self.type_foo)
-        self.assertEquals(len(response.context['types']), 1)
-        self.assertTrue(self.type_foo in response.context['types'])
-        self.assertFalse(self.type_bar in response.context['types'])
+        self.assertEqual(len(response.context['object_list']), 1)
+        self.assertIn(dashblock1, response.context['object_list'])
+        self.assertNotIn(dashblock2, response.context['object_list'])
+        self.assertNotIn(dashblock3, response.context['object_list'])
+        self.assertEqual(response.context['filtered_type'], self.type_foo)
+        self.assertEqual(len(response.context['types']), 1)
+        self.assertIn(self.type_foo, response.context['types'])
+        self.assertNotIn(self.type_bar, response.context['types'])
 
     def test_dashblock_image(self):
         dashblock1 = DashBlock.objects.create(dashblock_type=self.type_foo,
@@ -2534,7 +2534,7 @@ class DashBlockTest(DashTest):
         response = self.client.post(create_url, dict(), SERVER_NAME='uganda.ureport.io')
         self.assertTrue(response.context['form'].errors)
 
-        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "r")
+        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "rb")
         post_data = dict(dashblock=dashblock1.pk, image=upload, caption='image caption')
 
         response = self.client.post(create_url, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
@@ -2547,7 +2547,7 @@ class DashBlockTest(DashTest):
 
         update_url = reverse('dashblocks.dashblockimage_update', args=[dashblock_image.pk])
 
-        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "r")
+        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "rb")
         post_data = dict(dashblock=dashblock1.pk, image=upload, caption='image updated caption')
         response = self.client.post(update_url, post_data, follow=True, SERVER_NAME='uganda.ureport.io')
 

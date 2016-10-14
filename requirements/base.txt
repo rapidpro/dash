@@ -13,7 +13,7 @@ python-dateutil
 rapidpro-python
 requests
 six
-smartmin
+-e git+https://github.com/nyaruka/smartmin.git@python3_fix#egg=smartmin-dev
 sorl-thumbnail
 xlrd
 xlwt
