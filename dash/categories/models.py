@@ -32,6 +32,9 @@ class Category(SmartModel):
 
     def get_label_from_instance(self):
         label = str(self)
+        if isinstance(label, six.binary_type):
+            label = label.decode('utf-8')
+
         if not self.is_active:
             label = "%s %s" % (label, "(Inactive)")
         return label
