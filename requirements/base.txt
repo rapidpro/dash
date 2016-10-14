@@ -2,10 +2,10 @@ celery-with-redis
 django>=1.8.0,<1.10
 django-compressor<2.0
 django-guardian
+django-hamlpy
 django-redis
 django-timezone-field
 enum34
-hamlpy
 Pillow
 phonenumbers
 psycopg2

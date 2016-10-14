@@ -36,7 +36,7 @@
               %option{ value:"={ type.id }", selected: None}
                 {{ type.name }}
             - else
-              %option{ value:"{{ type.id }}" }
+              %option{ value:"={ type.id }" }
                 {{ type.name }}
       -else
         %input{ type:"hidden", name:"type", value:"{{filtered_type.id}}" }
