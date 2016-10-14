@@ -1,6 +1,6 @@
 celery-with-redis
 django>=1.8.0,<1.10
-django-compressor<2.0
+django-compressor
 django-guardian
 django-hamlpy
 django-redis
@@ -13,7 +13,7 @@ python-dateutil
 rapidpro-python
 requests
 six
--e git+https://github.com/nyaruka/smartmin.git@python3_fix#egg=smartmin-dev
+smartmin
 sorl-thumbnail
 xlrd
 xlwt
