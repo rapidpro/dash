@@ -12,7 +12,7 @@
           <a href="{% url 'dashblocks.dashblockimage_update' img.id %}"><img class="thumb" src="{{ im.url }}" width="{{ img.x }}" height="{{ img.y }}" /></a>
           {% endthumbnail %}
         
-          %a.btn.btn-default.btn-small{href:"{% url 'dashblocks.dashblockimage_create' %}?dashblock={{ object.id }}"}
+          %a.btn.btn-default.btn-small{href:"{% url 'dashblocks.dashblockimage_create' %}?dashblock=#{ object.id }"}
             - trans "Add Image"
 
 - block extra-style

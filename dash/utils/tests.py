@@ -8,7 +8,7 @@ from django.core.cache import cache
 from itertools import chain
 from . import (
     intersection, union, random_string, filter_dict, get_cacheable, get_obj_cacheable, get_month_range,
-    chunks, is_dict_equal
+    chunks, is_dict_equal, datetime_to_ms, ms_to_datetime
 )
 from ..test import DashTest
 
@@ -65,6 +65,18 @@ class InitTest(DashTest):
         self._test_value = "CACHED"
         self.assertEqual(get_obj_cacheable(self, '_test_value', calculate), "CACHED")
         self.assertEqual(get_obj_cacheable(self, '_test_value', calculate, recalculate=True), "CALCULATED")
+
+    def test_datetime_to_ms(self):
+        d1 = datetime(2014, 1, 2, 3, 4, 5, 678900, tzinfo=pytz.utc)
+        self.assertEqual(datetime_to_ms(d1), 1388631845678)  # from http://unixtimestamp.50x.eu
+
+        # conversion to millis loses some accuracy
+        self.assertEqual(ms_to_datetime(1388631845678), datetime(2014, 1, 2, 3, 4, 5, 678000, tzinfo=pytz.utc))
+
+        tz = pytz.timezone("Africa/Kigali")
+        d2 = tz.localize(datetime(2014, 1, 2, 3, 4, 5, 600000))
+        self.assertEqual(datetime_to_ms(d2), 1388624645600)
+        self.assertEqual(ms_to_datetime(1388624645600), d2.astimezone(pytz.utc))
 
     def test_get_month_range(self):
         self.assertEqual(

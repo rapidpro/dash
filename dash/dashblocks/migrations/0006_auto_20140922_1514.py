@@ -15,36 +15,36 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='dashblock',
             name='created_by',
-            field=models.ForeignKey(related_name=b'dashblocks_dashblock_creations', to=settings.AUTH_USER_MODEL, help_text=b'The user which originally created this item'),
+            field=models.ForeignKey(related_name='dashblocks_dashblock_creations', to=settings.AUTH_USER_MODEL, help_text='The user which originally created this item'),
         ),
         migrations.AlterField(
             model_name='dashblock',
             name='modified_by',
-            field=models.ForeignKey(related_name=b'dashblocks_dashblock_modifications', to=settings.AUTH_USER_MODEL, help_text=b'The user which last modified this item'),
+            field=models.ForeignKey(related_name='dashblocks_dashblock_modifications', to=settings.AUTH_USER_MODEL, help_text='The user which last modified this item'),
         ),
         migrations.AlterField(
             model_name='dashblockimage',
             name='created_by',
-            field=models.ForeignKey(related_name=b'dashblocks_dashblockimage_creations', to=settings.AUTH_USER_MODEL, help_text=b'The user which originally created this item'),
+            field=models.ForeignKey(related_name='dashblocks_dashblockimage_creations', to=settings.AUTH_USER_MODEL, help_text='The user which originally created this item'),
         ),
         migrations.AlterField(
             model_name='dashblockimage',
             name='dashblock',
-            field=models.ForeignKey(related_name=b'images', to='dashblocks.DashBlock'),
+            field=models.ForeignKey(related_name='images', to='dashblocks.DashBlock'),
         ),
         migrations.AlterField(
             model_name='dashblockimage',
             name='modified_by',
-            field=models.ForeignKey(related_name=b'dashblocks_dashblockimage_modifications', to=settings.AUTH_USER_MODEL, help_text=b'The user which last modified this item'),
+            field=models.ForeignKey(related_name='dashblocks_dashblockimage_modifications', to=settings.AUTH_USER_MODEL, help_text='The user which last modified this item'),
         ),
         migrations.AlterField(
             model_name='dashblocktype',
             name='created_by',
-            field=models.ForeignKey(related_name=b'dashblocks_dashblocktype_creations', to=settings.AUTH_USER_MODEL, help_text=b'The user which originally created this item'),
+            field=models.ForeignKey(related_name='dashblocks_dashblocktype_creations', to=settings.AUTH_USER_MODEL, help_text='The user which originally created this item'),
         ),
         migrations.AlterField(
             model_name='dashblocktype',
             name='modified_by',
-            field=models.ForeignKey(related_name=b'dashblocks_dashblocktype_modifications', to=settings.AUTH_USER_MODEL, help_text=b'The user which last modified this item'),
+            field=models.ForeignKey(related_name='dashblocks_dashblocktype_modifications', to=settings.AUTH_USER_MODEL, help_text='The user which last modified this item'),
         ),
     ]

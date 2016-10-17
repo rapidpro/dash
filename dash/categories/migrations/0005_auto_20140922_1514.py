@@ -15,26 +15,26 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='category',
             name='created_by',
-            field=models.ForeignKey(related_name=b'categories_category_creations', to=settings.AUTH_USER_MODEL, help_text=b'The user which originally created this item'),
+            field=models.ForeignKey(related_name='categories_category_creations', to=settings.AUTH_USER_MODEL, help_text='The user which originally created this item'),
         ),
         migrations.AlterField(
             model_name='category',
             name='modified_by',
-            field=models.ForeignKey(related_name=b'categories_category_modifications', to=settings.AUTH_USER_MODEL, help_text=b'The user which last modified this item'),
+            field=models.ForeignKey(related_name='categories_category_modifications', to=settings.AUTH_USER_MODEL, help_text='The user which last modified this item'),
         ),
         migrations.AlterField(
             model_name='categoryimage',
             name='category',
-            field=models.ForeignKey(related_name=b'images', to='categories.Category', help_text='The category this image represents'),
+            field=models.ForeignKey(related_name='images', to='categories.Category', help_text='The category this image represents'),
         ),
         migrations.AlterField(
             model_name='categoryimage',
             name='created_by',
-            field=models.ForeignKey(related_name=b'categories_categoryimage_creations', to=settings.AUTH_USER_MODEL, help_text=b'The user which originally created this item'),
+            field=models.ForeignKey(related_name='categories_categoryimage_creations', to=settings.AUTH_USER_MODEL, help_text='The user which originally created this item'),
         ),
         migrations.AlterField(
             model_name='categoryimage',
             name='modified_by',
-            field=models.ForeignKey(related_name=b'categories_categoryimage_modifications', to=settings.AUTH_USER_MODEL, help_text=b'The user which last modified this item'),
+            field=models.ForeignKey(related_name='categories_categoryimage_modifications', to=settings.AUTH_USER_MODEL, help_text='The user which last modified this item'),
         ),
     ]

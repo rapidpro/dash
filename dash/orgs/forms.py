@@ -4,7 +4,7 @@ from django import forms
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
-from timezones.forms import TimeZoneField
+from timezone_field import TimeZoneFormField
 from .models import Org
 
 
@@ -34,7 +34,7 @@ class CreateOrgLoginForm(forms.Form):
 class OrgForm(forms.ModelForm):
     language = forms.ChoiceField(
         required=False, choices=[('', '')] + list(settings.LANGUAGES))
-    timezone = TimeZoneField()
+    timezone = TimeZoneFormField()
 
     def __init__(self, *args, **kwargs):
         super(OrgForm, self).__init__(*args, **kwargs)

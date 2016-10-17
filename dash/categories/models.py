@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import six
+
 from dash.orgs.models import Org
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
@@ -30,7 +32,9 @@ class Category(SmartModel):
 
     def get_label_from_instance(self):
         label = str(self)
-        label = label.decode('utf-8')
+        if isinstance(label, six.binary_type):
+            label = label.decode('utf-8')
+
         if not self.is_active:
             label = "%s %s" % (label, "(Inactive)")
         return label
