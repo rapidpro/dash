@@ -58,8 +58,14 @@ class DashTest(TestCase):
 
         func = getattr(self.client, method)
         response = func(url, data, **extra)
+
         if isinstance(response, JsonResponse):
-            response.json = json.loads(response.content)
+            content = response.content
+            if isinstance(content, six.binary_type):
+                content = content.decode('utf-8')
+
+            response.json = json.loads(content)
+
         return response
 
 
