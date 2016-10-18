@@ -9,6 +9,8 @@ env:
   - TOXENV=py2.7-django1.9
   - TOXENV=py3.4-django1.8
   - TOXENV=py3.4-django1.9
+  - TOXENV=py3.5-django1.8
+  - TOXENV=py3.5-django1.9
 install:
   - pip install -q --use-mirrors tox
   - pip install coveralls
