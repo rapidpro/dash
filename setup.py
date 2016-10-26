@@ -1,75 +1,57 @@
-import re
-
 from setuptools import setup, find_packages
 
 
-EGG_REGEX = re.compile(r".*#egg=(?P<package>.+)-(?P<version>[\d.]+)$")
+try:
+    import pypandoc
+    long_description = pypandoc.convert('README.md', 'rst', 'md')
+except ImportError:
+    print("Warning: pypandoc module not found, could not convert Markdown to RST")
+    long_description = open('README.md', 'r').read()
 
 
 def _is_requirement(line):
     """Returns whether the line is a valid package requirement."""
     line = line.strip()
-    return line and not line.startswith("#")
+    return line and not (line.startswith("-r") or line.startswith("#"))
 
 
 def _read_requirements(filename):
-    """Parses a file for pip installation requirements.
-
-    Returns two lists: one with package requirements, and the other with
-    dependency links.
-    """
-    with open(filename) as requirements_file:
-        contents = requirements_file.read()
-        requirements = [line.strip() for line in contents.splitlines()
-                        if _is_requirement(line)]
-    packages = []
-    links = []
-    for req in requirements:
-        if req.startswith("-e "):
-            # Installation requires a dependency link.
-            # The dependency link package must be included in the requirements.
-            link = req.split()[-1]
-            m = EGG_REGEX.match(link)
-            if m:
-                links.append(link)
-                packages.append(m.groupdict()['package'])
-            else:
-                raise Exception("Could not get package name from "
-                                "dependency link: {}".format(link))
-        else:
-            packages.append(req)
-    return packages, links
+    """Returns a list of package requirements read from the file."""
+    requirements_file = open(filename).read()
+    return [line.strip() for line in requirements_file.splitlines() if _is_requirement(line)]
 
 
-base_packages, base_links = _read_requirements("requirements/base.txt")
-test_packages, test_links = _read_requirements("requirements/tests.txt")
-
+base_packages = _read_requirements("requirements/base.txt")
+test_packages = _read_requirements("requirements/tests.txt")
 
 setup(
     name='dash',
     version=__import__('dash').__version__,
+    description="Support library for RapidPro dashboards",
+    long_description=long_description,
+
+    keywords="rapidpro dashboard",
+    url='https://github.com/rapidpro/dash',
     license='BSD',
-    install_requires=base_packages,
-    tests_require=base_packages + test_packages,
-    dependency_links=base_links + test_links,
-    description="",
-    long_description=open('README.md').read(),
+
     author='Nyaruka Team',
     author_email='code@nyaruka.com',
-    url='http://www.nyaruka.com/#open',
-    download_url='http://github.com/rapidpro/dash',
-
-    include_package_data=True,
-    packages=find_packages(),
-    zip_safe=False,
 
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Framework :: Django',
-    ]
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 3',
+    ],
+
+    install_requires=base_packages,
+    tests_require=base_packages + test_packages,
+    packages=find_packages(),
+    include_package_data=True,
+    zip_safe=False,
 )
