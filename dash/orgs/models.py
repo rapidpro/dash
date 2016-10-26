@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 
 import json
 import random
-import pytz
 
 from dash.dash_email import send_dash_email
 from dash.utils import datetime_to_ms
