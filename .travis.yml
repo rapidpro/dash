@@ -4,14 +4,20 @@ python:
  - "2.7"
  - "3.4"
  - "3.5"
+env:
+ - DJANGO_VERSION=1.8.13
+ - DJANGO_VERSION=1.9.10
 services:
  - redis-server
 install:
- - pip install tox-travis
+ - pip install -q -rrequirements/base.txt
+ - pip install -q -rrequirements/tests.txt
+ - pip install -q Django==$DJANGO_VERSION
  - pip install coveralls
 before_script:
  - createdb -E UTF-8 dash -U postgres -O $USER
 script:
- - tox -- --settings=dash_test_runner.settings_travis
+ - coverage run manage.py test --settings=dash_test_runner.settings_travis
+ - flake8
 after_success:
  - coveralls
