@@ -25,7 +25,7 @@ base_packages = _read_requirements("requirements/base.txt")
 test_packages = _read_requirements("requirements/tests.txt")
 
 setup(
-    name='dash',
+    name='rapidpro-dash',
     version=__import__('dash').__version__,
     description="Support library for RapidPro dashboards",
     long_description=long_description,
