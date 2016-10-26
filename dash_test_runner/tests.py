@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import json
 import redis
+import pytz
 
 from dash.categories.models import Category, CategoryImage
 from dash.categories.fields import CategoryChoiceField
@@ -584,7 +585,7 @@ class OrgTest(DashTest):
         org = Org.objects.get(name="kLab")
         self.assertEquals(User.objects.all().count(), 5)
         self.assertTrue(org.administrators.filter(username="alicefox"))
-        self.assertEquals(org.timezone, "Africa/Kigali")
+        self.assertEquals(org.timezone, pytz.timezone("Africa/Kigali"))
 
         # allow may empty domain orgs
         data = dict(name="rwanda", subdomain="rwanda", domain="",
@@ -636,7 +637,7 @@ class OrgTest(DashTest):
         self.assertEquals(org.name, "Burundi")
         self.assertEquals(org.subdomain, "burundi")
         self.assertEquals(org.domain, "ureport.bi")
-        self.assertEquals(org.timezone, "Africa/Bujumbura")
+        self.assertEquals(org.timezone, pytz.timezone("Africa/Bujumbura"))
         self.assertEquals(response.request['PATH_INFO'], reverse('orgs.org_list'))
 
     def test_org_list(self):
@@ -1128,7 +1129,7 @@ class OrgTest(DashTest):
     def test_dashorgs_templatetags(self):
         self.assertEquals(display_time("2014-11-04T15:11:34Z", self.org), "Nov 04, 2014 15:11")
 
-        self.org.set_timezone('Africa/Kigali')
+        self.org.timezone = pytz.timezone('Africa/Kigali')
         self.org.save()
         self.assertEquals(display_time("2014-11-04T15:11:34Z", self.org), "Nov 04, 2014 17:11")
 
