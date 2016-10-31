@@ -17,9 +17,8 @@ def display_time(text_timestamp, org, time_format=None):
         time_format = '%b %d, %Y %H:%M'
 
     utc_tz = pytz.timezone('UTC')
-    org_tz = org.get_timezone()
     parsed_time = utc_tz.localize(datetime.strptime(text_timestamp, '%Y-%m-%dT%H:%M:%SZ'))
-    output_time = parsed_time.astimezone(org_tz)
+    output_time = parsed_time.astimezone(org.timezone)
 
     return output_time.strftime(time_format)
 

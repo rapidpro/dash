@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 
 import json
 import random
-import pytz
 
 from dash.dash_email import send_dash_email
 from dash.utils import datetime_to_ms
@@ -17,6 +16,7 @@ from django.utils.encoding import force_text, python_2_unicode_compatible
 from smartmin.models import SmartModel
 from temba_client.v1 import TembaClient as TembaClient1
 from temba_client.v2 import TembaClient as TembaClient2
+from timezone_field import TimeZoneField
 
 
 STATE = 1
@@ -66,8 +66,8 @@ class Org(SmartModel):
         error_messages=dict(unique=_("This domain is not available")),
         help_text=_("The custom domain for this organization"))
 
-    timezone = models.CharField(
-        verbose_name=_("Timezone"), max_length=64, default='UTC',
+    timezone = TimeZoneField(
+        verbose_name=_("Timezone"), default='UTC',
         help_text=_("The timezone your organization is in."))
 
     api_token = models.CharField(
@@ -79,20 +79,6 @@ class Org(SmartModel):
         null=True, blank=True,
         help_text=_("JSON blob used to store configuration information "
                     "associated with this organization"))
-
-    def set_timezone(self, timezone):
-        self.timezone = timezone
-        self._tzinfo = None
-
-    def get_timezone(self):
-        tzinfo = getattr(self, '_tzinfo', None)
-
-        if not tzinfo:
-            # we need to build the pytz timezone object with a context of now
-            tzinfo = timezone.now().astimezone(pytz.timezone(self.timezone)).tzinfo
-            self._tzinfo = tzinfo
-
-        return tzinfo
 
     def get_config(self, name, default=None):
         config = getattr(self, '_config', None)
