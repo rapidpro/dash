@@ -67,33 +67,35 @@ def trigger_org_task(task_name, queue='celery'):
     logger.info("Requested task '%s' for %d active orgs" % (task_name, len(active_orgs)))
 
 
-def org_task(task_key):
+def org_task(task_key, lock_timeout=None):
     """
     Decorator to create an org task.
     :param task_key: the task key used for state storage and locking, e.g. 'do-stuff'
+    :param lock_timeout: the lock timeout in seconds
     """
     def _org_task(task_func):
         def _decorator(org_id):
             org = apps.get_model('orgs', 'Org').objects.get(pk=org_id)
-            maybe_run_for_org(org, task_func, task_key)
+            maybe_run_for_org(org, task_func, task_key, lock_timeout)
 
         return shared_task(wraps(task_func)(_decorator))
     return _org_task
 
 
-def maybe_run_for_org(org, task_func, task_key):
+def maybe_run_for_org(org, task_func, task_key, lock_timeout):
     """
     Runs the given task function for the specified org provided it's not already running
     :param org: the org
     :param task_func: the task function
     :param task_key: the task key
+    :param lock_timeout: the lock timeout in seconds
     """
     r = get_redis_connection()
     key = ORG_TASK_LOCK_KEY % (org.pk, task_key)
     if r.get(key):
         logger.warn("Skipping for org #%d as it is still running" % org.pk)
     else:
-        with r.lock(key):
+        with r.lock(key, timeout=lock_timeout):
             state = org.get_task_state(task_key)
             if state.is_disabled:
                 logger.info("Skipping for org #%d as task is marked disabled" % org.pk)

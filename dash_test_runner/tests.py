@@ -1251,7 +1251,7 @@ def test_over_time_window(org, started_on, prev_started_on):
     return {}
 
 
-@org_task('test-task-1')
+@org_task('test-task-1', lock_timeout=10)
 def test_org_task_1(org):
     pass
 
