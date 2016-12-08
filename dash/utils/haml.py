@@ -1,13 +1,9 @@
 from __future__ import unicode_literals
 
 """
-Our dashboards typically use HamlPy (https://github.com/jessemiller/HamlPy) for templates, but we need our own custom
-template loaders for two reasons:
-
-  1. That library is not being actively maintained and the included loaders are not compatible with Django 1.9
-  2. We allow templates to be overridden even when the extension doesn't match, i.e. a template called index.haml can
-     override index.html in Smartmin
-
+Our dashboards typically use HamlPy (https://github.com/nyaruka/django-hamlpy) for templates, but we need our own custom
+template loaders because we allow templates to be overridden even when the extension doesn't match, i.e. a template
+called index.haml can override index.html in Smartmin
 """
 
 import os
@@ -16,7 +12,7 @@ from django.template import TemplateDoesNotExist
 from django.template.base import Origin
 from django.template.loaders import filesystem, app_directories
 
-from hamlpy import hamlpy
+from hamlpy.compiler import Compiler, VALID_EXTENSIONS
 from hamlpy.template.utils import get_django_template_loaders
 
 
@@ -35,7 +31,7 @@ def get_haml_loader(loader):
             """
             _name, _extension = os.path.splitext(template_name)
 
-            for extension in hamlpy.VALID_EXTENSIONS:
+            for extension in VALID_EXTENSIONS:
                 try:
                     haml_source, template_path = super(Loader, self).load_template_source(
                         self._generate_template_name(_name, extension), *args, **kwargs
@@ -43,7 +39,7 @@ def get_haml_loader(loader):
                 except TemplateDoesNotExist:
                     pass
                 else:
-                    haml_parser = hamlpy.Compiler()
+                    haml_parser = Compiler()
                     html = haml_parser.process(haml_source)
 
                     return html, template_path
@@ -59,7 +55,7 @@ def get_haml_loader(loader):
             name, _extension = os.path.splitext(origin.name)
             template_name, _extension = os.path.splitext(origin.template_name)
 
-            for extension in hamlpy.VALID_EXTENSIONS:
+            for extension in VALID_EXTENSIONS:
                 try_name = self._generate_template_name(name, extension)
                 try_template_name = self._generate_template_name(template_name, extension)
                 try_origin = Origin(try_name, try_template_name, origin.loader)
@@ -68,7 +64,7 @@ def get_haml_loader(loader):
                 except TemplateDoesNotExist:
                     pass
                 else:
-                    haml_parser = hamlpy.Compiler()
+                    haml_parser = Compiler()
                     return haml_parser.process(haml_source)
 
             raise TemplateDoesNotExist(origin.template_name)
