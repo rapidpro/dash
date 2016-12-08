@@ -14,4 +14,5 @@ def lang_direction(request):
         'lang_direction': 'rtl' if request.LANGUAGE_CODE in lang_direction.rtl_langs else 'ltr'
     }
 
+
 lang_direction.rtl_langs = None
