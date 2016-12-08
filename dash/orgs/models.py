@@ -266,13 +266,9 @@ class Org(SmartModel):
 def get_org(obj):
     return getattr(obj, '_org', None)
 
-User.get_org = get_org
-
 
 def set_org(obj, org):
     obj._org = org
-
-User.set_org = set_org
 
 
 def get_user_orgs(user):
@@ -280,8 +276,6 @@ def get_user_orgs(user):
         return Org.objects.all()
     user_orgs = user.org_admins.all() | user.org_editors.all() | user.org_viewers.all()
     return user_orgs.distinct()
-
-User.get_user_orgs = get_user_orgs
 
 
 def get_org_group(obj):
@@ -291,6 +285,10 @@ def get_org_group(obj):
         org_group = org.get_user_org_group(obj)
     return org_group
 
+
+User.get_org = get_org
+User.set_org = set_org
+User.get_user_orgs = get_user_orgs
 User.get_org_group = get_org_group
 
 
