@@ -12,7 +12,8 @@ from django.template import TemplateDoesNotExist
 from django.template.base import Origin
 from django.template.loaders import filesystem, app_directories
 
-from hamlpy.compiler import Compiler, VALID_EXTENSIONS
+from hamlpy import HAML_EXTENSIONS
+from hamlpy.compiler import Compiler
 from hamlpy.template.utils import get_django_template_loaders
 
 
@@ -31,7 +32,7 @@ def get_haml_loader(loader):
             """
             _name, _extension = os.path.splitext(template_name)
 
-            for extension in VALID_EXTENSIONS:
+            for extension in HAML_EXTENSIONS:
                 try:
                     haml_source, template_path = super(Loader, self).load_template_source(
                         self._generate_template_name(_name, extension), *args, **kwargs
@@ -55,7 +56,7 @@ def get_haml_loader(loader):
             name, _extension = os.path.splitext(origin.name)
             template_name, _extension = os.path.splitext(origin.template_name)
 
-            for extension in VALID_EXTENSIONS:
+            for extension in HAML_EXTENSIONS:
                 try_name = self._generate_template_name(name, extension)
                 try_template_name = self._generate_template_name(template_name, extension)
                 try_origin = Origin(try_name, try_template_name, origin.loader)
