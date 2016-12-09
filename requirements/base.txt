@@ -2,7 +2,7 @@ celery-with-redis
 django>=1.8.0,<1.10
 django-compressor
 django-guardian
-django-hamlpy
+django-hamlpy==1.0b1
 django-redis
 django-timezone-field
 enum34
