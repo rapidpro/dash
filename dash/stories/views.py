@@ -78,8 +78,8 @@ class StoryCRUDL(SmartCRUDL):
         success_url = '@stories.story_list'
         title = _("Story Images")
 
-        def get_form(self, form_class):
-            form = super(StoryCRUDL.Images, self).get_form(form_class)
+        def get_form(self):
+            form = super(StoryCRUDL.Images, self).get_form()
             form.fields.clear()
 
             idx = 1

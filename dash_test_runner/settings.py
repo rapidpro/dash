@@ -34,8 +34,6 @@ SECRET_KEY = '*z(s8sb^&p-6n#b!w=1-d2bho*+*0g_51bnx=-@a$wj6dnpd2w'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-TEMPLATE_DEBUG = DEBUG
-
 ALLOWED_HOSTS = []
 
 
@@ -90,19 +88,6 @@ MIDDLEWARE_CLASSES = (
 
 warnings.filterwarnings('error', r"DateTimeField received a naive datetime",
                         RuntimeWarning, r'django\.db\.models\.fields')
-
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'django.contrib.auth.context_processors.auth',
-    'django.core.context_processors.debug',
-    'django.core.context_processors.i18n',
-    'django.core.context_processors.media',
-    'django.core.context_processors.static',
-    'django.contrib.messages.context_processors.messages',
-    'django.core.context_processors.request',
-    'dash.orgs.context_processors.user_group_perms_processor',
-    'dash.orgs.context_processors.set_org_processor',
-)
-
 
 ROOT_URLCONF = 'dash_test_runner.urls'
 
@@ -171,14 +156,6 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
-)
-
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'dash.utils.haml.HamlFilesystemLoader',
-    'dash.utils.haml.HamlAppDirectoriesLoader',
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
 )
 
 AUTHENTICATION_BACKENDS = (
@@ -367,4 +344,33 @@ TESTFILES_DIR = os.path.join(PROJECT_DIR, '../testfiles')
 MEDIA_ROOT = os.path.join(PROJECT_DIR, '../media')
 MEDIA_URL = "/media/"
 
-TEMPLATE_DIRS = [os.path.join(PROJECT_DIR, '../templates')]
+# ----------------------------------------------------------------------------
+# Templates Configuration
+# ----------------------------------------------------------------------------
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [os.path.join(PROJECT_DIR, '../templates')],
+        'OPTIONS': {
+            'context_processors': [
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.request',
+                'dash.orgs.context_processors.user_group_perms_processor',
+                'dash.orgs.context_processors.set_org_processor',
+            ],
+            'loaders': [
+                'dash.utils.haml.HamlFilesystemLoader',
+                'dash.utils.haml.HamlAppDirectoriesLoader',
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+            ],
+            'debug': DEBUG
+        },
+    },
+]
