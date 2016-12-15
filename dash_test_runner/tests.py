@@ -2655,4 +2655,3 @@ class TemplateTagsTest(DashTest):
         self.assertNotContains(response, "TAG1-NO")
         self.assertNotContains(response, "TAG2-YES")
         self.assertContains(response, "TAG2-NO")
-
