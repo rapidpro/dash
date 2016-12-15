@@ -2643,3 +2643,16 @@ class DashBlockTest(DashTest):
         self.assertFalse(dashblock2 in context['foo'])
         self.assertFalse(dashblock3 in context['foo'])
         self.assertFalse(dashblock4 in context['foo'])
+
+
+class TemplateTagsTest(DashTest):
+    def test_if_url(self):
+        url = reverse('testapp.contact_test_tags')
+
+        response = self.client.get(url)
+
+        self.assertContains(response, "TAG1-YES")
+        self.assertNotContains(response, "TAG1-NO")
+        self.assertNotContains(response, "TAG2-YES")
+        self.assertContains(response, "TAG2-NO")
+
