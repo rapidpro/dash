@@ -1,3 +1,7 @@
+1.1.1 (2017-03-01)
+==================
+ * Update to latest smartmin which replaces uses of auto_now/auto_now_add in models with overridable defaults
+
 1.1 (2016-12-15)
 ==================
  * Added support for Django 1.10 https://github.com/rapidpro/dash/pull/90
