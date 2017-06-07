@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
-from django.template import loader, Context
+from django.template import loader
 
 
 def send_dash_email(to_email, subject, template, context):
