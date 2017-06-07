@@ -1,3 +1,7 @@
+1.2 (TBD)
+==================
+ * Update to latest smartmin which adds support for Django 1.11 and Python 3.6
+
 1.1.1 (2017-03-01)
 ==================
  * Update to latest smartmin which replaces uses of auto_now/auto_now_add in models with overridable defaults

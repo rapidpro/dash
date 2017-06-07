@@ -13,8 +13,8 @@ def send_dash_email(to_email, subject, template, context):
 
     context['subject'] = subject
 
-    html = html_template.render(Context(context))
-    text = text_template.render(Context(context))
+    html = html_template.render(context)
+    text = text_template.render(context)
 
     message = EmailMultiAlternatives(subject, text, from_email, [to_email])
     message.attach_alternative(html, "text/html")

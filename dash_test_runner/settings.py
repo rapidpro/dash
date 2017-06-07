@@ -16,28 +16,15 @@ import warnings
 
 from django.utils.translation import ugettext_lazy as _
 
+logging.disable(logging.WARN)
 
-# Disable logging during test runs.
-logging.disable(logging.CRITICAL)
-
-
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/dev/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '*z(s8sb^&p-6n#b!w=1-d2bho*+*0g_51bnx=-@a$wj6dnpd2w'
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
-
-# Application definition
+ALLOWED_HOSTS = ['testserver', '.ureport.io']
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -46,24 +33,13 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'guardian',
-    'timezone_field',
-
-    # compress our CSS and js
     'compressor',
-
-    # thumbnail
     'sorl.thumbnail',
+    'timezone_field',
 
     'smartmin',
     'smartmin.users',
 
-    # Uncomment the next line to enable the admin:
-    'django.contrib.admin',
-    # Uncomment the next line to enable admin documentation:
-    # 'django.contrib.admindocs',
-
-    # dash
     'dash.orgs',
     'dash.categories',
     'dash.dashblocks',
@@ -93,10 +69,6 @@ ROOT_URLCONF = 'dash_test_runner.urls'
 
 WSGI_APPLICATION = 'dash_test_runner.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/dev/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -106,26 +78,13 @@ DATABASES = {
 
 
 SITE_ID = 1
-
-# Internationalization
-# https://docs.djangoproject.com/en/dev/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
-
-# Available languages for translation
 LANGUAGES = (('en', "English"), ('fr', "French"))
 DEFAULT_LANGUAGE = "en"
-
-
 TIME_ZONE = 'UTC'
 USER_TIME_ZONE = 'Africa/Kigali'
-
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
 
 # Absolute path to the directory static files should be collected to.
@@ -160,7 +119,6 @@ STATICFILES_FINDERS = (
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',  # this is default
-    'guardian.backends.ObjectPermissionBackend',
 )
 
 # create the smartmin CRUDL permissions on all objects
@@ -188,7 +146,6 @@ GROUP_PERMISSIONS = {
         'orgs.org_manage_accounts',
         'orgs.orgbackground.*',
         'stories.story.*',
-
     ),
     "Editors": (
         'categories.category.*',
@@ -210,7 +167,6 @@ GROUP_PERMISSIONS = {
     "Viewers": [],
 }
 
-ANONYMOUS_USER_ID = -1
 LOGIN_URL = '/users/login/'
 LOGIN_REDIRECT_URL = "/manage/org/choose/"
 LOGOUT_REDIRECT_URL = "/"
