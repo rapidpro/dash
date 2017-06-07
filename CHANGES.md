@@ -1,4 +1,4 @@
-1.2 (TBD)
+1.2 (2017-06-07)
 ==================
  * Update to latest smartmin which adds support for Django 1.11 and Python 3.6
 
