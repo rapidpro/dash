@@ -44,10 +44,15 @@ class OrgForm(forms.ModelForm):
             self.fields['administrators'].queryset = administrators
 
     def clean_domain(self):
-        domain = self.cleaned_data['domain'].strip().lower() or None
-        if domain and domain == getattr(settings, 'HOSTNAME', ""):
-            raise forms.ValidationError(_("This domain is used for subdomains"))
-        return domain
+        domain = self.cleaned_data['domain'] or ""
+        domain = domain.strip().lower()
+
+        if domain:
+            if domain == getattr(settings, 'HOSTNAME', ""):
+                raise forms.ValidationError(_("This domain is used for subdomains"))
+            return domain
+        else:
+            return None
 
     class Meta:
         fields = forms.ALL_FIELDS

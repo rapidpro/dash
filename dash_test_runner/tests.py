@@ -565,7 +565,7 @@ class OrgTest(DashTest):
         self.assertEquals(200, response.status_code)
         self.assertEquals(len(response.context['form'].fields), 9)
         self.assertFalse(Org.objects.filter(name="kLab"))
-        self.assertEquals(User.objects.all().count(), 4)
+        self.assertEquals(User.objects.all().count(), 3)
 
         user_alice = User.objects.create_user("alicefox")
 
@@ -580,10 +580,10 @@ class OrgTest(DashTest):
         data = dict(name="kLab", subdomain="klab", domain="klab.rw",
                     timezone="Africa/Kigali", administrators=[user_alice.pk])
         response = self.client.post(create_url, data, follow=True)
-        self.assertTrue('form' not in response.context)
+        self.assertNotIn('form', response.context)
         self.assertTrue(Org.objects.filter(name="kLab"))
         org = Org.objects.get(name="kLab")
-        self.assertEquals(User.objects.all().count(), 5)
+        self.assertEquals(User.objects.all().count(), 4)
         self.assertTrue(org.administrators.filter(username="alicefox"))
         self.assertEquals(org.timezone, pytz.timezone("Africa/Kigali"))
 
@@ -591,14 +591,14 @@ class OrgTest(DashTest):
         data = dict(name="rwanda", subdomain="rwanda", domain="",
                     timezone="Africa/Kigali", administrators=[user_alice.pk])
         response = self.client.post(create_url, data, follow=True)
-        self.assertTrue('form' not in response.context)
+        self.assertNotIn('form', response.context)
         self.assertTrue(Org.objects.filter(name="rwanda"))
         self.assertTrue(Org.objects.get(name="rwanda"))
 
         data = dict(name="burundi", subdomain="burundi", domain="",
                     timezone="Africa/Kigali", administrators=[user_alice.pk])
         response = self.client.post(create_url, data, follow=True)
-        self.assertTrue('form' not in response.context)
+        self.assertNotIn('form', response.context)
         self.assertTrue(Org.objects.filter(name="burundi"))
         self.assertTrue(Org.objects.get(name="burundi"))
 
