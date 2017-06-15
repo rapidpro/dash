@@ -8,6 +8,7 @@ from django.core.exceptions import DisallowedHost
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.utils import translation, timezone
+from django.utils.deprecation import MiddlewareMixin
 from .models import Org
 
 
@@ -39,7 +40,7 @@ ALLOW_NO_ORG = (
 )
 
 
-class SetOrgMiddleware(object):
+class SetOrgMiddleware(MiddlewareMixin):
     """
     Sets the org on the request, based on the subdomain
     """
