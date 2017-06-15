@@ -19,7 +19,7 @@ class DashTest(TestCase):
     def setUp(self):
         super(DashTest, self).setUp()
 
-        self.superuser = User.objects.create_superuser(username="root", email="super@user.com", password="root")
+        self.superuser = User.objects.create_superuser(username="testroot", email="super@user.com", password="root")
 
         self.clear_cache()
 
