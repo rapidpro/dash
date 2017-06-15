@@ -1,3 +1,7 @@
+1.2.1 (2017-06-15)
+==================
+ * Support Django 1.10 new middleware style
+
 1.2 (2017-06-07)
 ==================
  * Update to latest smartmin which adds support for Django 1.11 and Python 3.6
