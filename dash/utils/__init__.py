@@ -11,6 +11,7 @@ from collections import OrderedDict
 from dateutil.relativedelta import relativedelta
 from django.core.cache import cache
 from django.utils import timezone
+from itertools import islice
 
 
 def intersection(*args):
@@ -118,15 +119,16 @@ def get_month_range(d=None):
     return start, end
 
 
-def chunks(data, size):
+def chunks(iterable, size):
     """
-    Yield successive chunks from the given slice-able collection
+    Splits a very large list into evenly sized chunks.
+    Returns an iterator of lists that are no more than the size passed in.
     """
-    if not isinstance(data, list):
-        data = list(data)
-
-    for i in six.moves.xrange(0, len(data), size):
-        yield data[i:(i + size)]
+    it = iter(iterable)
+    item = list(islice(it, size))
+    while item:
+        yield item
+        item = list(islice(it, size))
 
 
 def temba_client_flow_results_serializer(client_results):
