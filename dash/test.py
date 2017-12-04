@@ -36,7 +36,8 @@ class DashTest(TestCase):
             created_by=self.superuser, modified_by=self.superuser)
 
     def login(self, user):
-        result = self.client.login(username=user.username, password=user.username)
+        password = 'root' if user == self.superuser else user.username
+        result = self.client.login(username=user.username, password=password)
         self.assertTrue(result, "Couldn't login as %(user)s / %(user)s" % dict(user=user.username))
 
     def url_get(self, subdomain, url, params=None, **extra):
