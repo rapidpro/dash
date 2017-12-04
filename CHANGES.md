@@ -1,3 +1,7 @@
+1.2.2 (2017-12-04)
+==================
+ * Improve chunks util method so that it doesn't load the entire source iterator into a list
+ 
 1.2.1 (2017-06-15)
 ==================
  * Support Django 1.10 new middleware style
