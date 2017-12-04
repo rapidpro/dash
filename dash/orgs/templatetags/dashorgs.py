@@ -29,7 +29,7 @@ def national_phone(number_str):
         try:
             return phonenumbers.format_number(phonenumbers.parse(number_str, None),
                                               phonenumbers.PhoneNumberFormat.NATIONAL)
-        except:
+        except Exception:
             # number didn't parse, return it raw
             return number_str
 
