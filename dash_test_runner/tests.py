@@ -793,7 +793,9 @@ class OrgTest(DashTest):
             response = self.client.get(edit_url, SERVER_NAME="uganda.ureport.io")
             self.assertEquals(response.status_code, 200)
             self.assertTrue(response.context['form'])
-            self.assertEquals(len(response.context['form'].fields), 11)
+            self.assertEquals(len(response.context['form'].fields), 20)
+            self.assertEquals(len([f for f in response.context['form'].fields.items()
+                                   if f[1].widget.attrs.get('readonly', "") == 'readonly']), 9)
 
             # featured state is currently disabled; adjust the following lines
             self.assertTrue('featured_state' not in response.context['form'].fields)  # the featured state are disabled
