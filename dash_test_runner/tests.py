@@ -832,6 +832,18 @@ class OrgTest(DashTest):
             self.assertEquals(org.name, "Rwanda")
             self.assertEquals(org.get_config('shortcode'), "224433")
 
+            org.set_config('reporter_group', "reporters")
+
+            # can't update read-only
+            post_data['reporter_group'] = 'members'
+
+            response = self.client.post(edit_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
+            self.assertFalse('form' in response.context)
+            org = Org.objects.get(pk=self.org.pk)
+            self.assertEquals(org.name, "Rwanda")
+            self.assertEquals(org.get_config('shortcode'), "224433")
+            self.assertEquals(org.get_config("reporter_group"), "reporters")
+
             # featured state is currenty disabled, adjust the following lines
             self.assertFalse(org.get_config('featured_state'))  # this make sure the featured state are disabled
             # self.assertEquals(org.get_config('featured_state'), "R3713501")
@@ -843,6 +855,7 @@ class OrgTest(DashTest):
             form = response.context['form']
             self.assertEquals(form.initial['shortcode'], "224433")
             self.assertEquals(form.initial['name'], "Rwanda")
+            self.assertEquals(form.initial['reporter_group'], "reporters")
 
     def test_org_chooser(self):
         chooser_url = reverse('orgs.org_chooser')

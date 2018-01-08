@@ -274,7 +274,8 @@ class OrgCRUDL(SmartCRUDL):
 
             config_fields = getattr(settings, 'ORG_CONFIG_FIELDS', [])
             for config_field in config_fields:
-                if is_super or not config_field.get('superuser_only', False):
+                read_only = config_field.get('read_only', False)
+                if is_super or (not config_field.get('superuser_only', False) and not read_only):
                     name = config_field['name']
                     obj.set_config(name, cleaned.get(name, None))
 
@@ -286,7 +287,8 @@ class OrgCRUDL(SmartCRUDL):
 
             config_fields = getattr(settings, 'ORG_CONFIG_FIELDS', [])
             for config_field in config_fields:
-                if is_super or not config_field.get('superuser_only', False):
+                read_only = config_field.get('read_only', False)
+                if is_super or read_only or not config_field.get('superuser_only', False):
                     name = config_field['name']
                     initial[name] = self.object.get_config(name)
 
