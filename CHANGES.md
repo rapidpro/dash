@@ -1,3 +1,7 @@
+1.2.3 (2018-01-09)
+==================
+ * Add way to display read only org config fields to admins
+
 1.2.2 (2017-12-04)
 ==================
  * Improve chunks util method so that it doesn't load the entire source iterator into a list
