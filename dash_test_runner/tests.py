@@ -856,6 +856,7 @@ class OrgTest(DashTest):
             self.assertEquals(form.initial['shortcode'], "224433")
             self.assertEquals(form.initial['name'], "Rwanda")
             self.assertEquals(form.initial['reporter_group'], "reporters")
+            self.assertTrue('reporter_group' in response.context['view'].fields)
 
     def test_org_chooser(self):
         chooser_url = reverse('orgs.org_chooser')

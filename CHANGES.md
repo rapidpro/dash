@@ -1,3 +1,7 @@
+1.2.4 (2018-01-09)
+==================
+ * Fix derive fields to include read only fields
+
 1.2.3 (2018-01-09)
 ==================
  * Add way to display read only org config fields to admins
