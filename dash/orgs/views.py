@@ -248,7 +248,8 @@ class OrgCRUDL(SmartCRUDL):
             # add all our configured org fields as well
             config_fields = getattr(settings, 'ORG_CONFIG_FIELDS', [])
             for config_field in config_fields:
-                if is_super or not config_field.get('superuser_only', False):
+                read_only = config_field.get('read_only', False)
+                if is_super or read_only or not config_field.get('superuser_only', False):
                     field_name = config_field['name']
                     if field_name == 'featured_state':
                         choices = [(feature['properties']['id'], feature['properties']['name'])
@@ -260,6 +261,10 @@ class OrgCRUDL(SmartCRUDL):
                     else:
                         form.fields[field_name] = forms.CharField(**config_field['field'])
 
+                    if not is_super and read_only:
+                        form.fields[field_name].widget.attrs['readonly'] = 'readonly'
+                        form.fields[field_name].required = False
+
             return form
 
         def pre_save(self, obj):
@@ -269,7 +274,8 @@ class OrgCRUDL(SmartCRUDL):
 
             config_fields = getattr(settings, 'ORG_CONFIG_FIELDS', [])
             for config_field in config_fields:
-                if is_super or not config_field.get('superuser_only', False):
+                read_only = config_field.get('read_only', False)
+                if is_super or (not config_field.get('superuser_only', False) and not read_only):
                     name = config_field['name']
                     obj.set_config(name, cleaned.get(name, None))
 
@@ -281,7 +287,8 @@ class OrgCRUDL(SmartCRUDL):
 
             config_fields = getattr(settings, 'ORG_CONFIG_FIELDS', [])
             for config_field in config_fields:
-                if is_super or not config_field.get('superuser_only', False):
+                read_only = config_field.get('read_only', False)
+                if is_super or read_only or not config_field.get('superuser_only', False):
                     name = config_field['name']
                     initial[name] = self.object.get_config(name)
 
