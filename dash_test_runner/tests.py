@@ -381,20 +381,20 @@ class OrgTest(DashTest):
         client = self.org.get_temba_client()
         self.assertIsInstance(client, TembaClient1)
         self.assertEqual(client.root_url, 'http://localhost:8001/api/v1')
-        self.assertEqual(client.headers['Authorization'], 'Token %s' % self.org.api_token)
+        self.assertEqual(client.headers['Authorization'], 'Token %s' % self.org.get_config("api_token", top_key="rapidpro"))
         self.assertEqual(client.headers['User-Agent'], 'rapidpro-python/%s' % client_version)
 
         with self.settings(SITE_API_HOST='rapidpro.io', SITE_API_USER_AGENT='test/0.1'):
             client = self.org.get_temba_client()
             self.assertIsInstance(client, TembaClient1)
             self.assertEqual(client.root_url, 'https://rapidpro.io/api/v1')
-            self.assertEqual(client.headers['Authorization'], 'Token %s' % self.org.api_token)
+            self.assertEqual(client.headers['Authorization'], 'Token %s' % self.org.get_config("api_token", top_key="rapidpro"))
             self.assertEqual(client.headers['User-Agent'], 'test/0.1 rapidpro-python/%s' % client_version)
 
         client = self.org.get_temba_client(api_version=2)
         self.assertIsInstance(client, TembaClient2)
         self.assertEqual(client.root_url, 'http://localhost:8001/api/v2')
-        self.assertEqual(client.headers['Authorization'], 'Token %s' % self.org.api_token)
+        self.assertEqual(client.headers['Authorization'], 'Token %s' % self.org.get_config("api_token", top_key="rapidpro"))
         self.assertEqual(client.headers['User-Agent'], 'rapidpro-python/%s' % client_version)
 
         self.assertEquals(self.org.get_user(), self.admin)
@@ -563,7 +563,7 @@ class OrgTest(DashTest):
         self.login(self.superuser)
         response = self.client.get(create_url)
         self.assertEquals(200, response.status_code)
-        self.assertEquals(len(response.context['form'].fields), 9)
+        self.assertEquals(len(response.context['form'].fields), 8)
         self.assertFalse(Org.objects.filter(name="kLab"))
         self.assertEquals(User.objects.all().count(), 3)
 
@@ -616,7 +616,7 @@ class OrgTest(DashTest):
         response = self.client.get(update_url)
         self.assertEquals(200, response.status_code)
         self.assertFalse(Org.objects.filter(name="Burundi"))
-        self.assertEquals(len(response.context['form'].fields), 10)
+        self.assertEquals(len(response.context['form'].fields), 9)
 
         post_data = dict(name="Burundi", timezone="Africa/Bujumbura", subdomain="burundi", domain='ureport.io',
                          is_active=True, male_label="male", female_label='female', administrators=self.admin.pk)
@@ -759,18 +759,6 @@ class OrgTest(DashTest):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['object'], self.org)
         self.assertEqual(response.context['org'], self.org)
-        self.assertContains(response, "Not Set")
-
-        self.org.api_token = '0' * 64
-        self.org.save()
-
-        self.login(self.admin)
-        response = self.client.get(home_url, SERVER_NAME="uganda.ureport.io")
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['object'], self.org)
-        self.assertEqual(response.context['org'], self.org)
-        self.assertNotContains(response, "Not Set")
-        self.assertContains(response, '*' * 32)
 
     def test_org_edit(self):
 

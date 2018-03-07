@@ -60,3 +60,5 @@ target/
 
 .idea/
 db.sqlite3
+
+.vscode/

@@ -141,12 +141,12 @@ class OrgCRUDL(SmartCRUDL):
     class Create(SmartCreateView):
         form_class = OrgForm
         fields = ('name', 'language', 'timezone', 'subdomain',
-                  'domain', 'api_token', 'logo', 'administrators')
+                  'domain', 'logo', 'administrators')
 
     class Update(SmartUpdateView):
         form_class = OrgForm
         fields = ('is_active', 'name', 'language', 'timezone', 'subdomain',
-                  'domain', 'api_token', 'logo', 'administrators')
+                  'domain', 'logo', 'administrators')
 
     class List(SmartListView):
         fields = ('name', 'timezone', 'created_on', 'modified_on')
@@ -217,13 +217,7 @@ class OrgCRUDL(SmartCRUDL):
 
     class Home(InferOrgMixin, OrgPermsMixin, SmartReadView):
         title = _("Your Organization")
-        fields = ('name', 'subdomain', 'api_token')
-
-        def get_api_token(self, obj):
-            if obj and obj.api_token:
-                return "*" * 32 + obj.api_token[32:]
-            else:
-                return _("Not Set")
+        fields = ('name', 'subdomain')
 
     class Edit(InferOrgMixin, OrgPermsMixin, SmartUpdateView):
         title = _("Your Organization")
