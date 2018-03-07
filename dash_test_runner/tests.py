@@ -381,20 +381,23 @@ class OrgTest(DashTest):
         client = self.org.get_temba_client()
         self.assertIsInstance(client, TembaClient1)
         self.assertEqual(client.root_url, 'http://localhost:8001/api/v1')
-        self.assertEqual(client.headers['Authorization'], 'Token %s' % self.org.get_config("api_token", top_key="rapidpro"))
+        self.assertEqual(client.headers['Authorization'],
+                         'Token %s' % self.org.get_config("api_token", top_key="rapidpro"))
         self.assertEqual(client.headers['User-Agent'], 'rapidpro-python/%s' % client_version)
 
         with self.settings(SITE_API_HOST='rapidpro.io', SITE_API_USER_AGENT='test/0.1'):
             client = self.org.get_temba_client()
             self.assertIsInstance(client, TembaClient1)
             self.assertEqual(client.root_url, 'https://rapidpro.io/api/v1')
-            self.assertEqual(client.headers['Authorization'], 'Token %s' % self.org.get_config("api_token", top_key="rapidpro"))
+            self.assertEqual(client.headers['Authorization'],
+                             'Token %s' % self.org.get_config("api_token", top_key="rapidpro"))
             self.assertEqual(client.headers['User-Agent'], 'test/0.1 rapidpro-python/%s' % client_version)
 
         client = self.org.get_temba_client(api_version=2)
         self.assertIsInstance(client, TembaClient2)
         self.assertEqual(client.root_url, 'http://localhost:8001/api/v2')
-        self.assertEqual(client.headers['Authorization'], 'Token %s' % self.org.get_config("api_token", top_key="rapidpro"))
+        self.assertEqual(client.headers['Authorization'],
+                         'Token %s' % self.org.get_config("api_token", top_key="rapidpro"))
         self.assertEqual(client.headers['User-Agent'], 'rapidpro-python/%s' % client_version)
 
         self.assertEquals(self.org.get_user(), self.admin)
