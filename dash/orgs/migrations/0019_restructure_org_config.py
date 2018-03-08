@@ -20,15 +20,15 @@ class Migration(migrations.Migration):
             if not org.config:
                 old_config = dict()
             else:
-                old_config = json.loads(self.config)
+                old_config = json.loads(org.config)
 
             if "common" in old_config and "rapidpro" in old_config:
                 print("Skipped org(%d), it looks like already migrated" % org.id)
                 continue
 
             new_config = {"common": old_config, "rapidro": {"api_token": org.api_token}}
-            self.config = json.dumps(new_config)
-            self.save()
+            org.config = json.dumps(new_config)
+            org.save()
 
     def noop(apps, schema_editor):
         pass
