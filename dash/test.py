@@ -31,9 +31,11 @@ class DashTest(TestCase):
         r.flushdb()
 
     def create_org(self, name, timezone, subdomain):
-        return Org.objects.create(
-            name=name, timezone=timezone, subdomain=subdomain, api_token=random_string(32),
+        org = Org.objects.create(
+            name=name, timezone=timezone, subdomain=subdomain,
             created_by=self.superuser, modified_by=self.superuser)
+        org.set_config("api_token", random_string(32), top_key="rapidpro")
+        return org
 
     def login(self, user):
         password = 'root' if user == self.superuser else user.username

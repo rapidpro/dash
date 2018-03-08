@@ -80,7 +80,7 @@ class Org(SmartModel):
         help_text=_("JSON blob used to store configuration information "
                     "associated with this organization"))
 
-    def get_config(self, name, default=None):
+    def get_config(self, name, default=None, top_key="common"):
         config = getattr(self, '_config', None)
 
         if config is None:
@@ -90,15 +90,18 @@ class Org(SmartModel):
             config = json.loads(self.config)
             self._config = config
 
-        return config.get(name, default)
+        return config.get(top_key, dict()).get(name, default)
 
-    def set_config(self, name, value, commit=True):
+    def set_config(self, name, value, commit=True, top_key="common"):
         if not self.config:
             config = dict()
         else:
             config = json.loads(self.config)
 
-        config[name] = value
+        if top_key not in config:
+            config[top_key] = dict()
+
+        config[top_key][name] = value
         self.config = json.dumps(config)
         self._config = config
 
@@ -150,7 +153,9 @@ class Org(SmartModel):
 
         client_cls = TembaClient1 if api_version == 1 else TembaClient2
 
-        return client_cls(host, self.api_token, user_agent=agent)
+        api_token = self.get_config('api_token', top_key="rapidpro")
+
+        return client_cls(host, api_token, user_agent=agent)
 
     def build_host_link(self, user_authenticated=False):
         host_tld = getattr(settings, "HOSTNAME", 'locahost')
