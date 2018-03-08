@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
                 print("Skipped org(%d), it looks like already migrated" % org.id)
                 continue
 
-            new_config = {"common": old_config, "rapidro": {"api_token": org.api_token}}
+            new_config = {"common": old_config, "rapidpro": {"api_token": org.api_token}}
             org.config = json.dumps(new_config)
             org.save()
 
