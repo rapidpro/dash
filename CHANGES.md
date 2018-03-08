@@ -1,3 +1,7 @@
+1.2.5 (2018-03-08)
+==================
+ * Restructure org config dict
+
 1.2.4 (2018-01-09)
 ==================
  * Fix derive fields to include read only fields
