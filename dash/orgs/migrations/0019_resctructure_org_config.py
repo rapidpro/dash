@@ -17,7 +17,11 @@ class Migration(migrations.Migration):
         orgs = Org.objects.all()
 
         for org in orgs:
-            old_config = json.loads(self.config)
+            if not org.config:
+                old_config = dict()
+            else:
+                old_config = json.loads(self.config)
+
             if "common" in old_config and "rapidpro" in old_config:
                 print("Skipped org(%d), it looks like already migrated" % org.id)
                 continue
