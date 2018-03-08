@@ -31,6 +31,7 @@ ALLOW_NO_ORG = (
     'orgs.org_choose',
     'orgs.org_home',
     'orgs.org_edit',
+    'orgs.org_tokens',
     'orgs.org_manage_accounts',
     'orgs.org_create_login',
     'orgs.org_join',

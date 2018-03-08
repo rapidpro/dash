@@ -199,6 +199,10 @@ CACHES = {
     }
 }
 
+DATA_API_BACKENDS_CONFIG = [
+    dict(name="RapidPro", slug='rapidpro'),
+]
+
 ORG_CONFIG_FIELDS = [
     dict(name='shortcode',
          field=dict(help_text=_("The shortcode that users will use to contact U-report locally"),

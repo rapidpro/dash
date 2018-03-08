@@ -121,9 +121,63 @@ class InferOrgMixin(object):
 
 
 class OrgCRUDL(SmartCRUDL):
-    actions = ('create', 'list', 'update', 'choose', 'home', 'edit',
+    actions = ('create', 'list', 'update', 'choose', 'home', 'edit', 'tokens',
                'manage_accounts', 'create_login', 'join', 'chooser')
     model = Org
+
+    class Tokens(InferOrgMixin, OrgPermsMixin, SmartUpdateView):
+        title = _("Your Organization API Tokens")
+        success_url = '@orgs.org_home'
+
+        def get_object(self, *args, **kwargs):
+            return self.request.org
+
+        def derive_fields(self):
+            fields = []
+
+            api_configs = getattr(settings, 'DATA_API_BACKENDS_CONFIG', [])
+            for config in api_configs:
+                fields.append("%s_api_token" % config['slug'])
+
+            return fields
+
+        def derive_initial(self):
+            initial = super(OrgCRUDL.Tokens, self).derive_initial()
+
+            api_configs = getattr(settings, 'DATA_API_BACKENDS_CONFIG', [])
+            for config in api_configs:
+                slug = config['slug']
+                name = 'api_token'
+                field_name = "%s_%s" % (slug, name)
+                initial[field_name] = self.object.get_config(name, top_key=slug)
+
+            return initial
+
+        def get_form(self):
+            form = super(OrgCRUDL.Tokens, self).get_form()
+
+            api_configs = getattr(settings, 'DATA_API_BACKENDS_CONFIG', [])
+            for config in api_configs:
+                slug = config['slug']
+                name = 'api_token'
+                field_name = "%s_%s" % (slug, name)
+
+                form.fields[field_name] = forms.CharField(required=False,
+                                                          help_text=_("API token for %s API" % config['name']))
+
+            return form
+
+        def pre_save(self, obj):
+            obj = super(OrgCRUDL.Tokens, self).pre_save(obj)
+            cleaned = self.form.cleaned_data
+
+            api_configs = getattr(settings, 'DATA_API_BACKENDS_CONFIG', [])
+            for config in api_configs:
+                slug = config['slug']
+                name = 'api_token'
+                field_name = "%s_%s" % (slug, name)
+                obj.set_config(name, cleaned.get(field_name, None), top_key=slug)
+            return obj
 
     class Chooser(SmartTemplateView):
         permission = False

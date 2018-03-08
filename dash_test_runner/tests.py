@@ -763,6 +763,45 @@ class OrgTest(DashTest):
         self.assertEqual(response.context['object'], self.org)
         self.assertEqual(response.context['org'], self.org)
 
+    def test_org_tokens(self):
+        tokens_url = reverse("orgs.org_tokens")
+
+        response = self.client.get(tokens_url)
+        self.assertLoginRedirect(response)
+
+        self.login(self.admin)
+        response = self.client.get(tokens_url)
+        self.assertLoginRedirect(response)
+
+        response = self.client.get(tokens_url, SERVER_NAME="uganda.ureport.io")
+        self.assertLoginRedirect(response)
+
+        self.login(self.superuser)
+        response = self.client.get(tokens_url, SERVER_NAME="uganda.ureport.io")
+        self.assertEquals(response.status_code, 200)
+        self.assertTrue(response.context['form'])
+        self.assertEquals(len(response.context['form'].fields), 2)
+        self.assertEquals(set(response.context['form'].fields.keys()), set(["rapidpro_api_token", "loc"]))
+
+        self.assertIsNone(response.context['form'].initial['rapidpro_api_token'])
+
+        post_data = {"rapidpro_api_token": "FooBAR"}
+
+        response = self.client.post(tokens_url, post_data, SERVER_NAME="uganda.ureport.io")
+        self.assertEquals(response.status_code, 302)
+
+        response = self.client.post(tokens_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
+        self.assertFalse('form' in response.context)
+        org = Org.objects.get(pk=self.org.pk)
+        self.assertEquals(org.get_config("api_token", top_key="rapidpro"), "FooBAR")
+
+        response = self.client.get(tokens_url, SERVER_NAME="uganda.ureport.io")
+        self.assertEquals(response.status_code, 200)
+        self.assertTrue(response.context['form'])
+        self.assertEquals(len(response.context['form'].fields), 2)
+        self.assertEquals(set(response.context['form'].fields.keys()), set(["rapidpro_api_token", "loc"]))
+        self.assertEquals(response.context['form'].initial['rapidpro_api_token'], "FooBAR")
+
     def test_org_edit(self):
 
         with patch('dash.orgs.models.Org.get_country_geojson') as mock:
