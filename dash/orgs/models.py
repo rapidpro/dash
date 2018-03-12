@@ -66,11 +66,6 @@ class Org(SmartModel):
         verbose_name=_("Timezone"), default='UTC',
         help_text=_("The timezone your organization is in."))
 
-    api_token = models.CharField(
-        max_length=128, null=True, blank=True,
-        help_text=_("The API token for the RapidPro account this dashboard "
-                    "is tied to"))
-
     config = models.TextField(
         null=True, blank=True,
         help_text=_("JSON blob used to store configuration information "
