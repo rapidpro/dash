@@ -22,12 +22,10 @@ from django.core.exceptions import DisallowedHost
 from django.core.urlresolvers import reverse, ResolverMatch
 from django.db.utils import IntegrityError
 from django.http import HttpRequest
-from django.test import override_settings
 from django.utils.encoding import force_text
 from mock import patch, Mock
 from smartmin.tests import SmartminTest
 from temba_client import __version__ as client_version
-from temba_client.v1.types import Geometry, Boundary
 from temba_client.v2 import TembaClient
 
 
@@ -743,7 +741,6 @@ class OrgTest(DashTest):
         self.assertEquals(len(response.context['form'].fields), 20)
         self.assertEquals(len([f for f in response.context['form'].fields.items()
                                if f[1].widget.attrs.get('readonly', "") == 'readonly']), 9)
-
 
         self.assertEquals(response.context['form'].initial['name'], 'uganda')
         self.assertEquals(response.context['object'], self.org)

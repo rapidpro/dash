@@ -5,14 +5,13 @@ import json
 import logging
 import six
 import sys
-import time
 
 from celery import shared_task, signature
 from django_redis import get_redis_connection
 from django.apps import apps
 from django.utils import timezone
 from functools import wraps
-from .models import Invitation, Org
+from .models import Invitation
 
 
 ORG_TASK_LOCK_KEY = 'org-task-lock:%s:%s'

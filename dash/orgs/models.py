@@ -3,10 +3,8 @@ from __future__ import unicode_literals
 import json
 import random
 
-from datetime import datetime
 from django.conf import settings
 from django.contrib.auth.models import User, Group
-from django.core.cache import cache
 from django.db import models
 from django.utils import timezone
 from django.utils.encoding import force_text, python_2_unicode_compatible
@@ -15,7 +13,6 @@ from smartmin.models import SmartModel
 from temba_client.v2 import TembaClient
 from timezone_field import TimeZoneField
 
-from dash.utils import datetime_to_ms
 from dash.utils.email import send_dash_email
 
 STATE = 1
