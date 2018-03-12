@@ -11,11 +11,13 @@ from django_redis import get_redis_connection
 class Contact(models.Model):
     org = models.ForeignKey(Org)
 
-    uuid = models.CharField(max_length=36, unique=True)
+    uuid = models.CharField(max_length=36)
 
     name = models.CharField(verbose_name=_("Name"), max_length=128)
 
     is_active = models.BooleanField(default=True)
+
+    backend = models.CharField(max_length=16, default='rapidpro')
 
     @classmethod
     def lock(cls, org, uuid):
@@ -32,7 +34,8 @@ class ContactSyncer(BaseSyncer):
         return {
             'org': org,
             'uuid': remote.uuid,
-            'name': remote.name
+            'name': remote.name,
+            'backend': self.backend
         }
 
     def update_required(self, local, remote, remote_as_kwargs):
