@@ -39,7 +39,8 @@ class SyncTest(DashTest):
         self.assertEqual(sync_from_remote(self.unicef, self.syncer, remote), SyncOutcome.created)
 
         Contact.objects.get(org=self.unicef, uuid="C-002", name="Frank", backend="rapidpro", is_active=True)
-        self.assertIsNone(Contact.objects.filter(org=self.unicef, uuid="C-002", name="Frank", backend="floip", is_active=True).first())
+        self.assertIsNone(Contact.objects.filter(org=self.unicef, uuid="C-002", name="Frank",
+                                                 backend="floip", is_active=True).first())
 
         self.assertEqual(sync_from_remote(self.unicef, self.syncer2, remote), SyncOutcome.created)
         Contact.objects.get(org=self.unicef, uuid="C-002", name="Frank", backend="floip", is_active=True)
@@ -92,7 +93,7 @@ class SyncTest(DashTest):
 
         self.assertEqual(sync_local_to_set(self.unicef, self.syncer2, remote_set), (3, 0, 0, 0))
         self.assertEqual(Contact.objects.count(), 7)
-        Contact.objects.get(org=self.unicef, uuid="C-002", name="Bob", backend="floip",is_active=True)
+        Contact.objects.get(org=self.unicef, uuid="C-002", name="Bob", backend="floip", is_active=True)
         Contact.objects.get(org=self.unicef, uuid="C-003", name="Colm", backend="floip", is_active=True)
         Contact.objects.get(org=self.unicef, uuid="C-005", name="Edward", backend="floip", is_active=True)
 
