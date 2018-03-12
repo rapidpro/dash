@@ -27,9 +27,8 @@ from django.utils.encoding import force_text
 from mock import patch, Mock
 from smartmin.tests import SmartminTest
 from temba_client import __version__ as client_version
-from temba_client.v1 import TembaClient as TembaClient1
 from temba_client.v1.types import Geometry, Boundary
-from temba_client.v2 import TembaClient as TembaClient2
+from temba_client.v2 import TembaClient
 
 
 class UserTest(SmartminTest):
@@ -379,22 +378,14 @@ class OrgTest(DashTest):
         self.assertTrue(new_user.check_password("secretpassword"))
 
         client = self.org.get_temba_client()
-        self.assertIsInstance(client, TembaClient1)
-        self.assertEqual(client.root_url, 'http://localhost:8001/api/v1')
+        self.assertIsInstance(client, TembaClient)
+        self.assertEqual(client.root_url, 'http://localhost:8001/api/v2')
         self.assertEqual(client.headers['Authorization'],
                          'Token %s' % self.org.get_config("api_token", top_key="rapidpro"))
         self.assertEqual(client.headers['User-Agent'], 'rapidpro-python/%s' % client_version)
 
-        with self.settings(SITE_API_HOST='rapidpro.io', SITE_API_USER_AGENT='test/0.1'):
-            client = self.org.get_temba_client()
-            self.assertIsInstance(client, TembaClient1)
-            self.assertEqual(client.root_url, 'https://rapidpro.io/api/v1')
-            self.assertEqual(client.headers['Authorization'],
-                             'Token %s' % self.org.get_config("api_token", top_key="rapidpro"))
-            self.assertEqual(client.headers['User-Agent'], 'test/0.1 rapidpro-python/%s' % client_version)
-
         client = self.org.get_temba_client(api_version=2)
-        self.assertIsInstance(client, TembaClient2)
+        self.assertIsInstance(client, TembaClient)
         self.assertEqual(client.root_url, 'http://localhost:8001/api/v2')
         self.assertEqual(client.headers['Authorization'],
                          'Token %s' % self.org.get_config("api_token", top_key="rapidpro"))
@@ -489,69 +480,6 @@ class OrgTest(DashTest):
             with self.settings(SESSION_COOKIE_SECURE=True):
                 self.assertEqual(self.org.build_host_link(), 'http://ureport.ug')
                 self.assertEqual(self.org.build_host_link(True), 'https://uganda.localhost:8000')
-
-    @override_settings(CELERY_ALWAYS_EAGER=True)
-    def test_build_boundaries(self):
-        boundaries = dict()
-        boundaries['geojson:%d' % self.org.pk] = dict(
-            type="FeatureCollection",
-            features=[dict(type="Feature",
-                           geometry=dict(type='MultiPolygon', coordinates=[[1, 2], [3, 4]]),
-                           properties=dict(name='Burundi', id="R195269", level=1))])
-
-        boundaries['geojson:%d:%s' % (self.org.pk, "R195269")] = dict(
-            type="FeatureCollection",
-            features=[dict(type="Feature",
-                           geometry=dict(type='MultiPolygon', coordinates=[[5, 6], [7, 8]]),
-                           properties=dict(name='Bujumbura', id="R195270", level=2))])
-
-        with patch('dash.orgs.models.datetime_to_ms') as mock_datetime_to_ms:
-            mock_datetime_to_ms.return_value = 500
-
-            with patch('django.core.cache.cache.set') as cache_set_mock:
-                cache_set_mock.return_value = "Set"
-
-                with patch('dash.orgs.models.TembaClient1.get_boundaries') as mock_client:
-                    geometry1 = Geometry.create(type='MultiPolygon', coordinates=[[1, 2], [3, 4]])
-                    geometry2 = Geometry.create(type='MultiPolygon', coordinates=[[5, 6], [7, 8]])
-                    level_1_boundary = Boundary.create(boundary='R195269', name='Burundi', level=1, parent="",
-                                                       geometry=geometry1)
-                    level_2_boundary = Boundary.create(boundary='R195270', name='Bujumbura', level=2, parent="R195269",
-                                                       geometry=geometry2)
-
-                    mock_client.return_value = [level_1_boundary, level_2_boundary]
-
-                    self.assertEqual(self.org.build_boundaries(), boundaries)
-                    cache_set_mock.assert_called_with('org:%d:boundaries' % self.org.pk, dict(time=500,
-                                                                                              results=boundaries),
-                                                      60 * 60 * 24 * 30)
-
-        with patch('django.core.cache.cache.get') as cache_get_mock:
-            cache_get_mock.return_value = None
-            self.assertIsNone(self.org.get_boundaries())
-
-            cache_get_mock.return_value = dict(time=500, results=boundaries)
-            self.assertEqual(self.org.get_boundaries(), boundaries)
-
-        with patch('dash.orgs.models.Org.get_boundaries') as mock_get_boundaries:
-            mock_get_boundaries.return_value = None
-
-            self.assertIsNone(self.org.get_country_geojson())
-            self.assertIsNone(self.org.get_state_geojson("R195269"))
-
-            mock_get_boundaries.return_value = boundaries
-            self.assertEqual(self.org.get_country_geojson(),
-                             dict(type="FeatureCollection",
-                                  features=[dict(type="Feature",
-                                                 geometry=dict(type='MultiPolygon', coordinates=[[1, 2], [3, 4]]),
-                                                 properties=dict(name='Burundi', id="R195269", level=1))]))
-            self.assertEqual(self.org.get_state_geojson("R195269"),
-                             dict(type="FeatureCollection",
-                                  features=[dict(type="Feature",
-                                                 geometry=dict(type='MultiPolygon', coordinates=[[5, 6], [7, 8]]),
-                                                 properties=dict(name='Bujumbura', id="R195270", level=2))]))
-            # we get None if no value in dict
-            self.assertIsNone(self.org.get_state_geojson("R11"))
 
     def test_org_create(self):
         create_url = reverse("orgs.org_create")
@@ -804,89 +732,68 @@ class OrgTest(DashTest):
 
     def test_org_edit(self):
 
-        with patch('dash.orgs.models.Org.get_country_geojson') as mock:
-            mock.return_value = dict(type="FeatureCollection", features=[dict(type='Feature',
-                                                                              properties=dict(id="R3713501",
-                                                                                              level=1,
-                                                                                              name="Abia"),
-                                                                              geometry=dict(type="MultiPolygon",
-                                                                                            coordinates=[[[[7, 5]]]]
-                                                                                            )
-                                                                              )
-                                                                         ])
+        edit_url = reverse("orgs.org_edit")
 
-            edit_url = reverse("orgs.org_edit")
+        self.login(self.admin)
+        self.admin.set_org(self.org)
 
-            self.login(self.admin)
-            self.admin.set_org(self.org)
+        response = self.client.get(edit_url, SERVER_NAME="uganda.ureport.io")
+        self.assertEquals(response.status_code, 200)
+        self.assertTrue(response.context['form'])
+        self.assertEquals(len(response.context['form'].fields), 20)
+        self.assertEquals(len([f for f in response.context['form'].fields.items()
+                               if f[1].widget.attrs.get('readonly', "") == 'readonly']), 9)
 
-            response = self.client.get(edit_url, SERVER_NAME="uganda.ureport.io")
-            self.assertEquals(response.status_code, 200)
-            self.assertTrue(response.context['form'])
-            self.assertEquals(len(response.context['form'].fields), 20)
-            self.assertEquals(len([f for f in response.context['form'].fields.items()
-                                   if f[1].widget.attrs.get('readonly', "") == 'readonly']), 9)
 
-            # featured state is currently disabled; adjust the following lines
-            self.assertTrue('featured_state' not in response.context['form'].fields)  # the featured state are disabled
-            # self.assertEquals(len(response.context['form'].fields['featured_state'].choices), 1)
-            # self.assertEquals(response.context['form'].fields['featured_state'].choices[0][0], 'R3713501')
-            # self.assertEquals(response.context['form'].fields['featured_state'].choices[0][1], 'Abia')
+        self.assertEquals(response.context['form'].initial['name'], 'uganda')
+        self.assertEquals(response.context['object'], self.org)
+        self.assertEquals(response.context['object'], response.context['org'])
+        self.assertEquals(response.context['object'].subdomain, 'uganda')
 
-            self.assertEquals(response.context['form'].initial['name'], 'uganda')
-            self.assertEquals(response.context['object'], self.org)
-            self.assertEquals(response.context['object'], response.context['org'])
-            self.assertEquals(response.context['object'].subdomain, 'uganda')
+        post_data = dict()
+        response = self.client.post(edit_url, post_data, SERVER_NAME="uganda.ureport.io")
+        self.assertTrue(response.context['form'])
 
-            post_data = dict()
-            response = self.client.post(edit_url, post_data, SERVER_NAME="uganda.ureport.io")
-            self.assertTrue(response.context['form'])
+        errors = response.context['form'].errors
+        self.assertEquals(len(errors.keys()), 2)
+        self.assertTrue('name' in errors)
+        self.assertTrue('shortcode' in errors)
+        self.assertEquals(errors['name'][0], 'This field is required.')
+        self.assertEquals(errors['shortcode'][0], 'This field is required.')
 
-            errors = response.context['form'].errors
-            self.assertEquals(len(errors.keys()), 2)
-            self.assertTrue('name' in errors)
-            self.assertTrue('shortcode' in errors)
-            self.assertEquals(errors['name'][0], 'This field is required.')
-            self.assertEquals(errors['shortcode'][0], 'This field is required.')
+        post_data = dict(name="Rwanda",
+                         shortcode="224433")
 
-            post_data = dict(name="Rwanda",
-                             shortcode="224433",
-                             featured_state="R3713501")
+        response = self.client.post(edit_url, post_data, SERVER_NAME="uganda.ureport.io")
+        self.assertEquals(response.status_code, 302)
 
-            response = self.client.post(edit_url, post_data, SERVER_NAME="uganda.ureport.io")
-            self.assertEquals(response.status_code, 302)
+        response = self.client.post(edit_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
+        self.assertFalse('form' in response.context)
+        org = Org.objects.get(pk=self.org.pk)
+        self.assertEquals(org.name, "Rwanda")
+        self.assertEquals(org.get_config('shortcode'), "224433")
 
-            response = self.client.post(edit_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
-            self.assertFalse('form' in response.context)
-            org = Org.objects.get(pk=self.org.pk)
-            self.assertEquals(org.name, "Rwanda")
-            self.assertEquals(org.get_config('shortcode'), "224433")
+        org.set_config('reporter_group', "reporters")
 
-            org.set_config('reporter_group', "reporters")
+        # can't update read-only
+        post_data['reporter_group'] = 'members'
 
-            # can't update read-only
-            post_data['reporter_group'] = 'members'
+        response = self.client.post(edit_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
+        self.assertFalse('form' in response.context)
+        org = Org.objects.get(pk=self.org.pk)
+        self.assertEquals(org.name, "Rwanda")
+        self.assertEquals(org.get_config('shortcode'), "224433")
+        self.assertEquals(org.get_config("reporter_group"), "reporters")
 
-            response = self.client.post(edit_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
-            self.assertFalse('form' in response.context)
-            org = Org.objects.get(pk=self.org.pk)
-            self.assertEquals(org.name, "Rwanda")
-            self.assertEquals(org.get_config('shortcode'), "224433")
-            self.assertEquals(org.get_config("reporter_group"), "reporters")
+        self.assertEquals(response.request['PATH_INFO'], reverse('orgs.org_home'))
 
-            # featured state is currenty disabled, adjust the following lines
-            self.assertFalse(org.get_config('featured_state'))  # this make sure the featured state are disabled
-            # self.assertEquals(org.get_config('featured_state'), "R3713501")
-
-            self.assertEquals(response.request['PATH_INFO'], reverse('orgs.org_home'))
-
-            response = self.client.get(edit_url, SERVER_NAME="uganda.ureport.io")
-            self.assertEquals(response.status_code, 200)
-            form = response.context['form']
-            self.assertEquals(form.initial['shortcode'], "224433")
-            self.assertEquals(form.initial['name'], "Rwanda")
-            self.assertEquals(form.initial['reporter_group'], "reporters")
-            self.assertTrue('reporter_group' in response.context['view'].fields)
+        response = self.client.get(edit_url, SERVER_NAME="uganda.ureport.io")
+        self.assertEquals(response.status_code, 200)
+        form = response.context['form']
+        self.assertEquals(form.initial['shortcode'], "224433")
+        self.assertEquals(form.initial['name'], "Rwanda")
+        self.assertEquals(form.initial['reporter_group'], "reporters")
+        self.assertTrue('reporter_group' in response.context['view'].fields)
 
     def test_org_chooser(self):
         chooser_url = reverse('orgs.org_chooser')
