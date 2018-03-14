@@ -3,20 +3,16 @@ from __future__ import unicode_literals
 import json
 import random
 
-from datetime import datetime
 from django.conf import settings
 from django.contrib.auth.models import User, Group
-from django.core.cache import cache
 from django.db import models
 from django.utils import timezone
 from django.utils.encoding import force_text, python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from smartmin.models import SmartModel
-from temba_client.v1 import TembaClient as TembaClient1
-from temba_client.v2 import TembaClient as TembaClient2
+from temba_client.v2 import TembaClient
 from timezone_field import TimeZoneField
 
-from dash.utils import datetime_to_ms
 from dash.utils.email import send_dash_email
 
 STATE = 1
@@ -69,11 +65,6 @@ class Org(SmartModel):
     timezone = TimeZoneField(
         verbose_name=_("Timezone"), default='UTC',
         help_text=_("The timezone your organization is in."))
-
-    api_token = models.CharField(
-        max_length=128, null=True, blank=True,
-        help_text=_("The API token for the RapidPro account this dashboard "
-                    "is tied to"))
 
     config = models.TextField(
         null=True, blank=True,
@@ -140,22 +131,20 @@ class Org(SmartModel):
             org_user.set_org(self)
             return org_user
 
-    def get_temba_client(self, api_version=1):
-        if api_version not in (1, 2):
+    def get_temba_client(self, api_version=2):
+        if api_version not in (2,):
             raise ValueError("Unsupported RapidPro API version: %d" % api_version)
 
         host = getattr(settings, 'SITE_API_HOST', None)
         agent = getattr(settings, 'SITE_API_USER_AGENT', None)
 
-        if host.endswith('api/v1') or host.endswith('api/v1/'):
+        if host.endswith('api/v2') or host.endswith('api/v2/'):
             raise ValueError("API host should not include API version, "
-                             "e.g. http://example.com instead of http://example.com/api/v1")
-
-        client_cls = TembaClient1 if api_version == 1 else TembaClient2
+                             "e.g. http://example.com instead of http://example.com/api/v2")
 
         api_token = self.get_config('api_token', top_key="rapidpro")
 
-        return client_cls(host, api_token, user_agent=agent)
+        return TembaClient(host, api_token, user_agent=agent)
 
     def build_host_link(self, user_authenticated=False):
         host_tld = getattr(settings, "HOSTNAME", 'locahost')
@@ -172,77 +161,6 @@ class Org(SmartModel):
         if self.subdomain == '':
             return prefix + host_tld
         return prefix + force_text(self.subdomain) + "." + host_tld
-
-    @classmethod
-    def rebuild_org_boundaries_task(cls, org):
-        from dash.orgs.tasks import rebuild_org_boundaries
-        rebuild_org_boundaries.delay(org.pk)
-
-    def build_boundaries(self):
-
-        this_time = datetime.now()
-        temba_client = self.get_temba_client()
-        client_boundaries = temba_client.get_boundaries()
-
-        # we now build our cached versions of level 1 (all states) and level 2
-        # (all districts for each state) geojson
-        states = []
-        districts_by_state = dict()
-        for boundary in client_boundaries:
-            if boundary.level == STATE:
-                states.append(boundary)
-            elif boundary.level == DISTRICT:
-                osm_id = boundary.parent
-                if osm_id not in districts_by_state:
-                    districts_by_state[osm_id] = []
-
-                districts = districts_by_state[osm_id]
-                districts.append(boundary)
-
-        # mini function to convert a list of boundary objects to geojson
-        def to_geojson(boundary_list):
-            features = [dict(type='Feature',
-                             geometry=dict(type=b.geometry.type,
-                                           coordinates=b.geometry.coordinates),
-                             properties=dict(name=b.name, id=b.boundary, level=b.level))
-                        for b in boundary_list]
-            return dict(type='FeatureCollection', features=features)
-
-        boundaries = dict()
-        boundaries[BOUNDARY_LEVEL_1_KEY % self.id] = to_geojson(states)
-
-        for state_id in districts_by_state.keys():
-            boundaries[BOUNDARY_LEVEL_2_KEY % (self.id, state_id)] = to_geojson(
-                districts_by_state[state_id])
-
-        key = BOUNDARY_CACHE_KEY % self.pk
-        value = {'time': datetime_to_ms(this_time), 'results': boundaries}
-        cache.set(key, value, BOUNDARY_CACHE_TIME)
-
-        return boundaries
-
-    def get_boundaries(self):
-        key = BOUNDARY_CACHE_KEY % self.pk
-        cached_value = cache.get(key, None)
-        if cached_value:
-            return cached_value['results']
-        Org.rebuild_org_boundaries_task(self)
-
-    def get_country_geojson(self):
-        boundaries = self.get_boundaries()
-        if boundaries:
-            key = BOUNDARY_LEVEL_1_KEY % self.id
-            return boundaries.get(key, None)
-
-    def get_state_geojson(self, state_id):
-        boundaries = self.get_boundaries()
-        if boundaries:
-            key = BOUNDARY_LEVEL_2_KEY % (self.id, state_id)
-            return boundaries.get(key, None)
-
-    def get_top_level_geojson_ids(self):
-        org_country_boundaries = self.get_country_geojson()
-        return [elt['properties']['id'] for elt in org_country_boundaries['features']]
 
     def get_task_state(self, task_key):
         return TaskState.get_or_create(self, task_key)

@@ -289,9 +289,6 @@ ORG_CONFIG_FIELDS = [
     dict(name='has_jobs',
          field=dict(help_text=_("If there are jobs to be shown on the public site"),
                     required=False)),
-    # dict(name='featured_state',
-    #      field=dict(help_text=_("Choose the featured State of reporters "
-    #                             "shown on the home page"))),
 ]
 
 # ----------------------------------------------------------------------------
