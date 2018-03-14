@@ -17,6 +17,8 @@ class Contact(models.Model):
 
     is_active = models.BooleanField(default=True)
 
+    backend = models.CharField(max_length=16, default='rapidpro')
+
     @classmethod
     def lock(cls, org, uuid):
         return get_redis_connection().lock('contact-lock:%d:%s' % (org.pk, uuid), timeout=60)
@@ -32,7 +34,8 @@ class ContactSyncer(BaseSyncer):
         return {
             'org': org,
             'uuid': remote.uuid,
-            'name': remote.name
+            'name': remote.name,
+            'backend': self.backend
         }
 
     def update_required(self, local, remote, remote_as_kwargs):

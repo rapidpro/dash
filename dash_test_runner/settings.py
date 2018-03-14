@@ -199,9 +199,13 @@ CACHES = {
     }
 }
 
-DATA_API_BACKENDS_CONFIG = [
-    dict(name="RapidPro", slug='rapidpro'),
-]
+DATA_API_BACKENDS_CONFIG = {
+    'rapidpro': {
+        'name': 'RapidPro',
+        'slug': 'rapidpro',
+        'class_type': None
+    }
+}
 
 ORG_CONFIG_FIELDS = [
     dict(name='shortcode',

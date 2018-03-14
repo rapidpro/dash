@@ -135,35 +135,34 @@ class OrgCRUDL(SmartCRUDL):
         def derive_fields(self):
             fields = []
 
-            api_configs = getattr(settings, 'DATA_API_BACKENDS_CONFIG', [])
-            for config in api_configs:
-                fields.append("%s_api_token" % config['slug'])
+            backends_config_dict = getattr(settings, 'DATA_API_BACKENDS_CONFIG', {})
+            for backend_slug in backends_config_dict:
+                fields.append("%s_api_token" % backend_slug)
 
             return fields
 
         def derive_initial(self):
             initial = super(OrgCRUDL.Tokens, self).derive_initial()
 
-            api_configs = getattr(settings, 'DATA_API_BACKENDS_CONFIG', [])
-            for config in api_configs:
-                slug = config['slug']
+            backends_config_dict = getattr(settings, 'DATA_API_BACKENDS_CONFIG', {})
+            for backend_slug in backends_config_dict:
                 name = 'api_token'
-                field_name = "%s_%s" % (slug, name)
-                initial[field_name] = self.object.get_config(name, top_key=slug)
+                field_name = "%s_%s" % (backend_slug, name)
+                initial[field_name] = self.object.get_config(name, top_key=backend_slug)
 
             return initial
 
         def get_form(self):
             form = super(OrgCRUDL.Tokens, self).get_form()
 
-            api_configs = getattr(settings, 'DATA_API_BACKENDS_CONFIG', [])
-            for config in api_configs:
-                slug = config['slug']
+            backends_config_dict = getattr(settings, 'DATA_API_BACKENDS_CONFIG', {})
+            for backend_slug in backends_config_dict:
                 name = 'api_token'
-                field_name = "%s_%s" % (slug, name)
+                field_name = "%s_%s" % (backend_slug, name)
 
-                form.fields[field_name] = forms.CharField(required=False,
-                                                          help_text=_("API token for %s API" % config['name']))
+                form.fields[field_name] = forms.CharField(
+                    required=False,
+                    help_text=_("API token for %s API" % backends_config_dict[backend_slug]['name']))
 
             return form
 
@@ -171,12 +170,11 @@ class OrgCRUDL(SmartCRUDL):
             obj = super(OrgCRUDL.Tokens, self).pre_save(obj)
             cleaned = self.form.cleaned_data
 
-            api_configs = getattr(settings, 'DATA_API_BACKENDS_CONFIG', [])
-            for config in api_configs:
-                slug = config['slug']
+            backends_config_dict = getattr(settings, 'DATA_API_BACKENDS_CONFIG', {})
+            for backend_slug in backends_config_dict:
                 name = 'api_token'
-                field_name = "%s_%s" % (slug, name)
-                obj.set_config(name, cleaned.get(field_name, None), top_key=slug)
+                field_name = "%s_%s" % (backend_slug, name)
+                obj.set_config(name, cleaned.get(field_name, None), top_key=backend_slug)
             return obj
 
     class Chooser(SmartTemplateView):

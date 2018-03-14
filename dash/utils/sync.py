@@ -29,6 +29,9 @@ class BaseSyncer(object):
     select_related = ()
     prefetch_related = ()
 
+    def __init__(self, backend='rapidpro'):
+        self.backend = backend
+
     def identify_local(self, local):
         """
         Gets the unique identity of the local model instance
@@ -76,7 +79,7 @@ class BaseSyncer(object):
         :param org: the org
         :return: the queryset
         """
-        return self.model.objects.filter(org=org)
+        return self.model.objects.filter(backend=self.backend, org=org)
 
     @abstractmethod
     def local_kwargs(self, org, remote):
