@@ -160,8 +160,9 @@ class OrgCRUDL(SmartCRUDL):
                 name = 'api_token'
                 field_name = "%s_%s" % (backend_slug, name)
 
-                form.fields[field_name] = forms.CharField(required=False,
-                                                          help_text=_("API token for %s API" % backends_config_dict[backend_slug]['name']))
+                form.fields[field_name] = forms.CharField(
+                    required=False,
+                    help_text=_("API token for %s API" % backends_config_dict[backend_slug]['name']))
 
             return form
 
