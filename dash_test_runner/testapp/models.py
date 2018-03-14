@@ -11,7 +11,7 @@ from django_redis import get_redis_connection
 class Contact(models.Model):
     org = models.ForeignKey(Org)
 
-    uuid = models.CharField(max_length=36)
+    uuid = models.CharField(max_length=36, unique=True)
 
     name = models.CharField(verbose_name=_("Name"), max_length=128)
 
