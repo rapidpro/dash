@@ -804,7 +804,6 @@ class OrgTest(DashTest):
         self.assertEquals(len([f for f in response.context['form'].fields.items()
                                if f[1].widget.attrs.get('readonly', "") == 'readonly']), 0)
 
-
     def test_org_chooser(self):
         chooser_url = reverse('orgs.org_chooser')
 

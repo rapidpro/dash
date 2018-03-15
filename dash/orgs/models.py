@@ -67,7 +67,8 @@ class Org(SmartModel):
         verbose_name=_("Timezone"), default='UTC',
         help_text=_("The timezone your organization is in."))
 
-    config = JSONField(default=dict,
+    config = JSONField(
+        default=dict,
         help_text=_("JSON blob used to store configuration information "
                     "associated with this organization"))
 
