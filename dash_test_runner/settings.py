@@ -71,11 +71,11 @@ WSGI_APPLICATION = 'dash_test_runner.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'dash',
+        'USER': 'postgres',
     }
 }
-
 
 SITE_ID = 1
 LANGUAGE_CODE = 'en-us'
@@ -207,6 +207,45 @@ DATA_API_BACKENDS_CONFIG = {
     }
 }
 
+
+BACKENDS_ORG_CONFIG_FIELDS = [
+    dict(name='reporter_group',
+         field=dict(help_text=_("The name of the Contact Group that contains "
+                                "registered reporters")),
+         superuser_only=True, read_only=True),
+    dict(name='born_label',
+         field=dict(help_text=_("The label of the Contact Field that contains "
+                                "the birth date of reporters")),
+         superuser_only=True, read_only=True),
+    dict(name='gender_label',
+         field=dict(help_text=_("The label of the Contact Field that contains "
+                                "the gender of reporters")),
+         superuser_only=True, read_only=True),
+    dict(name='occupation_label',
+         field=dict(help_text=_("The label of the Contact Field that contains "
+                                "the occupation of reporters")),
+         superuser_only=True, read_only=True),
+    dict(name='registration_label',
+         field=dict(help_text=_("The label of the Contact Field that contains "
+                                "the registration date of reporters")),
+         superuser_only=True, read_only=True),
+    dict(name='state_label',
+         field=dict(help_text=_("The label of the Contact Field that contains "
+                                "the State of reporters")),
+         superuser_only=True, read_only=True),
+    dict(name='district_label',
+         field=dict(help_text=_("The label of the Contact Field that contains "
+                                "the District of reporters")),
+         superuser_only=True, read_only=True),
+    dict(name='male_label',
+         field=dict(help_text=_("The label assigned to U-reporters that are Male.")),
+         superuser_only=True, read_only=True),
+    dict(name='female_label',
+         field=dict(help_text=_("The label assigned to U-reporters that are Female.")),
+         superuser_only=True, read_only=True),
+]
+
+
 ORG_CONFIG_FIELDS = [
     dict(name='shortcode',
          field=dict(help_text=_("The shortcode that users will use to contact U-report locally"),
@@ -256,40 +295,6 @@ ORG_CONFIG_FIELDS = [
     dict(name='twitter_search_widget',
          field=dict(help_text=_("The Twitter widget used for searching"),
                     required=False)),
-    dict(name='reporter_group',
-         field=dict(help_text=_("The name of txbhe Contact Group that contains "
-                                "registered reporters")),
-         superuser_only=True, read_only=True),
-    dict(name='born_label',
-         field=dict(help_text=_("The label of the Contact Field that contains "
-                                "the birth date of reporters")),
-         superuser_only=True, read_only=True),
-    dict(name='gender_label',
-         field=dict(help_text=_("The label of the Contact Field that contains "
-                                "the gender of reporters")),
-         superuser_only=True, read_only=True),
-    dict(name='occupation_label',
-         field=dict(help_text=_("The label of the Contact Field that contains "
-                                "the occupation of reporters")),
-         superuser_only=True, read_only=True),
-    dict(name='registration_label',
-         field=dict(help_text=_("The label of the Contact Field that contains "
-                                "the registration date of reporters")),
-         superuser_only=True, read_only=True),
-    dict(name='state_label',
-         field=dict(help_text=_("The label of the Contact Field that contains "
-                                "the State of reporters")),
-         superuser_only=True, read_only=True),
-    dict(name='district_label',
-         field=dict(help_text=_("The label of the Contact Field that contains "
-                                "the District of reporters")),
-         superuser_only=True, read_only=True),
-    dict(name='male_label',
-         field=dict(help_text=_("The label assigned to U-reporters that are Male.")),
-         superuser_only=True, read_only=True),
-    dict(name='female_label',
-         field=dict(help_text=_("The label assigned to U-reporters that are Female.")),
-         superuser_only=True, read_only=True),
     dict(name='has_jobs',
          field=dict(help_text=_("If there are jobs to be shown on the public site"),
                     required=False)),
