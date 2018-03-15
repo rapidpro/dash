@@ -5,6 +5,7 @@ import random
 
 from django.conf import settings
 from django.contrib.auth.models import User, Group
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils import timezone
 from django.utils.encoding import force_text, python_2_unicode_compatible
@@ -66,8 +67,8 @@ class Org(SmartModel):
         verbose_name=_("Timezone"), default='UTC',
         help_text=_("The timezone your organization is in."))
 
-    config = models.TextField(
-        null=True, blank=True,
+    config = JSONField(
+        default=dict,
         help_text=_("JSON blob used to store configuration information "
                     "associated with this organization"))
 
@@ -78,7 +79,7 @@ class Org(SmartModel):
             if not self.config:
                 return default
 
-            config = json.loads(self.config)
+            config = self.config
             self._config = config
 
         return config.get(top_key, dict()).get(name, default)
@@ -87,17 +88,20 @@ class Org(SmartModel):
         if not self.config:
             config = dict()
         else:
-            config = json.loads(self.config)
+            config = self.config
 
         if top_key not in config:
             config[top_key] = dict()
 
         config[top_key][name] = value
-        self.config = json.dumps(config)
+        self.config = config
         self._config = config
 
         if commit:
             self.save()
+
+    def has_backend_config(self, backend_slug):
+        return backend_slug in self.config and self.config[backend_slug]['api_token']
 
     def get_org_admins(self):
         return self.administrators.all()

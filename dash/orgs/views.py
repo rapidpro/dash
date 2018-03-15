@@ -284,8 +284,17 @@ class OrgCRUDL(SmartCRUDL):
             for config_field in config_fields:
                 read_only = config_field.get('read_only', False)
                 if is_super or read_only or not config_field.get('superuser_only', False):
-                    fields.append(config_field['name'])
+                    fields.append("%s__%s" % ('common', config_field['name']))
 
+            backends_config_dict = getattr(settings, 'DATA_API_BACKENDS_CONFIG', {})
+            for backend_slug in backends_config_dict:
+                if not self.get_object().has_backend_config(backend_slug):
+                    continue
+                config_fields = getattr(settings, 'BACKENDS_ORG_CONFIG_FIELDS', [])
+                for config_field in config_fields:
+                    read_only = config_field.get('read_only', False)
+                    if is_super or read_only or not config_field.get('superuser_only', False):
+                        fields.append("%s__%s" % (backend_slug, config_field['name']))
             return fields
 
         def get_form(self):
@@ -297,8 +306,9 @@ class OrgCRUDL(SmartCRUDL):
             for config_field in config_fields:
                 read_only = config_field.get('read_only', False)
                 if is_super or read_only or not config_field.get('superuser_only', False):
-                    field_name = config_field['name']
-                    if field_name.startswith('has_') or field_name.startswith('is_'):
+                    name = config_field['name']
+                    field_name = "common__%s" % name
+                    if name.startswith('has_') or name.startswith('is_'):
                         form.fields[field_name] = forms.BooleanField(**config_field['field'])
                     else:
                         form.fields[field_name] = forms.CharField(**config_field['field'])
@@ -307,6 +317,24 @@ class OrgCRUDL(SmartCRUDL):
                         form.fields[field_name].widget.attrs['readonly'] = 'readonly'
                         form.fields[field_name].required = False
 
+            backends_config_dict = getattr(settings, 'DATA_API_BACKENDS_CONFIG', {})
+            for backend_slug in backends_config_dict:
+                if not self.get_object().has_backend_config(backend_slug):
+                    continue
+                config_fields = getattr(settings, 'BACKENDS_ORG_CONFIG_FIELDS', [])
+                for config_field in config_fields:
+                    read_only = config_field.get('read_only', False)
+                    if is_super or read_only or not config_field.get('superuser_only', False):
+                        name = config_field['name']
+                        field_name = "%s__%s" % (backend_slug, name)
+                        if name.startswith('has_') or name.startswith('is_'):
+                            form.fields[field_name] = forms.BooleanField(**config_field['field'])
+                        else:
+                            form.fields[field_name] = forms.CharField(**config_field['field'])
+
+                        if not is_super and read_only:
+                            form.fields[field_name].widget.attrs['readonly'] = 'readonly'
+                            form.fields[field_name].required = False
             return form
 
         def pre_save(self, obj):
@@ -319,8 +347,20 @@ class OrgCRUDL(SmartCRUDL):
                 read_only = config_field.get('read_only', False)
                 if is_super or (not config_field.get('superuser_only', False) and not read_only):
                     name = config_field['name']
-                    obj.set_config(name, cleaned.get(name, None))
+                    obj.set_config(name, cleaned.get("%s__%s" % ('common', name), None), top_key='common')
 
+            backends_config_dict = getattr(settings, 'DATA_API_BACKENDS_CONFIG', {})
+            for backend_slug in backends_config_dict:
+                if not self.get_object().has_backend_config(backend_slug):
+                    continue
+                config_fields = getattr(settings, 'BACKENDS_ORG_CONFIG_FIELDS', [])
+                for config_field in config_fields:
+                    read_only = config_field.get('read_only', False)
+                    if is_super or (not config_field.get('superuser_only', False) and not read_only):
+                        name = config_field['name']
+                        if name == 'api_token':
+                            raise forms.ValidationError(_("You cannot edit the API TOKEN here"))
+                        obj.set_config(name, cleaned.get("%s__%s" % (backend_slug, name), None), top_key=backend_slug)
             return obj
 
         def derive_initial(self):
@@ -332,7 +372,18 @@ class OrgCRUDL(SmartCRUDL):
                 read_only = config_field.get('read_only', False)
                 if is_super or read_only or not config_field.get('superuser_only', False):
                     name = config_field['name']
-                    initial[name] = self.object.get_config(name)
+                    initial["%s__%s" % ('common', name)] = self.object.get_config(name, top_key='common')
+
+            backends_config_dict = getattr(settings, 'DATA_API_BACKENDS_CONFIG', {})
+            for backend_slug in backends_config_dict:
+                if not self.get_object().has_backend_config(backend_slug):
+                    continue
+                config_fields = getattr(settings, 'BACKENDS_ORG_CONFIG_FIELDS', [])
+                for config_field in config_fields:
+                    read_only = config_field.get('read_only', False)
+                    if is_super or read_only or not config_field.get('superuser_only', False):
+                        name = config_field['name']
+                        initial["%s__%s" % (backend_slug, name)] = self.object.get_config(name, top_key=backend_slug)
 
             return initial
 
