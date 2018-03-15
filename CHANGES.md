@@ -1,3 +1,13 @@
+
+1.3 (2018-03-15)
+==================
+ * Remove Org api_token field
+ * Convert Org config field to JSONField
+ * Support multiple backend configurations
+ * Add DATA_API_BACKENDS_CONFIG settings
+ * Add BACKENDS_ORG_CONFIG_FIELDS settings
+ * Migrations to move existing backend API specific under rapidpro config
+
 1.2.7 (2018-03-08)
 ==================
  * Fix migrations
