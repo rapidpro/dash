@@ -358,6 +358,8 @@ class OrgCRUDL(SmartCRUDL):
                     read_only = config_field.get('read_only', False)
                     if is_super or (not config_field.get('superuser_only', False) and not read_only):
                         name = config_field['name']
+                        if name == 'api_token':
+                            raise forms.ValidationError(_("You cannot edit the API TOKEN here"))
                         obj.set_config(name, cleaned.get("%s__%s" % (backend_slug, name), None), top_key=backend_slug)
             return obj
 
