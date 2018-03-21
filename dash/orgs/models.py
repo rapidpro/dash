@@ -100,9 +100,6 @@ class Org(SmartModel):
         if commit:
             self.save()
 
-    def has_backend_config(self, backend_slug):
-        return backend_slug in self.config and self.config[backend_slug]['api_token']
-
     def get_org_admins(self):
         return self.administrators.all()
 
@@ -345,3 +342,16 @@ class TaskState(models.Model):
 
     class Meta:
         unique_together = ('org', 'task_key')
+
+
+class OrgBackend(SmartModel):
+    org = models.ForeignKey(Org, related_name='backends')
+
+    slug = models.CharField(max_length=16)
+
+    backend_type = models.CharField(max_length=256, null=True, blank=True)
+
+    host = models.CharField(max_length=128, null=True, blank=True)
+
+    api_token = models.CharField(max_length=128, null=True, blank=True,
+                                 help_text=_("The API token for this backend"))
