@@ -694,16 +694,33 @@ class TaskCRUDL(SmartCRUDL):
             else:
                 return super(TaskCRUDL.List, self).lookup_field_link(context, field, obj)
 
+class OrgBackendForm(forms.ModelForm):
+    backend_type = forms.ChoiceField(choices=settings.DATA_API_BACKEND_TYPES)
+
+    class Meta:
+        model = OrgBackend
+        fields = ('is_active', 'org', 'slug', 'backend_type', 'host', 'api_token')
+
 
 class OrgBackendCRUDL(SmartCRUDL):
     model = OrgBackend
     actions = ('create', 'update', 'list')
 
-    class Update(SmartUpdateView):
-        fields = ('is_active', 'org', 'slug', 'backend_type', 'host', 'api_token')
+    class Update(OrgObjPermsMixin, SmartUpdateView):
+        form_class = OrgBackendForm
+        fields = ('is_active', 'slug', 'backend_type', 'host', 'api_token')
 
-    class Create(SmartCreateView):
+    class Create(OrgPermsMixin, SmartCreateView):
+        form_class = OrgBackendForm
         fields = ('org', 'slug', 'backend_type', 'host', 'api_token')
 
-    class List(SmartListView):
+    class List(OrgPermsMixin, SmartListView):
         fields = ('org', 'slug', 'backend_type', 'modified_on', 'created_on')
+
+        def get_queryset(self, **kwargs):
+            queryset = super(OrgBackendCRUDL.List, self).get_queryset(**kwargs)
+
+            if self.derive_org():
+                queryset = queryset.filter(org=self.derive_org())
+
+            return queryset

@@ -31,15 +31,15 @@ class Migration(migrations.Migration):
             if not org.config:
                 continue
 
-            config = self.config
+            config = org.config
             rapidpro_config = config.get('rapidpro', dict())
             api_token = rapidpro_config.get('api_token', '')
             OrgBackend.objects.create(org=org, slug='rapidpro', api_token=api_token, backend_type=default_backend, created_by=root, modified_by=root)
 
             del rapidpro_config['api_token']
             config['rapipro'] = rapidpro_config
-            self.config = config
-            self.save()
+            org.config = config
+            org.save()
 
     def noop(apps, schema_editor):
         pass
