@@ -353,6 +353,45 @@ class OrgContextProcessorTestcase(DashTest):
         self.assertFalse(viewers_wrapper["orgs"]["org_home"])
 
 
+class OrgBackendTest(DashTest):
+    def setUp(self):
+        super(OrgBackendTest, self).setUp()
+
+        self.uganda = self.create_org('uganda', self.admin)
+        self.nigeria = self.create_org('nigeria', self.admin)
+
+        self.uganda_backend = self.uganda.backends.create(api_token="token_ug", slug='rapidpro',
+                                                          created_by=self.admin, modified_by=self.admin)
+
+        self.nigeria_backend = self.nigeria.backends.create(api_token="token_ng", slug='rapidpro',
+                                                            created_by=self.admin, modified_by=self.admin)
+
+    def test_list(self):
+        list_url = reverse("orgs.orgbackend_list")
+
+        response = self.client.get(list_url)
+        self.assertLoginRedirect(response)
+
+        self.login(self.admin)
+        response = self.client.get(list_url)
+        self.assertLoginRedirect(response)
+
+        self.login(self.superuser)
+        response = self.client.get(list_url)
+        self.assertEquals(response.status_code, 200)
+        self.assertTrue(response.context['object_list'])
+        self.assertTrue(self.uganda_backend in response.context['object_list'])
+        self.assertTrue(self.nigeria_backend in response.context['object_list'])
+        self.assertEquals(len(response.context['object_list']), 2)
+
+        response = self.client.get(list_url, SERVER_NAME='uganda.ureport.io')
+        self.assertEquals(response.status_code, 200)
+        self.assertTrue(response.context['object_list'])
+        self.assertFalse(self.nigeria_backend in response.context['object_list'])
+        self.assertTrue(self.uganda_backend in response.context['object_list'])
+        self.assertEquals(len(response.context['object_list']), 1)
+
+
 class OrgTest(DashTest):
 
     def setUp(self):
