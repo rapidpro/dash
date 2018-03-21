@@ -234,7 +234,8 @@ class OrgCRUDL(SmartCRUDL):
                 if is_super or read_only or not config_field.get('superuser_only', False):
                     fields.append("%s__%s" % ('common', config_field['name']))
 
-            backends = self.get_object().backends.filter(is_active=True).exclude(api_token='').exclude(api_token=None).values_list('slug', flat=True)
+            backends = self.get_object().backends.filter(is_active=True)
+            backends = backends.exclude(api_token='').exclude(api_token=None).values_list('slug', flat=True)
             for backend_slug in backends:
                 config_fields = getattr(settings, 'BACKENDS_ORG_CONFIG_FIELDS', [])
                 for config_field in config_fields:
@@ -263,7 +264,8 @@ class OrgCRUDL(SmartCRUDL):
                         form.fields[field_name].widget.attrs['readonly'] = 'readonly'
                         form.fields[field_name].required = False
 
-            backends = self.get_object().backends.filter(is_active=True).exclude(api_token='').exclude(api_token=None).values_list('slug', flat=True)
+            backends = self.get_object().backends.filter(is_active=True)
+            backends = backends.exclude(api_token='').exclude(api_token=None).values_list('slug', flat=True)
             for backend_slug in backends:
                 config_fields = getattr(settings, 'BACKENDS_ORG_CONFIG_FIELDS', [])
                 for config_field in config_fields:
@@ -293,7 +295,8 @@ class OrgCRUDL(SmartCRUDL):
                     name = config_field['name']
                     obj.set_config(name, cleaned.get("%s__%s" % ('common', name), None), top_key='common')
 
-            backends = self.get_object().backends.filter(is_active=True).exclude(api_token='').exclude(api_token=None).values_list('slug', flat=True)
+            backends = self.get_object().backends.filter(is_active=True)
+            backends = backends.exclude(api_token='').exclude(api_token=None).values_list('slug', flat=True)
             for backend_slug in backends:
                 config_fields = getattr(settings, 'BACKENDS_ORG_CONFIG_FIELDS', [])
                 for config_field in config_fields:
@@ -316,7 +319,8 @@ class OrgCRUDL(SmartCRUDL):
                     name = config_field['name']
                     initial["%s__%s" % ('common', name)] = self.object.get_config(name, top_key='common')
 
-            backends = self.get_object().backends.filter(is_active=True).exclude(api_token='').exclude(api_token=None).values_list('slug', flat=True)
+            backends = self.get_object().backends.filter(is_active=True)
+            backends = backends.exclude(api_token='').exclude(api_token=None).values_list('slug', flat=True)
             for backend_slug in backends:
                 config_fields = getattr(settings, 'BACKENDS_ORG_CONFIG_FIELDS', [])
                 for config_field in config_fields:

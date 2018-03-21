@@ -696,7 +696,8 @@ class OrgTest(DashTest):
         self.login(self.admin)
         self.admin.set_org(self.org)
 
-        org_backend = self.org.backends.create(api_token="token", slug='rapidpro', created_by=self.admin, modified_by=self.admin)
+        org_backend = self.org.backends.create(api_token="token", slug='rapidpro',
+                                               created_by=self.admin, modified_by=self.admin)
 
         response = self.client.get(edit_url, SERVER_NAME="uganda.ureport.io")
         self.assertEquals(response.status_code, 200)
