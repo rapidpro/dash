@@ -10,6 +10,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.encoding import force_text, python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
+from pydoc import locate
 from smartmin.models import SmartModel
 from temba_client.v2 import TembaClient
 from timezone_field import TimeZoneField
@@ -71,6 +72,11 @@ class Org(SmartModel):
         default=dict,
         help_text=_("JSON blob used to store configuration information "
                     "associated with this organization"))
+
+    def get_backend(self, backend_slug='rapidpro'):
+
+        backend = self.backends.filter(is_active=True, slug=backend_slug).first()
+        return locate(backend.backend_type)(backend=backend.slug)
 
     def get_config(self, name, default=None, top_key="common"):
         config = getattr(self, '_config', None)
@@ -143,7 +149,12 @@ class Org(SmartModel):
             raise ValueError("API host should not include API version, "
                              "e.g. http://example.com instead of http://example.com/api/v2")
 
-        api_token = self.get_config('api_token', top_key="rapidpro")
+        api_token = ''
+        backend = self.backends.filter(is_active=True, slug='rapidpro').first()
+        if backend:
+            api_token = backend.api_token
+            if backend.host:
+                host = backend.host
 
         return TembaClient(host, api_token, user_agent=agent)
 

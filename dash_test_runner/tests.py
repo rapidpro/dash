@@ -22,6 +22,7 @@ from django.core.exceptions import DisallowedHost
 from django.core.urlresolvers import reverse, ResolverMatch
 from django.db.utils import IntegrityError
 from django.http import HttpRequest
+from dash.utils import random_string
 from django.utils.encoding import force_text
 from mock import patch, Mock
 from smartmin.tests import SmartminTest
@@ -138,6 +139,12 @@ class DashTest(SmartminTest):
         org.administrators.add(user)
 
         self.assertEquals(Org.objects.filter(subdomain=subdomain).count(), 1)
+
+        org_backend = org.backends.filter(slug='rapidpro').first()
+
+        if not org_backend:
+            org.backends.get_or_create(api_token=random_string(32), slug='rapidpro',
+                                       created_by=user, modified_by=user)
         return Org.objects.get(subdomain=subdomain)
 
     def read_json(self, filename):
@@ -360,11 +367,9 @@ class OrgBackendTest(DashTest):
         self.uganda = self.create_org('uganda', self.admin)
         self.nigeria = self.create_org('nigeria', self.admin)
 
-        self.uganda_backend = self.uganda.backends.create(api_token="token_ug", slug='rapidpro',
-                                                          created_by=self.admin, modified_by=self.admin)
+        self.uganda_backend = self.uganda.backends.get(slug='rapidpro')
 
-        self.nigeria_backend = self.nigeria.backends.create(api_token="token_ng", slug='rapidpro',
-                                                            created_by=self.admin, modified_by=self.admin)
+        self.nigeria_backend = self.nigeria.backends.get(slug='rapidpro')
 
     def test_list(self):
         list_url = reverse("orgs.orgbackend_list")
@@ -418,14 +423,14 @@ class OrgTest(DashTest):
         self.assertIsInstance(client, TembaClient)
         self.assertEqual(client.root_url, 'http://localhost:8001/api/v2')
         self.assertEqual(client.headers['Authorization'],
-                         'Token %s' % self.org.get_config("api_token", top_key="rapidpro"))
+                         'Token %s' % self.org.backends.filter(slug="rapidpro").first().api_token)
         self.assertEqual(client.headers['User-Agent'], 'rapidpro-python/%s' % client_version)
 
         client = self.org.get_temba_client(api_version=2)
         self.assertIsInstance(client, TembaClient)
         self.assertEqual(client.root_url, 'http://localhost:8001/api/v2')
         self.assertEqual(client.headers['Authorization'],
-                         'Token %s' % self.org.get_config("api_token", top_key="rapidpro"))
+                         'Token %s' % self.org.backends.filter(slug="rapidpro").first().api_token)
         self.assertEqual(client.headers['User-Agent'], 'rapidpro-python/%s' % client_version)
 
         self.assertEquals(self.org.get_user(), self.admin)
@@ -735,8 +740,9 @@ class OrgTest(DashTest):
         self.login(self.admin)
         self.admin.set_org(self.org)
 
-        org_backend = self.org.backends.create(api_token="token", slug='rapidpro',
-                                               created_by=self.admin, modified_by=self.admin)
+        org_backend = self.org.backends.get(slug='rapidpro')
+        org_backend.api_token = 'token'
+        org_backend.save()
 
         response = self.client.get(edit_url, SERVER_NAME="uganda.ureport.io")
         self.assertEquals(response.status_code, 200)
