@@ -433,6 +433,17 @@ class OrgTest(DashTest):
                          'Token %s' % self.org.backends.filter(slug="rapidpro").first().api_token)
         self.assertEqual(client.headers['User-Agent'], 'rapidpro-python/%s' % client_version)
 
+        org_backend = self.org.backends.filter(slug="rapidpro").first()
+        org_backend.host = 'http://example.com/'
+        org_backend.save()
+
+        client = self.org.get_temba_client(api_version=2)
+        self.assertIsInstance(client, TembaClient)
+        self.assertEqual(client.root_url, 'http://example.com/api/v2')
+        self.assertEqual(client.headers['Authorization'],
+                         'Token %s' % self.org.backends.filter(slug="rapidpro").first().api_token)
+        self.assertEqual(client.headers['User-Agent'], 'rapidpro-python/%s' % client_version)
+
         self.assertEquals(self.org.get_user(), self.admin)
 
         viewer = self.create_user('Viewer')

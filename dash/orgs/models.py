@@ -74,7 +74,6 @@ class Org(SmartModel):
                     "associated with this organization"))
 
     def get_backend(self, backend_slug='rapidpro'):
-
         backend = self.backends.filter(is_active=True, slug=backend_slug).first()
         return locate(backend.backend_type)(backend=backend.slug)
 

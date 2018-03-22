@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from dash.test import DashTest, MockClientQuery
 from dash.utils.sync import SyncOutcome, sync_from_remote, sync_local_to_set, sync_local_to_changes
 from temba_client.v2.types import Contact as TembaContact
-from .models import Contact, ContactSyncer
+from .models import Contact, ContactSyncer, APIBackend
 
 
 class SyncTest(DashTest):
@@ -16,6 +16,14 @@ class SyncTest(DashTest):
         self.joe2 = Contact.objects.create(org=self.unicef, uuid="CF-001", name="Joe", backend='floip')
         self.syncer = ContactSyncer(backend='rapidpro')
         self.syncer2 = ContactSyncer(backend='floip')
+
+    def test_get_backend(self):
+        org_backend = self.unicef.backends.filter(slug="rapidpro").first()
+        org_backend.host = 'http://example.com/'
+        org_backend.backend_type = 'dash_test_runner.testapp.models.APIBackend'
+        org_backend.save()
+
+        self.assertIsInstance(self.unicef.get_backend(), APIBackend)
 
     def test_fetch_local(self):
         self.assertEqual(self.syncer.fetch_local(self.unicef, "C-001"), self.joe)
