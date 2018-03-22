@@ -359,11 +359,11 @@ class OrgBackend(SmartModel):
 
     slug = models.CharField(max_length=16)
 
-    backend_type = models.CharField(max_length=256, null=True, blank=True)
+    backend_type = models.CharField(max_length=256)
 
-    host = models.CharField(max_length=128, null=True, blank=True)
+    host = models.CharField(max_length=128)
 
-    api_token = models.CharField(max_length=128, null=True, blank=True,
+    api_token = models.CharField(max_length=128,
                                  help_text=_("The API token for this backend"))
 
     class Meta:

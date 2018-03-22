@@ -26,6 +26,7 @@ class Migration(migrations.Migration):
             root = User.objects.create(username="root2")
         
         default_backend = getattr(settings, 'SITE_BACKEND', None)
+        host = getattr(settings, 'SITE_API_HOST', None)
 
         for org in orgs:
             if not org.config:
@@ -34,7 +35,7 @@ class Migration(migrations.Migration):
             config = org.config
             rapidpro_config = config.get('rapidpro', dict())
             api_token = rapidpro_config.get('api_token', '')
-            OrgBackend.objects.create(org=org, slug='rapidpro', api_token=api_token, backend_type=default_backend, created_by=root, modified_by=root)
+            OrgBackend.objects.create(org=org, slug='rapidpro', api_token=api_token, host=host, backend_type=default_backend, created_by=root, modified_by=root)
 
             del rapidpro_config['api_token']
             config['rapipro'] = rapidpro_config
