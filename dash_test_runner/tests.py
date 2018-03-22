@@ -22,6 +22,7 @@ from django.core.exceptions import DisallowedHost
 from django.core.urlresolvers import reverse, ResolverMatch
 from django.db.utils import IntegrityError
 from django.http import HttpRequest
+from dash.utils import random_string
 from django.utils.encoding import force_text
 from mock import patch, Mock
 from smartmin.tests import SmartminTest
@@ -138,6 +139,12 @@ class DashTest(SmartminTest):
         org.administrators.add(user)
 
         self.assertEquals(Org.objects.filter(subdomain=subdomain).count(), 1)
+
+        org_backend = org.backends.filter(slug='rapidpro').first()
+
+        if not org_backend:
+            org.backends.get_or_create(api_token=random_string(32), slug='rapidpro',
+                                       created_by=user, modified_by=user)
         return Org.objects.get(subdomain=subdomain)
 
     def read_json(self, filename):
@@ -353,6 +360,43 @@ class OrgContextProcessorTestcase(DashTest):
         self.assertFalse(viewers_wrapper["orgs"]["org_home"])
 
 
+class OrgBackendTest(DashTest):
+    def setUp(self):
+        super(OrgBackendTest, self).setUp()
+
+        self.uganda = self.create_org('uganda', self.admin)
+        self.nigeria = self.create_org('nigeria', self.admin)
+
+        self.uganda_backend = self.uganda.backends.get(slug='rapidpro')
+
+        self.nigeria_backend = self.nigeria.backends.get(slug='rapidpro')
+
+    def test_list(self):
+        list_url = reverse("orgs.orgbackend_list")
+
+        response = self.client.get(list_url)
+        self.assertLoginRedirect(response)
+
+        self.login(self.admin)
+        response = self.client.get(list_url)
+        self.assertLoginRedirect(response)
+
+        self.login(self.superuser)
+        response = self.client.get(list_url)
+        self.assertEquals(response.status_code, 200)
+        self.assertTrue(response.context['object_list'])
+        self.assertTrue(self.uganda_backend in response.context['object_list'])
+        self.assertTrue(self.nigeria_backend in response.context['object_list'])
+        self.assertEquals(len(response.context['object_list']), 2)
+
+        response = self.client.get(list_url, SERVER_NAME='uganda.ureport.io')
+        self.assertEquals(response.status_code, 200)
+        self.assertTrue(response.context['object_list'])
+        self.assertFalse(self.nigeria_backend in response.context['object_list'])
+        self.assertTrue(self.uganda_backend in response.context['object_list'])
+        self.assertEquals(len(response.context['object_list']), 1)
+
+
 class OrgTest(DashTest):
 
     def setUp(self):
@@ -379,14 +423,25 @@ class OrgTest(DashTest):
         self.assertIsInstance(client, TembaClient)
         self.assertEqual(client.root_url, 'http://localhost:8001/api/v2')
         self.assertEqual(client.headers['Authorization'],
-                         'Token %s' % self.org.get_config("api_token", top_key="rapidpro"))
+                         'Token %s' % self.org.backends.filter(slug="rapidpro").first().api_token)
         self.assertEqual(client.headers['User-Agent'], 'rapidpro-python/%s' % client_version)
 
         client = self.org.get_temba_client(api_version=2)
         self.assertIsInstance(client, TembaClient)
         self.assertEqual(client.root_url, 'http://localhost:8001/api/v2')
         self.assertEqual(client.headers['Authorization'],
-                         'Token %s' % self.org.get_config("api_token", top_key="rapidpro"))
+                         'Token %s' % self.org.backends.filter(slug="rapidpro").first().api_token)
+        self.assertEqual(client.headers['User-Agent'], 'rapidpro-python/%s' % client_version)
+
+        org_backend = self.org.backends.filter(slug="rapidpro").first()
+        org_backend.host = 'http://example.com/'
+        org_backend.save()
+
+        client = self.org.get_temba_client(api_version=2)
+        self.assertIsInstance(client, TembaClient)
+        self.assertEqual(client.root_url, 'http://example.com/api/v2')
+        self.assertEqual(client.headers['Authorization'],
+                         'Token %s' % self.org.backends.filter(slug="rapidpro").first().api_token)
         self.assertEqual(client.headers['User-Agent'], 'rapidpro-python/%s' % client_version)
 
         self.assertEquals(self.org.get_user(), self.admin)
@@ -689,45 +744,6 @@ class OrgTest(DashTest):
         self.assertEqual(response.context['object'], self.org)
         self.assertEqual(response.context['org'], self.org)
 
-    def test_org_tokens(self):
-        tokens_url = reverse("orgs.org_tokens")
-
-        response = self.client.get(tokens_url)
-        self.assertLoginRedirect(response)
-
-        self.login(self.admin)
-        response = self.client.get(tokens_url)
-        self.assertLoginRedirect(response)
-
-        response = self.client.get(tokens_url, SERVER_NAME="uganda.ureport.io")
-        self.assertLoginRedirect(response)
-
-        self.login(self.superuser)
-        response = self.client.get(tokens_url, SERVER_NAME="uganda.ureport.io")
-        self.assertEquals(response.status_code, 200)
-        self.assertTrue(response.context['form'])
-        self.assertEquals(len(response.context['form'].fields), 2)
-        self.assertEquals(set(response.context['form'].fields.keys()), set(["rapidpro_api_token", "loc"]))
-
-        self.assertIsNone(response.context['form'].initial['rapidpro_api_token'])
-
-        post_data = {"rapidpro_api_token": "FooBAR"}
-
-        response = self.client.post(tokens_url, post_data, SERVER_NAME="uganda.ureport.io")
-        self.assertEquals(response.status_code, 302)
-
-        response = self.client.post(tokens_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
-        self.assertFalse('form' in response.context)
-        org = Org.objects.get(pk=self.org.pk)
-        self.assertEquals(org.get_config("api_token", top_key="rapidpro"), "FooBAR")
-
-        response = self.client.get(tokens_url, SERVER_NAME="uganda.ureport.io")
-        self.assertEquals(response.status_code, 200)
-        self.assertTrue(response.context['form'])
-        self.assertEquals(len(response.context['form'].fields), 2)
-        self.assertEquals(set(response.context['form'].fields.keys()), set(["rapidpro_api_token", "loc"]))
-        self.assertEquals(response.context['form'].initial['rapidpro_api_token'], "FooBAR")
-
     def test_org_edit(self):
 
         edit_url = reverse("orgs.org_edit")
@@ -735,7 +751,9 @@ class OrgTest(DashTest):
         self.login(self.admin)
         self.admin.set_org(self.org)
 
-        self.org.set_config('api_token', "token", top_key='rapidpro')
+        org_backend = self.org.backends.get(slug='rapidpro')
+        org_backend.api_token = 'token'
+        org_backend.save()
 
         response = self.client.get(edit_url, SERVER_NAME="uganda.ureport.io")
         self.assertEquals(response.status_code, 200)
@@ -795,7 +813,8 @@ class OrgTest(DashTest):
         self.assertTrue('rapidpro__reporter_group' in response.context['view'].fields)
 
         # remove rapidpro config then hide its config fields
-        org.set_config('api_token', "", top_key='rapidpro')
+        org_backend.api_token = ''
+        org_backend.save()
 
         response = self.client.get(edit_url, SERVER_NAME="uganda.ureport.io")
         self.assertEquals(response.status_code, 200)

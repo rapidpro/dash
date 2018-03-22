@@ -207,6 +207,7 @@ DATA_API_BACKENDS_CONFIG = {
     }
 }
 
+DATA_API_BACKEND_TYPES = ()
 
 BACKENDS_ORG_CONFIG_FIELDS = [
     dict(name='reporter_group',

@@ -40,3 +40,8 @@ class ContactSyncer(BaseSyncer):
 
     def update_required(self, local, remote, remote_as_kwargs):
         return local.name != remote.name
+
+
+class APIBackend(object):
+    def __init__(self, backend='rapidpro'):
+        self.backend = backend

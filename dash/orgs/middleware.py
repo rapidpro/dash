@@ -37,7 +37,10 @@ ALLOW_NO_ORG = (
     'orgs.org_join',
     'orgs.orgbackground_create',
     'orgs.orgbackground_update',
-    'orgs.orgbackground_list'
+    'orgs.orgbackground_list',
+    'orgs.orgbackend_list',
+    'orgs.orgbackend_create',
+    'orgs.orgbackend_update',
 )
 
 

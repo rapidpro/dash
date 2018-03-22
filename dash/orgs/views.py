@@ -16,7 +16,7 @@ from smartmin.views import (
     SmartCRUDL, SmartCreateView, SmartReadView, SmartUpdateView,
     SmartListView, SmartFormView, SmartTemplateView)
 from .forms import CreateOrgLoginForm, OrgForm
-from .models import Org, OrgBackground, Invitation, TaskState
+from .models import Org, OrgBackground, Invitation, TaskState, OrgBackend
 
 
 class OrgPermsMixin(object):
@@ -121,61 +121,9 @@ class InferOrgMixin(object):
 
 
 class OrgCRUDL(SmartCRUDL):
-    actions = ('create', 'list', 'update', 'choose', 'home', 'edit', 'tokens',
+    actions = ('create', 'list', 'update', 'choose', 'home', 'edit',
                'manage_accounts', 'create_login', 'join', 'chooser')
     model = Org
-
-    class Tokens(InferOrgMixin, OrgPermsMixin, SmartUpdateView):
-        title = _("Your Organization API Tokens")
-        success_url = '@orgs.org_home'
-
-        def get_object(self, *args, **kwargs):
-            return self.request.org
-
-        def derive_fields(self):
-            fields = []
-
-            backends_config_dict = getattr(settings, 'DATA_API_BACKENDS_CONFIG', {})
-            for backend_slug in backends_config_dict:
-                fields.append("%s_api_token" % backend_slug)
-
-            return fields
-
-        def derive_initial(self):
-            initial = super(OrgCRUDL.Tokens, self).derive_initial()
-
-            backends_config_dict = getattr(settings, 'DATA_API_BACKENDS_CONFIG', {})
-            for backend_slug in backends_config_dict:
-                name = 'api_token'
-                field_name = "%s_%s" % (backend_slug, name)
-                initial[field_name] = self.object.get_config(name, top_key=backend_slug)
-
-            return initial
-
-        def get_form(self):
-            form = super(OrgCRUDL.Tokens, self).get_form()
-
-            backends_config_dict = getattr(settings, 'DATA_API_BACKENDS_CONFIG', {})
-            for backend_slug in backends_config_dict:
-                name = 'api_token'
-                field_name = "%s_%s" % (backend_slug, name)
-
-                form.fields[field_name] = forms.CharField(
-                    required=False,
-                    help_text=_("API token for %s API" % backends_config_dict[backend_slug]['name']))
-
-            return form
-
-        def pre_save(self, obj):
-            obj = super(OrgCRUDL.Tokens, self).pre_save(obj)
-            cleaned = self.form.cleaned_data
-
-            backends_config_dict = getattr(settings, 'DATA_API_BACKENDS_CONFIG', {})
-            for backend_slug in backends_config_dict:
-                name = 'api_token'
-                field_name = "%s_%s" % (backend_slug, name)
-                obj.set_config(name, cleaned.get(field_name, None), top_key=backend_slug)
-            return obj
 
     class Chooser(SmartTemplateView):
         permission = False
@@ -286,10 +234,9 @@ class OrgCRUDL(SmartCRUDL):
                 if is_super or read_only or not config_field.get('superuser_only', False):
                     fields.append("%s__%s" % ('common', config_field['name']))
 
-            backends_config_dict = getattr(settings, 'DATA_API_BACKENDS_CONFIG', {})
-            for backend_slug in backends_config_dict:
-                if not self.get_object().has_backend_config(backend_slug):
-                    continue
+            backends = self.get_object().backends.filter(is_active=True)
+            backends = backends.exclude(api_token='').exclude(api_token=None).values_list('slug', flat=True)
+            for backend_slug in backends:
                 config_fields = getattr(settings, 'BACKENDS_ORG_CONFIG_FIELDS', [])
                 for config_field in config_fields:
                     read_only = config_field.get('read_only', False)
@@ -317,10 +264,9 @@ class OrgCRUDL(SmartCRUDL):
                         form.fields[field_name].widget.attrs['readonly'] = 'readonly'
                         form.fields[field_name].required = False
 
-            backends_config_dict = getattr(settings, 'DATA_API_BACKENDS_CONFIG', {})
-            for backend_slug in backends_config_dict:
-                if not self.get_object().has_backend_config(backend_slug):
-                    continue
+            backends = self.get_object().backends.filter(is_active=True)
+            backends = backends.exclude(api_token='').exclude(api_token=None).values_list('slug', flat=True)
+            for backend_slug in backends:
                 config_fields = getattr(settings, 'BACKENDS_ORG_CONFIG_FIELDS', [])
                 for config_field in config_fields:
                     read_only = config_field.get('read_only', False)
@@ -349,17 +295,14 @@ class OrgCRUDL(SmartCRUDL):
                     name = config_field['name']
                     obj.set_config(name, cleaned.get("%s__%s" % ('common', name), None), top_key='common')
 
-            backends_config_dict = getattr(settings, 'DATA_API_BACKENDS_CONFIG', {})
-            for backend_slug in backends_config_dict:
-                if not self.get_object().has_backend_config(backend_slug):
-                    continue
+            backends = self.get_object().backends.filter(is_active=True)
+            backends = backends.exclude(api_token='').exclude(api_token=None).values_list('slug', flat=True)
+            for backend_slug in backends:
                 config_fields = getattr(settings, 'BACKENDS_ORG_CONFIG_FIELDS', [])
                 for config_field in config_fields:
                     read_only = config_field.get('read_only', False)
                     if is_super or (not config_field.get('superuser_only', False) and not read_only):
                         name = config_field['name']
-                        if name == 'api_token':
-                            raise forms.ValidationError(_("You cannot edit the API TOKEN here"))
                         obj.set_config(name, cleaned.get("%s__%s" % (backend_slug, name), None), top_key=backend_slug)
             return obj
 
@@ -374,10 +317,9 @@ class OrgCRUDL(SmartCRUDL):
                     name = config_field['name']
                     initial["%s__%s" % ('common', name)] = self.object.get_config(name, top_key='common')
 
-            backends_config_dict = getattr(settings, 'DATA_API_BACKENDS_CONFIG', {})
-            for backend_slug in backends_config_dict:
-                if not self.get_object().has_backend_config(backend_slug):
-                    continue
+            backends = self.get_object().backends.filter(is_active=True)
+            backends = backends.exclude(api_token='').exclude(api_token=None).values_list('slug', flat=True)
+            for backend_slug in backends:
                 config_fields = getattr(settings, 'BACKENDS_ORG_CONFIG_FIELDS', [])
                 for config_field in config_fields:
                     read_only = config_field.get('read_only', False)
@@ -749,3 +691,35 @@ class TaskCRUDL(SmartCRUDL):
                 return reverse('orgs.org_update', args=[obj.org_id])
             else:
                 return super(TaskCRUDL.List, self).lookup_field_link(context, field, obj)
+
+
+class OrgBackendForm(forms.ModelForm):
+    backend_type = forms.ChoiceField(choices=settings.DATA_API_BACKEND_TYPES)
+
+    class Meta:
+        model = OrgBackend
+        fields = ('is_active', 'org', 'slug', 'backend_type', 'host', 'api_token')
+
+
+class OrgBackendCRUDL(SmartCRUDL):
+    model = OrgBackend
+    actions = ('create', 'update', 'list')
+
+    class Update(OrgObjPermsMixin, SmartUpdateView):
+        form_class = OrgBackendForm
+        fields = ('is_active', 'slug', 'backend_type', 'host', 'api_token')
+
+    class Create(OrgPermsMixin, SmartCreateView):
+        form_class = OrgBackendForm
+        fields = ('org', 'slug', 'backend_type', 'host', 'api_token')
+
+    class List(OrgPermsMixin, SmartListView):
+        fields = ('org', 'slug', 'backend_type', 'modified_on', 'created_on')
+
+        def get_queryset(self, **kwargs):
+            queryset = super(OrgBackendCRUDL.List, self).get_queryset(**kwargs)
+
+            if self.derive_org():
+                queryset = queryset.filter(org=self.derive_org())
+
+            return queryset
