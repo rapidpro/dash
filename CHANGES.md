@@ -1,4 +1,10 @@
 
+1.3.1 (2018-03-22)
+==================
+ * Add OrgBackend model to store the configurations for backends
+ * Remove `api_token` key from Org config
+ * Add DATA_API_BACKEND_TYPES settings for backend types
+
 1.3 (2018-03-15)
 ==================
  * Remove Org api_token field
