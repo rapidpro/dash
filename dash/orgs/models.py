@@ -374,5 +374,8 @@ class OrgBackend(SmartModel):
     api_token = models.CharField(max_length=128,
                                  help_text=_("The API token for this backend"))
 
+    def __str__(self):
+        return self.slug
+
     class Meta:
         unique_together = ('org', 'slug')
