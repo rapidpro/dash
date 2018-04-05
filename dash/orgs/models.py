@@ -75,7 +75,7 @@ class Org(SmartModel):
 
     def get_backend(self, backend_slug='rapidpro'):
         backend = self.backends.filter(is_active=True, slug=backend_slug).first()
-        return locate(backend.backend_type)(backend=backend.slug)
+        return locate(backend.backend_type)(backend=backend)
 
     def get_config(self, name, default=None):
         config = getattr(self, '_config', None)
