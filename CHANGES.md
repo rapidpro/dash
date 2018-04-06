@@ -1,3 +1,7 @@
+1.3.2 (2018-04-06)
+==================
+ * Use . paths on the Org config to set and retrieve the values
+ * Use a foreign key for the backend fields and use OrgBackend object instead of slug as arguments
 
 1.3.1 (2018-03-22)
 ==================
