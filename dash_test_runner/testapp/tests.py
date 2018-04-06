@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 
 from dash.test import DashTest, MockClientQuery
+from dash.utils import random_string
 from dash.utils.sync import SyncOutcome, sync_from_remote, sync_local_to_set, sync_local_to_changes
 from temba_client.v2.types import Contact as TembaContact
 from .models import Contact, ContactSyncer, APIBackend
@@ -12,10 +13,29 @@ class SyncTest(DashTest):
         super(SyncTest, self).setUp()
 
         self.unicef = self.create_org("UNICEF", 'Africa/Kampala', 'unicef')
-        self.joe = Contact.objects.create(org=self.unicef, uuid="C-001", name="Joe", backend='rapidpro')
-        self.joe2 = Contact.objects.create(org=self.unicef, uuid="CF-001", name="Joe", backend='floip')
-        self.syncer = ContactSyncer(backend='rapidpro')
-        self.syncer2 = ContactSyncer(backend='floip')
+        rapidpro_backend = self.unicef
+
+        rapidpro_backend = self.unicef.backends.filter(slug='rapidpro').first()
+        if not rapidpro_backend:
+            rapidpro_backend, created = self.unicef.backends.get_or_create(api_token=random_string(32),
+                                                                           slug='rapidpro',
+                                                                           created_by=self.superuser,
+                                                                           modified_by=self.superuser)
+        self.rapidpro_backend = rapidpro_backend
+
+        floip_backend = self.unicef.backends.filter(slug='floip').first()
+        if not floip_backend:
+            floip_backend, created = self.unicef.backends.get_or_create(api_token=random_string(32),
+                                                                        slug='floip',
+                                                                        created_by=self.superuser,
+                                                                        modified_by=self.superuser)
+
+        self.floip_backend = floip_backend
+
+        self.joe = Contact.objects.create(org=self.unicef, uuid="C-001", name="Joe", backend=self.rapidpro_backend)
+        self.joe2 = Contact.objects.create(org=self.unicef, uuid="CF-001", name="Joe", backend=self.floip_backend)
+        self.syncer = ContactSyncer(backend=self.rapidpro_backend)
+        self.syncer2 = ContactSyncer(backend=self.floip_backend)
 
     def test_get_backend(self):
         org_backend = self.unicef.backends.filter(slug="rapidpro").first()
@@ -32,11 +52,13 @@ class SyncTest(DashTest):
     def test_local_kwargs(self):
         remote = TembaContact.create(uuid="C-002", name="Frank", blocked=False)
         kwargs = self.syncer.local_kwargs(self.unicef, remote)
-        self.assertEqual(kwargs, {'org': self.unicef, 'uuid': "C-002", 'name': "Frank", 'backend': "rapidpro"})
+        self.assertEqual(kwargs, {'org': self.unicef, 'uuid': "C-002", 'name': "Frank",
+                                  'backend': self.rapidpro_backend})
 
         remote = TembaContact.create(uuid="CF-002", name="Frank", blocked=False)
         kwargs = self.syncer2.local_kwargs(self.unicef, remote)
-        self.assertEqual(kwargs, {'org': self.unicef, 'uuid': "CF-002", 'name': "Frank", 'backend': "floip"})
+        self.assertEqual(kwargs, {'org': self.unicef, 'uuid': "CF-002", 'name': "Frank",
+                                  'backend': self.floip_backend})
 
         remote = TembaContact.create(uuid="C-002", name="Frank", blocked=True)
         self.assertIsNone(self.syncer.local_kwargs(self.unicef, remote))
@@ -49,31 +71,32 @@ class SyncTest(DashTest):
         remote = TembaContact.create(uuid="C-002", name="Frank", blocked=False)
         self.assertEqual(sync_from_remote(self.unicef, self.syncer, remote), SyncOutcome.created)
 
-        Contact.objects.get(org=self.unicef, uuid="C-002", name="Frank", backend="rapidpro", is_active=True)
+        Contact.objects.get(org=self.unicef, uuid="C-002", name="Frank", backend=self.rapidpro_backend, is_active=True)
         self.assertIsNone(Contact.objects.filter(org=self.unicef, uuid="C-002", name="Frank",
-                                                 backend="floip", is_active=True).first())
+                                                 backend=self.floip_backend, is_active=True).first())
 
         remote = TembaContact.create(uuid="CF-002", name="Frank", blocked=False)
         self.assertEqual(sync_from_remote(self.unicef, self.syncer2, remote), SyncOutcome.created)
-        Contact.objects.get(org=self.unicef, uuid="CF-002", name="Frank", backend="floip", is_active=True)
+        Contact.objects.get(org=self.unicef, uuid="CF-002", name="Frank", backend=self.floip_backend, is_active=True)
 
         # no significant change
         remote = TembaContact.create(uuid="C-002", name="Frank", blocked=False)
         self.assertEqual(sync_from_remote(self.unicef, self.syncer, remote), SyncOutcome.ignored)
 
-        Contact.objects.get(org=self.unicef, uuid="C-002", name="Frank", backend="rapidpro", is_active=True)
+        Contact.objects.get(org=self.unicef, uuid="C-002", name="Frank", backend=self.rapidpro_backend, is_active=True)
 
         # significant change (name)
         remote = TembaContact.create(uuid="C-002", name="Franky", blocked=False)
         self.assertEqual(sync_from_remote(self.unicef, self.syncer, remote), SyncOutcome.updated)
 
-        Contact.objects.get(org=self.unicef, uuid="C-002", name="Franky", backend="rapidpro", is_active=True)
+        Contact.objects.get(org=self.unicef, uuid="C-002", name="Franky", backend=self.rapidpro_backend, is_active=True)
 
         # change to something we don't want locally
         remote = TembaContact.create(uuid="C-002", name="Franky", blocked=True)
         self.assertEqual(sync_from_remote(self.unicef, self.syncer, remote), SyncOutcome.deleted)
 
-        Contact.objects.get(org=self.unicef, uuid="C-002", name="Franky", backend="rapidpro", is_active=False)
+        Contact.objects.get(org=self.unicef, uuid="C-002", name="Franky", backend=self.rapidpro_backend,
+                            is_active=False)
 
     def test_sync_local_to_set(self):
         Contact.objects.all().delete()  # start with no contacts...
@@ -111,9 +134,9 @@ class SyncTest(DashTest):
         ]
         self.assertEqual(sync_local_to_set(self.unicef, self.syncer2, remote_set), (3, 0, 0, 0))
         self.assertEqual(Contact.objects.count(), 7)
-        Contact.objects.get(org=self.unicef, uuid="CF-002", name="Bob", backend="floip", is_active=True)
-        Contact.objects.get(org=self.unicef, uuid="CF-003", name="Colm", backend="floip", is_active=True)
-        Contact.objects.get(org=self.unicef, uuid="CF-005", name="Edward", backend="floip", is_active=True)
+        Contact.objects.get(org=self.unicef, uuid="CF-002", name="Bob", backend=self.floip_backend, is_active=True)
+        Contact.objects.get(org=self.unicef, uuid="CF-003", name="Colm", backend=self.floip_backend, is_active=True)
+        Contact.objects.get(org=self.unicef, uuid="CF-005", name="Edward", backend=self.floip_backend, is_active=True)
 
     def test_sync_local_to_changes(self):
         Contact.objects.all().delete()  # start with no contacts...

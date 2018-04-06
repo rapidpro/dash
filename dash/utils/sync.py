@@ -29,7 +29,7 @@ class BaseSyncer(object):
     select_related = ()
     prefetch_related = ()
 
-    def __init__(self, backend='rapidpro'):
+    def __init__(self, backend):
         self.backend = backend
 
     def identify_local(self, local):
