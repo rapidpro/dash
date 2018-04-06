@@ -774,12 +774,12 @@ class OrgTest(DashTest):
         errors = response.context['form'].errors
         self.assertEquals(len(errors.keys()), 2)
         self.assertTrue('name' in errors)
-        self.assertTrue('common__shortcode' in errors)
+        self.assertTrue('common.shortcode' in errors)
         self.assertEquals(errors['name'][0], 'This field is required.')
-        self.assertEquals(errors['common__shortcode'][0], 'This field is required.')
+        self.assertEquals(errors['common.shortcode'][0], 'This field is required.')
 
-        post_data = dict(name="Rwanda",
-                         common__shortcode="224433")
+        post_data = dict(name="Rwanda")
+        post_data['common.shortcode'] = "224433"
 
         response = self.client.post(edit_url, post_data, SERVER_NAME="uganda.ureport.io")
         self.assertEquals(response.status_code, 302)
@@ -788,29 +788,29 @@ class OrgTest(DashTest):
         self.assertFalse('form' in response.context)
         org = Org.objects.get(pk=self.org.pk)
         self.assertEquals(org.name, "Rwanda")
-        self.assertEquals(org.get_config('shortcode', top_key='common'), "224433")
+        self.assertEquals(org.get_config('shortcode'), "224433")
 
-        org.set_config('reporter_group', "reporters", top_key='rapidpro')
+        org.set_config('rapidpro.reporter_group', "reporters")
 
         # can't update read-only
-        post_data['rapidpro__reporter_group'] = 'members'
+        post_data['rapidpro.reporter_group'] = 'members'
 
         response = self.client.post(edit_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
         self.assertFalse('form' in response.context)
         org = Org.objects.get(pk=self.org.pk)
         self.assertEquals(org.name, "Rwanda")
-        self.assertEquals(org.get_config('shortcode', top_key='common'), "224433")
-        self.assertEquals(org.get_config("reporter_group", top_key='rapidpro'), "reporters")
+        self.assertEquals(org.get_config('shortcode'), "224433")
+        self.assertEquals(org.get_config("rapidpro.reporter_group"), "reporters")
 
         self.assertEquals(response.request['PATH_INFO'], reverse('orgs.org_home'))
 
         response = self.client.get(edit_url, SERVER_NAME="uganda.ureport.io")
         self.assertEquals(response.status_code, 200)
         form = response.context['form']
-        self.assertEquals(form.initial['common__shortcode'], "224433")
+        self.assertEquals(form.initial['common.shortcode'], "224433")
         self.assertEquals(form.initial['name'], "Rwanda")
-        self.assertEquals(form.initial['rapidpro__reporter_group'], "reporters")
-        self.assertTrue('rapidpro__reporter_group' in response.context['view'].fields)
+        self.assertEquals(form.initial['rapidpro.reporter_group'], "reporters")
+        self.assertTrue('rapidpro.reporter_group' in response.context['view'].fields)
 
         # remove rapidpro config then hide its config fields
         org_backend.api_token = ''

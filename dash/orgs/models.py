@@ -77,7 +77,7 @@ class Org(SmartModel):
         backend = self.backends.filter(is_active=True, slug=backend_slug).first()
         return locate(backend.backend_type)(backend=backend.slug)
 
-    def get_config(self, name, default=None, top_key="common"):
+    def get_config(self, name, default=None):
         config = getattr(self, '_config', None)
 
         if config is None:
@@ -87,18 +87,26 @@ class Org(SmartModel):
             config = self.config
             self._config = config
 
-        return config.get(top_key, dict()).get(name, default)
+        if name.find(".") == -1:
+            name = "common.%s" % name
 
-    def set_config(self, name, value, commit=True, top_key="common"):
+        key1, key2 = name.split(".", 1)
+        return config.get(key1, dict()).get(key2, default)
+
+    def set_config(self, name, value, commit=True):
         if not self.config:
             config = dict()
         else:
             config = self.config
 
-        if top_key not in config:
-            config[top_key] = dict()
+        if name.find(".") == -1:
+            name = "common.%s" % name
+        key1, key2 = name.split(".", 1)
 
-        config[top_key][name] = value
+        if key1 not in config:
+            config[key1] = dict()
+
+        config[key1][key2] = value
         self.config = config
         self._config = config
 
