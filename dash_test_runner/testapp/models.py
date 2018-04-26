@@ -26,6 +26,7 @@ class Contact(models.Model):
 
 class ContactSyncer(BaseSyncer):
     model = Contact
+    local_backend_attr = 'backend'
 
     def local_kwargs(self, org, remote):
         if remote.blocked:  # we don't store blocked contacts
@@ -35,7 +36,7 @@ class ContactSyncer(BaseSyncer):
             'org': org,
             'uuid': remote.uuid,
             'name': remote.name,
-            'backend': self.backend
+            self.local_backend_attr: self.backend
         }
 
     def update_required(self, local, remote, remote_as_kwargs):

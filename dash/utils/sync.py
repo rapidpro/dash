@@ -28,6 +28,7 @@ class BaseSyncer(object):
     remote_id_attr = 'uuid'
     select_related = ()
     prefetch_related = ()
+    local_backend_attr = None
 
     def __init__(self, backend):
         self.backend = backend
@@ -79,7 +80,10 @@ class BaseSyncer(object):
         :param org: the org
         :return: the queryset
         """
-        return self.model.objects.filter(backend=self.backend, org=org)
+        qs = self.model.objects.filter(org=org)
+        if self.local_backend_attr is not None:
+            qs = qs.filter(**{self.local_backend_attr: self.backend})
+        return qs
 
     @abstractmethod
     def local_kwargs(self, org, remote):
