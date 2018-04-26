@@ -1,3 +1,7 @@
+1.3.3 (2018-04-26)
+=================
+ * Make filtering by backend field on model optional
+
 1.3.2 (2018-04-06)
 ==================
  * Use . paths on the Org config to set and retrieve the values
