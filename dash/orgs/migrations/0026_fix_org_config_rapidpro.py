@@ -16,8 +16,12 @@ class Migration(migrations.Migration):
 
             config = org.config
             rapidpro_config = config.get('rapidpro', dict())
-            del rapidpro_config['api_token']
-            del rapidpro_config['rapipro'] # remove the mistakenly added key by typo in 0024_populate_org_backend
+            if 'api_token' in rapidpro_config:
+                del rapidpro_config['api_token']
+
+            if 'rapipro' in config:
+                del config['rapipro'] # remove the mistakenly added key by typo in 0024_populate_org_backend
+
             config['rapidpro'] = rapidpro_config
             org.config = config
             org.save()
