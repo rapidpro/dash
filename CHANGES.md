@@ -1,3 +1,7 @@
+1.3.7 (2018-05-28)
+=================
+* Include static folder in release
+
 1.3.6 (2018-05-28)
 =================
 * Switch Text editor to Summernote JS library
