@@ -1,7 +1,10 @@
-1.3.3 (2018-05-28)
+1.3.5 (2018-05-28)
 =================
- * Switch Text editor to Summernote JS library
- * Add migrations to clean up org config
+* Switch Text editor to Summernote JS library
+
+1.3.4 (2018-04-27)
+=================
+  * Add migrations to clean up org config
  
 1.3.3 (2018-04-26)
 =================
