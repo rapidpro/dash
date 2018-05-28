@@ -1,3 +1,8 @@
+1.3.3 (2018-05-28)
+=================
+ * Switch Text editor to Summernote JS library
+ * Add migrations to clean up org config
+ 
 1.3.3 (2018-04-26)
 =================
  * Make filtering by backend field on model optional
