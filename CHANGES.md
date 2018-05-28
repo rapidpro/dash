@@ -1,4 +1,4 @@
-1.3.5 (2018-05-28)
+1.3.6 (2018-05-28)
 =================
 * Switch Text editor to Summernote JS library
 
