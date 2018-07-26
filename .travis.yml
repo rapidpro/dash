@@ -22,9 +22,6 @@ script:
  # any non-zero error code should be treated as an immediate failure
  - set -e
 
- # test that everything is well formatted
- - black --line-length=119 dash --check --quiet || (echo 'The source code could use a bit more black.' && exit 1)
-
  # test PEP8 compliance on both Python 2 and 3
  - flake8
 
