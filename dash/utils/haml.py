@@ -17,9 +17,6 @@ called index.haml can override index.html in Smartmin
 """
 
 
-
-
-
 def get_haml_loader(loader):
     baseclass = loader.Loader
 

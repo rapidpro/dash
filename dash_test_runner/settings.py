@@ -17,7 +17,6 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 """
 
 
-
 logging.disable(logging.WARN)
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))

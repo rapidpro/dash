@@ -7,13 +7,6 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('orgs', '0019_restructure_org_config'),
-    ]
+    dependencies = [("orgs", "0019_restructure_org_config")]
 
-    operations = [
-        migrations.RemoveField(
-            model_name='org',
-            name='api_token',
-        ),
-    ]
+    operations = [migrations.RemoveField(model_name="org", name="api_token")]

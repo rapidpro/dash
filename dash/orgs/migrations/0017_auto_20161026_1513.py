@@ -8,14 +8,14 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('orgs', '0016_taskstate_is_disabled'),
-    ]
+    dependencies = [("orgs", "0016_taskstate_is_disabled")]
 
     operations = [
         migrations.AlterField(
-            model_name='org',
-            name='timezone',
-            field=timezone_field.fields.TimeZoneField(default='UTC', help_text='The timezone your organization is in.', verbose_name='Timezone'),
-        ),
+            model_name="org",
+            name="timezone",
+            field=timezone_field.fields.TimeZoneField(
+                default="UTC", help_text="The timezone your organization is in.", verbose_name="Timezone"
+            ),
+        )
     ]

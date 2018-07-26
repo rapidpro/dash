@@ -20,64 +20,79 @@ STATE = 1
 DISTRICT = 2
 
 # we cache boundary data for a month at a time
-BOUNDARY_CACHE_TIME = getattr(settings, 'API_BOUNDARY_CACHE_TIME', 60 * 60 * 24 * 30)
+BOUNDARY_CACHE_TIME = getattr(settings, "API_BOUNDARY_CACHE_TIME", 60 * 60 * 24 * 30)
 
-BOUNDARY_CACHE_KEY = 'org:%d:boundaries'
-BOUNDARY_LEVEL_1_KEY = 'geojson:%d'
-BOUNDARY_LEVEL_2_KEY = 'geojson:%d:%s'
+BOUNDARY_CACHE_KEY = "org:%d:boundaries"
+BOUNDARY_LEVEL_1_KEY = "geojson:%d"
+BOUNDARY_LEVEL_2_KEY = "geojson:%d:%s"
 
 
 @python_2_unicode_compatible
 class Org(SmartModel):
-    name = models.CharField(
-        verbose_name=_("Name"), max_length=128,
-        help_text=_("The name of this organization"))
+    name = models.CharField(verbose_name=_("Name"), max_length=128, help_text=_("The name of this organization"))
 
     logo = models.ImageField(
-        upload_to='logos', null=True, blank=True,
-        help_text=_("The logo that should be used for this organization"))
+        upload_to="logos", null=True, blank=True, help_text=_("The logo that should be used for this organization")
+    )
 
     administrators = models.ManyToManyField(
-        User, verbose_name=_("Administrators"), related_name="org_admins",
-        help_text=_("The administrators in your organization"))
+        User,
+        verbose_name=_("Administrators"),
+        related_name="org_admins",
+        help_text=_("The administrators in your organization"),
+    )
 
     viewers = models.ManyToManyField(
-        User, verbose_name=_("Viewers"), related_name="org_viewers",
-        help_text=_("The viewers in your organization"))
+        User, verbose_name=_("Viewers"), related_name="org_viewers", help_text=_("The viewers in your organization")
+    )
 
     editors = models.ManyToManyField(
-        User, verbose_name=_("Editors"), related_name="org_editors",
-        help_text=_("The editors in your organization"))
+        User, verbose_name=_("Editors"), related_name="org_editors", help_text=_("The editors in your organization")
+    )
 
     language = models.CharField(
-        verbose_name=_("Language"), max_length=64, null=True, blank=True,
-        help_text=_("The main language used by this organization"))
+        verbose_name=_("Language"),
+        max_length=64,
+        null=True,
+        blank=True,
+        help_text=_("The main language used by this organization"),
+    )
 
     subdomain = models.SlugField(
-        verbose_name=_("Subdomain"), null=True, blank=True, max_length=255, unique=True,
+        verbose_name=_("Subdomain"),
+        null=True,
+        blank=True,
+        max_length=255,
+        unique=True,
         error_messages=dict(unique=_("This subdomain is not available")),
-        help_text=_("The subdomain for this organization"))
+        help_text=_("The subdomain for this organization"),
+    )
 
     domain = models.CharField(
-        verbose_name=_("Domain"), null=True, blank=True, max_length=255, unique=True,
+        verbose_name=_("Domain"),
+        null=True,
+        blank=True,
+        max_length=255,
+        unique=True,
         error_messages=dict(unique=_("This domain is not available")),
-        help_text=_("The custom domain for this organization"))
+        help_text=_("The custom domain for this organization"),
+    )
 
     timezone = TimeZoneField(
-        verbose_name=_("Timezone"), default='UTC',
-        help_text=_("The timezone your organization is in."))
+        verbose_name=_("Timezone"), default="UTC", help_text=_("The timezone your organization is in.")
+    )
 
     config = JSONField(
         default=dict,
-        help_text=_("JSON blob used to store configuration information "
-                    "associated with this organization"))
+        help_text=_("JSON blob used to store configuration information " "associated with this organization"),
+    )
 
-    def get_backend(self, backend_slug='rapidpro'):
+    def get_backend(self, backend_slug="rapidpro"):
         backend = self.backends.filter(is_active=True, slug=backend_slug).first()
         return locate(backend.backend_type)(backend=backend)
 
     def get_config(self, name, default=None):
-        config = getattr(self, '_config', None)
+        config = getattr(self, "_config", None)
 
         if config is None:
             if not self.config:
@@ -135,7 +150,7 @@ class Org(SmartModel):
         else:
             user._org_group = None
 
-        return getattr(user, '_org_group', None)
+        return getattr(user, "_org_group", None)
 
     def get_user(self):
         user = self.administrators.filter(is_active=True).first()
@@ -148,15 +163,17 @@ class Org(SmartModel):
         if api_version not in (2,):
             raise ValueError("Unsupported RapidPro API version: %d" % api_version)
 
-        host = getattr(settings, 'SITE_API_HOST', None)
-        agent = getattr(settings, 'SITE_API_USER_AGENT', None)
+        host = getattr(settings, "SITE_API_HOST", None)
+        agent = getattr(settings, "SITE_API_USER_AGENT", None)
 
-        if host.endswith('api/v2') or host.endswith('api/v2/'):
-            raise ValueError("API host should not include API version, "
-                             "e.g. http://example.com instead of http://example.com/api/v2")
+        if host.endswith("api/v2") or host.endswith("api/v2/"):
+            raise ValueError(
+                "API host should not include API version, "
+                "e.g. http://example.com instead of http://example.com/api/v2"
+            )
 
-        api_token = ''
-        backend = self.backends.filter(is_active=True, slug='rapidpro').first()
+        api_token = ""
+        backend = self.backends.filter(is_active=True, slug="rapidpro").first()
         if backend:
             api_token = backend.api_token
             if backend.host:
@@ -165,18 +182,18 @@ class Org(SmartModel):
         return TembaClient(host, api_token, user_agent=agent)
 
     def build_host_link(self, user_authenticated=False):
-        host_tld = getattr(settings, "HOSTNAME", 'locahost')
-        is_secure = getattr(settings, 'SESSION_COOKIE_SECURE', False)
+        host_tld = getattr(settings, "HOSTNAME", "locahost")
+        is_secure = getattr(settings, "SESSION_COOKIE_SECURE", False)
 
-        prefix = 'http://'
+        prefix = "http://"
 
         if self.domain and is_secure and not user_authenticated:
             return prefix + str(self.domain)
 
         if is_secure:
-            prefix = 'https://'
+            prefix = "https://"
 
-        if self.subdomain == '':
+        if self.subdomain == "":
             return prefix + host_tld
         return prefix + force_text(self.subdomain) + "." + host_tld
 
@@ -193,19 +210,19 @@ class Org(SmartModel):
         if not user:
             return None
 
-        if not hasattr(user, '_org'):
+        if not hasattr(user, "_org"):
             org = Org.objects.filter(administrators=user, is_active=True).first()
             if org:
                 user._org = org
 
-        return getattr(user, '_org', None)
+        return getattr(user, "_org", None)
 
     def __str__(self):
         return self.name
 
 
 def get_org(obj):
-    return getattr(obj, '_org', None)
+    return getattr(obj, "_org", None)
 
 
 def set_org(obj, org):
@@ -233,26 +250,29 @@ User.get_user_orgs = get_user_orgs
 User.get_org_group = get_org_group
 
 
-USER_GROUPS = (('A', _("Administrator")),
-               ('E', _("Editor")),
-               ('V', _("Viewer")))
+USER_GROUPS = (("A", _("Administrator")), ("E", _("Editor")), ("V", _("Viewer")))
 
 
 class Invitation(SmartModel):
     org = models.ForeignKey(
-        Org, verbose_name=_("Org"), related_name="invitations",
-        help_text=_("The organization to which the account is invited to view"))
+        Org,
+        verbose_name=_("Org"),
+        related_name="invitations",
+        help_text=_("The organization to which the account is invited to view"),
+    )
 
     email = models.EmailField(
-        verbose_name=_("Email"),
-        help_text=_("The email to which we send the invitation of the viewer"))
+        verbose_name=_("Email"), help_text=_("The email to which we send the invitation of the viewer")
+    )
 
     secret = models.CharField(
-        verbose_name=_("Secret"), max_length=64, unique=True,
-        help_text=_("a unique code associated with this invitation"))
+        verbose_name=_("Secret"),
+        max_length=64,
+        unique=True,
+        help_text=_("a unique code associated with this invitation"),
+    )
 
-    user_group = models.CharField(
-        max_length=1, choices=USER_GROUPS, default='V', verbose_name=_("User Role"))
+    user_group = models.CharField(max_length=1, choices=USER_GROUPS, default="V", verbose_name=_("User Role"))
 
     def save(self, *args, **kwargs):
         if not self.secret:
@@ -272,10 +292,11 @@ class Invitation(SmartModel):
         """
         # avoid things that could be mistaken ex: 'I' and '1'
         letters = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"
-        return ''.join([random.choice(letters) for _ in range(length)])
+        return "".join([random.choice(letters) for _ in range(length)])
 
     def send_invitation(self):
         from .tasks import send_invitation_email_task
+
         send_invitation_email_task(self.id)
 
     def send_email(self):
@@ -288,35 +309,39 @@ class Invitation(SmartModel):
         to_email = self.email
 
         context = dict(org=self.org, now=timezone.now(), invitation=self)
-        context['subject'] = subject
-        context['host'] = self.org.build_host_link()
+        context["subject"] = subject
+        context["host"] = self.org.build_host_link()
 
         send_dash_email(to_email, subject, template, context)
 
 
 class OrgBackground(SmartModel):
-    BACKGROUND_TYPES = (('B', _("Banner")),
-                        ('P', _("Pattern")))
+    BACKGROUND_TYPES = (("B", _("Banner")), ("P", _("Pattern")))
 
     org = models.ForeignKey(
-        Org, verbose_name=_("Org"), related_name="backgrounds",
-        help_text=_("The organization in which the image will be used"))
+        Org,
+        verbose_name=_("Org"),
+        related_name="backgrounds",
+        help_text=_("The organization in which the image will be used"),
+    )
 
     name = models.CharField(
-        verbose_name=_("Name"), max_length=128,
-        help_text=_("The name to describe this background"))
+        verbose_name=_("Name"), max_length=128, help_text=_("The name to describe this background")
+    )
 
     background_type = models.CharField(
-        max_length=1, choices=BACKGROUND_TYPES, default='P', verbose_name=_("Background type"))
+        max_length=1, choices=BACKGROUND_TYPES, default="P", verbose_name=_("Background type")
+    )
 
-    image = models.ImageField(upload_to='org_bgs', help_text=_("The image file"))
+    image = models.ImageField(upload_to="org_bgs", help_text=_("The image file"))
 
 
 class TaskState(models.Model):
     """
     Holds org specific state for a scheduled task
     """
-    org = models.ForeignKey(Org, related_name='task_states')
+
+    org = models.ForeignKey(Org, related_name="task_states")
 
     task_key = models.CharField(max_length=32)
 
@@ -358,11 +383,11 @@ class TaskState(models.Model):
         return (until - self.started_on).total_seconds()
 
     class Meta:
-        unique_together = ('org', 'task_key')
+        unique_together = ("org", "task_key")
 
 
 class OrgBackend(SmartModel):
-    org = models.ForeignKey(Org, related_name='backends')
+    org = models.ForeignKey(Org, related_name="backends")
 
     slug = models.CharField(max_length=16)
 
@@ -370,11 +395,10 @@ class OrgBackend(SmartModel):
 
     host = models.CharField(max_length=128)
 
-    api_token = models.CharField(max_length=128,
-                                 help_text=_("The API token for this backend"))
+    api_token = models.CharField(max_length=128, help_text=_("The API token for this backend"))
 
     def __str__(self):
         return self.slug
 
     class Meta:
-        unique_together = ('org', 'slug')
+        unique_together = ("org", "slug")

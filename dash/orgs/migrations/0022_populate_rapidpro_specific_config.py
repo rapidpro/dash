@@ -8,9 +8,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('orgs', '0021_auto_20180315_0823'),
-    ]
+    dependencies = [("orgs", "0021_auto_20180315_0823")]
 
     def populate_rapidpro_config(apps, schema_editor):
         Org = apps.get_model("orgs", "Org")
@@ -20,12 +18,12 @@ class Migration(migrations.Migration):
             if not org.config:
                 continue
 
-            backends_config_dict = getattr(settings, 'DATA_API_BACKENDS_CONFIG', {})
+            backends_config_dict = getattr(settings, "DATA_API_BACKENDS_CONFIG", {})
             for backend_slug in backends_config_dict:
-                config_fields = getattr(settings, 'BACKENDS_ORG_CONFIG_FIELDS', [])
+                config_fields = getattr(settings, "BACKENDS_ORG_CONFIG_FIELDS", [])
                 for config_field in config_fields:
-                    name = config_field['name']
-                    existing_value = org.config['common'].get(name, None)
+                    name = config_field["name"]
+                    existing_value = org.config["common"].get(name, None)
                     if backend_slug not in org.config:
                         org.config[backend_slug] = dict()
                     org.config[backend_slug][name] = existing_value
@@ -34,7 +32,5 @@ class Migration(migrations.Migration):
 
     def noop(apps, schema_editor):
         pass
-    
-    operations = [
-        migrations.RunPython(populate_rapidpro_config, noop)
-    ]
+
+    operations = [migrations.RunPython(populate_rapidpro_config, noop)]

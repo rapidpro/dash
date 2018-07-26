@@ -17,6 +17,7 @@ class DashTest(TestCase):
     """
     Base class for dashboard test cases
     """
+
     def setUp(self):
         super(DashTest, self).setUp()
 
@@ -28,38 +29,38 @@ class DashTest(TestCase):
     def clear_cache(cls):
         # we are extra paranoid here and actually hardcode redis to 'localhost' and '10'
         # Redis 10 is our testing redis db
-        r = redis.StrictRedis(host='localhost', db=10)
+        r = redis.StrictRedis(host="localhost", db=10)
         r.flushdb()
 
     def create_org(self, name, timezone, subdomain):
         org = Org.objects.create(
-            name=name, timezone=timezone, subdomain=subdomain,
-            created_by=self.superuser, modified_by=self.superuser)
-        org.backends.get_or_create(api_token=random_string(32), slug='rapidpro',
-                                   created_by=self.superuser, modified_by=self.superuser)
+            name=name, timezone=timezone, subdomain=subdomain, created_by=self.superuser, modified_by=self.superuser
+        )
+        org.backends.get_or_create(
+            api_token=random_string(32), slug="rapidpro", created_by=self.superuser, modified_by=self.superuser
+        )
         return org
 
     def login(self, user):
-        password = 'root' if user == self.superuser else user.username
+        password = "root" if user == self.superuser else user.username
         result = self.client.login(username=user.username, password=password)
         self.assertTrue(result, "Couldn't login as %(user)s / %(user)s" % dict(user=user.username))
 
     def url_get(self, subdomain, url, params=None, **extra):
-        return self._url_request(subdomain, 'get', url, params, **extra)
+        return self._url_request(subdomain, "get", url, params, **extra)
 
     def url_post(self, subdomain, url, data=None, **extra):
-        return self._url_request(subdomain, 'post', url, data, **extra)
+        return self._url_request(subdomain, "post", url, data, **extra)
 
     def assertLoginRedirect(self, response, subdomain, next_url):
-        self.assertRedirects(response,
-                             'http://%s.localhost/users/login/?next=%s' % (subdomain, next_url))
+        self.assertRedirects(response, "http://%s.localhost/users/login/?next=%s" % (subdomain, next_url))
 
     def _url_request(self, subdomain, method, url, data, **extra):
         if data is None:
             data = {}
 
         if subdomain:
-            extra['HTTP_HOST'] = '%s.localhost' % subdomain
+            extra["HTTP_HOST"] = "%s.localhost" % subdomain
 
         func = getattr(self.client, method)
         response = func(url, data, **extra)
@@ -67,7 +68,7 @@ class DashTest(TestCase):
         if isinstance(response, JsonResponse):
             content = response.content
             if isinstance(content, six.binary_type):
-                content = content.decode('utf-8')
+                content = content.decode("utf-8")
 
             response.json = json.loads(content)
 
@@ -87,6 +88,7 @@ class MockClientQuery(six.Iterator):
     Will return the three contacts on the first call to iterfetches, and one on the second call.
 
     """
+
     def __init__(self, *fetches):
         self.fetches = list(fetches)
 
@@ -100,7 +102,7 @@ class MockClientQuery(six.Iterator):
         return self.fetches[0][0] if self.fetches[0] else None
 
     def get_cursor(self):
-        return 'cursor-string'
+        return "cursor-string"
 
     def __iter__(self):
         return self

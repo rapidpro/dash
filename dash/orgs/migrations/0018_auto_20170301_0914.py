@@ -8,39 +8,67 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('orgs', '0017_auto_20161026_1513'),
-    ]
+    dependencies = [("orgs", "0017_auto_20161026_1513")]
 
     operations = [
         migrations.AlterField(
-            model_name='invitation',
-            name='created_on',
-            field=models.DateTimeField(blank=True, default=django.utils.timezone.now, editable=False, help_text='When this item was originally created'),
+            model_name="invitation",
+            name="created_on",
+            field=models.DateTimeField(
+                blank=True,
+                default=django.utils.timezone.now,
+                editable=False,
+                help_text="When this item was originally created",
+            ),
         ),
         migrations.AlterField(
-            model_name='invitation',
-            name='modified_on',
-            field=models.DateTimeField(blank=True, default=django.utils.timezone.now, editable=False, help_text='When this item was last modified'),
+            model_name="invitation",
+            name="modified_on",
+            field=models.DateTimeField(
+                blank=True,
+                default=django.utils.timezone.now,
+                editable=False,
+                help_text="When this item was last modified",
+            ),
         ),
         migrations.AlterField(
-            model_name='org',
-            name='created_on',
-            field=models.DateTimeField(blank=True, default=django.utils.timezone.now, editable=False, help_text='When this item was originally created'),
+            model_name="org",
+            name="created_on",
+            field=models.DateTimeField(
+                blank=True,
+                default=django.utils.timezone.now,
+                editable=False,
+                help_text="When this item was originally created",
+            ),
         ),
         migrations.AlterField(
-            model_name='org',
-            name='modified_on',
-            field=models.DateTimeField(blank=True, default=django.utils.timezone.now, editable=False, help_text='When this item was last modified'),
+            model_name="org",
+            name="modified_on",
+            field=models.DateTimeField(
+                blank=True,
+                default=django.utils.timezone.now,
+                editable=False,
+                help_text="When this item was last modified",
+            ),
         ),
         migrations.AlterField(
-            model_name='orgbackground',
-            name='created_on',
-            field=models.DateTimeField(blank=True, default=django.utils.timezone.now, editable=False, help_text='When this item was originally created'),
+            model_name="orgbackground",
+            name="created_on",
+            field=models.DateTimeField(
+                blank=True,
+                default=django.utils.timezone.now,
+                editable=False,
+                help_text="When this item was originally created",
+            ),
         ),
         migrations.AlterField(
-            model_name='orgbackground',
-            name='modified_on',
-            field=models.DateTimeField(blank=True, default=django.utils.timezone.now, editable=False, help_text='When this item was last modified'),
+            model_name="orgbackground",
+            name="modified_on",
+            field=models.DateTimeField(
+                blank=True,
+                default=django.utils.timezone.now,
+                editable=False,
+                help_text="When this item was last modified",
+            ),
         ),
     ]

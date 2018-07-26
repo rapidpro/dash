@@ -12,27 +12,72 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('orgs', '0022_populate_rapidpro_specific_config'),
+        ("orgs", "0022_populate_rapidpro_specific_config"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='OrgBackend',
+            name="OrgBackend",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('is_active', models.BooleanField(default=True, help_text='Whether this item is active, use this instead of deleting')),
-                ('created_on', models.DateTimeField(blank=True, default=django.utils.timezone.now, editable=False, help_text='When this item was originally created')),
-                ('modified_on', models.DateTimeField(blank=True, default=django.utils.timezone.now, editable=False, help_text='When this item was last modified')),
-                ('api_token', models.CharField(blank=True, help_text='The API token for this backend', max_length=128, null=True)),
-                ('host', models.CharField(blank=True, max_length=128, null=True)),
-                ('slug', models.CharField(max_length=16)),
-                ('backend_type', models.CharField(blank=True, max_length=256, null=True)),
-                ('created_by', models.ForeignKey(help_text='The user which originally created this item', on_delete=django.db.models.deletion.CASCADE, related_name='orgs_orgbackend_creations', to=settings.AUTH_USER_MODEL)),
-                ('modified_by', models.ForeignKey(help_text='The user which last modified this item', on_delete=django.db.models.deletion.CASCADE, related_name='orgs_orgbackend_modifications', to=settings.AUTH_USER_MODEL)),
-                ('org', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='backends', to='orgs.Org')),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "is_active",
+                    models.BooleanField(
+                        default=True, help_text="Whether this item is active, use this instead of deleting"
+                    ),
+                ),
+                (
+                    "created_on",
+                    models.DateTimeField(
+                        blank=True,
+                        default=django.utils.timezone.now,
+                        editable=False,
+                        help_text="When this item was originally created",
+                    ),
+                ),
+                (
+                    "modified_on",
+                    models.DateTimeField(
+                        blank=True,
+                        default=django.utils.timezone.now,
+                        editable=False,
+                        help_text="When this item was last modified",
+                    ),
+                ),
+                (
+                    "api_token",
+                    models.CharField(
+                        blank=True, help_text="The API token for this backend", max_length=128, null=True
+                    ),
+                ),
+                ("host", models.CharField(blank=True, max_length=128, null=True)),
+                ("slug", models.CharField(max_length=16)),
+                ("backend_type", models.CharField(blank=True, max_length=256, null=True)),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        help_text="The user which originally created this item",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="orgs_orgbackend_creations",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "modified_by",
+                    models.ForeignKey(
+                        help_text="The user which last modified this item",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="orgs_orgbackend_modifications",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "org",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="backends", to="orgs.Org"
+                    ),
+                ),
             ],
-            options={
-                'abstract': False,
-            },
-        ),
+            options={"abstract": False},
+        )
     ]

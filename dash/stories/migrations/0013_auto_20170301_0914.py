@@ -8,29 +8,47 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('stories', '0012_story_written_by'),
-    ]
+    dependencies = [("stories", "0012_story_written_by")]
 
     operations = [
         migrations.AlterField(
-            model_name='story',
-            name='created_on',
-            field=models.DateTimeField(blank=True, default=django.utils.timezone.now, editable=False, help_text='When this item was originally created'),
+            model_name="story",
+            name="created_on",
+            field=models.DateTimeField(
+                blank=True,
+                default=django.utils.timezone.now,
+                editable=False,
+                help_text="When this item was originally created",
+            ),
         ),
         migrations.AlterField(
-            model_name='story',
-            name='modified_on',
-            field=models.DateTimeField(blank=True, default=django.utils.timezone.now, editable=False, help_text='When this item was last modified'),
+            model_name="story",
+            name="modified_on",
+            field=models.DateTimeField(
+                blank=True,
+                default=django.utils.timezone.now,
+                editable=False,
+                help_text="When this item was last modified",
+            ),
         ),
         migrations.AlterField(
-            model_name='storyimage',
-            name='created_on',
-            field=models.DateTimeField(blank=True, default=django.utils.timezone.now, editable=False, help_text='When this item was originally created'),
+            model_name="storyimage",
+            name="created_on",
+            field=models.DateTimeField(
+                blank=True,
+                default=django.utils.timezone.now,
+                editable=False,
+                help_text="When this item was originally created",
+            ),
         ),
         migrations.AlterField(
-            model_name='storyimage',
-            name='modified_on',
-            field=models.DateTimeField(blank=True, default=django.utils.timezone.now, editable=False, help_text='When this item was last modified'),
+            model_name="storyimage",
+            name="modified_on",
+            field=models.DateTimeField(
+                blank=True,
+                default=django.utils.timezone.now,
+                editable=False,
+                help_text="When this item was last modified",
+            ),
         ),
     ]

@@ -6,7 +6,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     def fix_org_config_rapidpro(apps, schema_editor):
         Org = apps.get_model("orgs", "Org")
         orgs = Org.objects.all()
@@ -15,25 +14,20 @@ class Migration(migrations.Migration):
                 continue
 
             config = org.config
-            rapidpro_config = config.get('rapidpro', dict())
-            if 'api_token' in rapidpro_config:
-                del rapidpro_config['api_token']
+            rapidpro_config = config.get("rapidpro", dict())
+            if "api_token" in rapidpro_config:
+                del rapidpro_config["api_token"]
 
-            if 'rapipro' in config:
-                del config['rapipro'] # remove the mistakenly added key by typo in 0024_populate_org_backend
+            if "rapipro" in config:
+                del config["rapipro"]  # remove the mistakenly added key by typo in 0024_populate_org_backend
 
-            config['rapidpro'] = rapidpro_config
+            config["rapidpro"] = rapidpro_config
             org.config = config
             org.save()
 
     def noop(apps, schema_editor):
         pass
 
+    dependencies = [("orgs", "0025_auto_20180322_1415")]
 
-    dependencies = [
-        ('orgs', '0025_auto_20180322_1415'),
-    ]
-
-    operations = [
-        migrations.RunPython(fix_org_config_rapidpro, noop)
-    ]
+    operations = [migrations.RunPython(fix_org_config_rapidpro, noop)]

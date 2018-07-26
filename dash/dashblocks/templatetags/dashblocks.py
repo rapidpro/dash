@@ -54,16 +54,16 @@ register = template.Library()
 @register.simple_tag(takes_context=True)
 def load_dashblocks(context, org, slug, tag=None):
     if not org:
-        return ''
+        return ""
 
     try:
         dashblock_type = DashBlockType.objects.get(slug=slug)
     except DashBlockType.DoesNotExist:
         default_invalid = '<b><font color="red">DashBlockType with slug: %s not found</font></b>'
-        return getattr(settings, 'DASHBLOCK_STRING_IF_INVALID', default_invalid) % slug
+        return getattr(settings, "DASHBLOCK_STRING_IF_INVALID", default_invalid) % slug
 
     dashblocks = DashBlock.objects.filter(dashblock_type=dashblock_type, org=org, is_active=True)
-    dashblocks = dashblocks.order_by('-priority')
+    dashblocks = dashblocks.order_by("-priority")
 
     # filter by our tag if one was specified
     if tag is not None:
@@ -71,7 +71,7 @@ def load_dashblocks(context, org, slug, tag=None):
 
     context[slug] = dashblocks
 
-    return ''
+    return ""
 
 
 @register.simple_tag(takes_context=True)

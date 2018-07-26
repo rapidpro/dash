@@ -10,7 +10,7 @@ class GroupPermWrapper(object):
 
         self.apps = dict()
         if self.group:
-            for perm in self.group.permissions.all().select_related('content_type'):
+            for perm in self.group.permissions.all().select_related("content_type"):
                 app_name = perm.content_type.app_label
                 app_perms = self.apps.get(app_name, None)
 
@@ -31,11 +31,11 @@ class GroupPermWrapper(object):
         """
         Lookup by "someapp" or "someapp.someperm" in perms.
         """
-        if '.' not in perm_name:
+        if "." not in perm_name:
             return perm_name in self.apps
 
         else:
-            module_name, perm_name = perm_name.split('.', 1)
+            module_name, perm_name = perm_name.split(".", 1)
             if module_name in self.apps:
                 return perm_name in self.apps[module_name]
             else:
@@ -49,7 +49,7 @@ def user_group_perms_processor(request):
     org = None
     group = None
 
-    if hasattr(request, 'user'):
+    if hasattr(request, "user"):
         if request.user.is_anonymous():
             group = None
         else:
@@ -62,7 +62,7 @@ def user_group_perms_processor(request):
         context = dict()
 
     # make sure user_org is set on our request based on their session
-    context['user_org'] = org
+    context["user_org"] = org
 
     return context
 
@@ -72,12 +72,12 @@ def set_org_processor(request):
     Simple context processor that automatically sets 'org' on the context if it
     is present in the request.
     """
-    if getattr(request, 'org', None):
+    if getattr(request, "org", None):
         org = request.org
-        pattern_bg = org.backgrounds.filter(is_active=True, background_type='P')
-        pattern_bg = pattern_bg.order_by('-pk').first()
-        banner_bg = org.backgrounds.filter(is_active=True, background_type='B')
-        banner_bg = banner_bg.order_by('-pk').first()
+        pattern_bg = org.backgrounds.filter(is_active=True, background_type="P")
+        pattern_bg = pattern_bg.order_by("-pk").first()
+        banner_bg = org.backgrounds.filter(is_active=True, background_type="B")
+        banner_bg = banner_bg.order_by("-pk").first()
 
         return dict(org=org, pattern_bg=pattern_bg, banner_bg=banner_bg)
     else:

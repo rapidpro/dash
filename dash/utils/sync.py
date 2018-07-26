@@ -12,8 +12,6 @@ Sync support
 """
 
 
-
-
 class SyncOutcome(Enum):
     created = 1
     updated = 2
@@ -26,9 +24,10 @@ class BaseSyncer(object):
     """
     Base class for classes that describe how to synchronize particular local models against incoming data
     """
+
     model = None
-    local_id_attr = 'uuid'
-    remote_id_attr = 'uuid'
+    local_id_attr = "uuid"
+    remote_id_attr = "uuid"
     select_related = ()
     prefetch_related = ()
     local_backend_attr = None
@@ -117,7 +116,7 @@ class BaseSyncer(object):
         :return:
         """
         local.is_active = False
-        local.save(update_fields=('is_active',))
+        local.save(update_fields=("is_active",))
 
 
 def sync_from_remote(org, syncer, remote):
@@ -183,7 +182,7 @@ def sync_local_to_set(org, syncer, remote_set):
 
     # active local objects which weren't in the remote set need to be deleted
     active_locals = syncer.fetch_all(org).filter(is_active=True)
-    delete_locals = active_locals.exclude(**{syncer.local_id_attr + '__in': remote_identities})
+    delete_locals = active_locals.exclude(**{syncer.local_id_attr + "__in": remote_identities})
 
     for local in delete_locals:
         with syncer.lock(org, syncer.identify_local(local)):
@@ -194,7 +193,7 @@ def sync_local_to_set(org, syncer, remote_set):
         outcome_counts[SyncOutcome.created],
         outcome_counts[SyncOutcome.updated],
         outcome_counts[SyncOutcome.deleted],
-        outcome_counts[SyncOutcome.ignored]
+        outcome_counts[SyncOutcome.ignored],
     )
 
 
@@ -239,5 +238,5 @@ def sync_local_to_changes(org, syncer, fetches, deleted_fetches, progress_callba
         outcome_counts[SyncOutcome.created],
         outcome_counts[SyncOutcome.updated],
         outcome_counts[SyncOutcome.deleted],
-        outcome_counts[SyncOutcome.ignored]
+        outcome_counts[SyncOutcome.ignored],
     )

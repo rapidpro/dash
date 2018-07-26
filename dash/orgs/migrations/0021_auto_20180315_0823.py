@@ -8,14 +8,15 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('orgs', '0020_remove_org_api_token'),
-    ]
+    dependencies = [("orgs", "0020_remove_org_api_token")]
 
     operations = [
         migrations.AlterField(
-            model_name='org',
-            name='config',
-            field=django.contrib.postgres.fields.jsonb.JSONField(default=dict, help_text='JSON blob used to store configuration information associated with this organization'),
-        ),
+            model_name="org",
+            name="config",
+            field=django.contrib.postgres.fields.jsonb.JSONField(
+                default=dict,
+                help_text="JSON blob used to store configuration information associated with this organization",
+            ),
+        )
     ]

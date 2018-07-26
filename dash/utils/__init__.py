@@ -51,7 +51,7 @@ def random_string(length):
     """
     # avoid things that could be mistaken ex: 'I' and '1'
     letters = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"
-    return ''.join([random.choice(letters) for _ in range(length)])
+    return "".join([random.choice(letters) for _ in range(length)])
 
 
 def filter_dict(d, keys):
@@ -138,14 +138,15 @@ def temba_client_flow_results_serializer(client_results):
     json_results = []
     for flow_result in client_results:
         flow_result_json = dict()
-        flow_result_json['set'] = flow_result.set
-        flow_result_json['unset'] = flow_result.unset
-        flow_result_json['open_ended'] = flow_result.open_ended
-        flow_result_json['label'] = flow_result.label
-        flow_result_json['categories'] = [dict(label=category.label, count=category.count)
-                                          for category in flow_result.categories]
+        flow_result_json["set"] = flow_result.set
+        flow_result_json["unset"] = flow_result.unset
+        flow_result_json["open_ended"] = flow_result.open_ended
+        flow_result_json["label"] = flow_result.label
+        flow_result_json["categories"] = [
+            dict(label=category.label, count=category.count) for category in flow_result.categories
+        ]
         if flow_result.boundary:
-            flow_result_json['boundary'] = flow_result.boundary
+            flow_result_json["boundary"] = flow_result.boundary
 
         json_results.append(flow_result_json)
 
@@ -162,9 +163,15 @@ def is_dict_equal(d1, d2, keys=None, ignore_none_values=True):
     :return: true if the dictionaries are equal, else false
     """
     if keys or ignore_none_values:
-        d1 = {k: v for k, v in six.iteritems(d1)
-              if (keys is None or k in keys) and (v is not None or not ignore_none_values)}
-        d2 = {k: v for k, v in six.iteritems(d2)
-              if (keys is None or k in keys) and (v is not None or not ignore_none_values)}
+        d1 = {
+            k: v
+            for k, v in six.iteritems(d1)
+            if (keys is None or k in keys) and (v is not None or not ignore_none_values)
+        }
+        d2 = {
+            k: v
+            for k, v in six.iteritems(d2)
+            if (keys is None or k in keys) and (v is not None or not ignore_none_values)
+        }
 
     return d1 == d2
