@@ -5,7 +5,6 @@ import datetime
 import json
 import pytz
 import random
-import six
 
 from collections import OrderedDict
 from dateutil.relativedelta import relativedelta
@@ -58,7 +57,7 @@ def filter_dict(d, keys):
     """
     Creates a new dict from an existing dict that only has the given keys
     """
-    return {k: v for k, v in six.iteritems(d) if k in keys}
+    return {k: v for k, v in d.items() if k in keys}
 
 
 def get_cacheable(cache_key, cache_ttl, calculate, recalculate=False):
@@ -163,15 +162,7 @@ def is_dict_equal(d1, d2, keys=None, ignore_none_values=True):
     :return: true if the dictionaries are equal, else false
     """
     if keys or ignore_none_values:
-        d1 = {
-            k: v
-            for k, v in six.iteritems(d1)
-            if (keys is None or k in keys) and (v is not None or not ignore_none_values)
-        }
-        d2 = {
-            k: v
-            for k, v in six.iteritems(d2)
-            if (keys is None or k in keys) and (v is not None or not ignore_none_values)
-        }
+        d1 = {k: v for k, v in d1.items() if (keys is None or k in keys) and (v is not None or not ignore_none_values)}
+        d2 = {k: v for k, v in d2.items() if (keys is None or k in keys) and (v is not None or not ignore_none_values)}
 
     return d1 == d2

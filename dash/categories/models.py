@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+from smartmin.models import SmartModel
 
-import six
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
-from smartmin.models import SmartModel
 
 from dash.orgs.models import Org
 
@@ -37,7 +34,7 @@ class Category(SmartModel):
 
     def get_label_from_instance(self):
         label = str(self)
-        if isinstance(label, six.binary_type):
+        if isinstance(label, bytes):
             label = label.decode("utf-8")
 
         if not self.is_active:

@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 from smartmin.views import SmartCRUDL, SmartTemplateView
 
 from dash_test_runner.testapp.models import Contact

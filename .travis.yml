@@ -1,14 +1,13 @@
 language: python
 sudo: false
 python:
- - "2.7"
  - "3.5"
  - "3.6"
 addons:
   postgresql: "9.6"
 env:
- - DJANGO_VERSION=1.10.4
- - DJANGO_VERSION=1.11.2
+ - DJANGO_VERSION=1.11.14
+ - DJANGO_VERSION=2.0.7
 services:
  - redis-server
 install:
@@ -19,7 +18,19 @@ install:
 before_script:
  - createdb -E UTF-8 dash -U postgres -O $USER
 script:
- - coverage run manage.py test --settings=dash_test_runner.settings_travis
+ # any non-zero error code should be treated as an immediate failure
+ - set -e
+
+ # test that everything is well formatted
+ - black --line-length=119 dash --check --quiet || (echo 'The source code could use a bit more black.' && exit 1)
+
+ # test PEP8 compliance on both Python 2 and 3
  - flake8
+
+ # check for model changes not reflected in a migration
+ - python manage.py makemigrations --dry-run | grep 'No changes detected' || (echo 'There are changes which require migrations.' && exit 1)
+
+ - coverage run manage.py test --settings=dash_test_runner.settings_travis
+
 after_success:
  - coveralls

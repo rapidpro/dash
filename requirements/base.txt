@@ -12,7 +12,6 @@ python-dateutil
 rapidpro-python
 redis
 requests
-six
 smartmin
 sorl-thumbnail
 xlrd

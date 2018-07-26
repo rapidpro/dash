@@ -1,10 +1,6 @@
-from __future__ import unicode_literals
-
 from abc import ABCMeta, abstractmethod
 from collections import defaultdict
 from enum import Enum
-
-import six
 
 
 """
@@ -19,8 +15,7 @@ class SyncOutcome(Enum):
     ignored = 4
 
 
-@six.add_metaclass(ABCMeta)
-class BaseSyncer(object):
+class BaseSyncer(object, metaclass=ABCMeta):
     """
     Base class for classes that describe how to synchronize particular local models against incoming data
     """
@@ -142,7 +137,7 @@ def sync_from_remote(org, syncer, remote):
 
             if remote_as_kwargs:
                 if syncer.update_required(existing, remote, remote_as_kwargs) or not existing.is_active:
-                    for field, value in six.iteritems(remote_as_kwargs):
+                    for field, value in remote_as_kwargs.items():
                         setattr(existing, field, value)
 
                     existing.is_active = True

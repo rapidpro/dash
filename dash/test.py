@@ -1,10 +1,8 @@
-from __future__ import unicode_literals
-
 import itertools
 import json
 
 import redis
-import six
+
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.test import TestCase
@@ -67,7 +65,7 @@ class DashTest(TestCase):
 
         if isinstance(response, JsonResponse):
             content = response.content
-            if isinstance(content, six.binary_type):
+            if isinstance(content, bytes):
                 content = content.decode("utf-8")
 
             response.json = json.loads(content)
@@ -75,7 +73,7 @@ class DashTest(TestCase):
         return response
 
 
-class MockClientQuery(six.Iterator):
+class MockClientQuery:
     """
     Mock for APIv2 client get_xxxxx return values. Pass lists of temba objects to mock each fetch the client would make.
 

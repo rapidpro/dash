@@ -1,6 +1,16 @@
-from __future__ import unicode_literals
+
 
 import re
+
+from smartmin.views import (
+    SmartCreateView,
+    SmartCRUDL,
+    SmartFormView,
+    SmartListView,
+    SmartReadView,
+    SmartTemplateView,
+    SmartUpdateView,
+)
 
 from django import forms
 from django.conf import settings
@@ -12,9 +22,6 @@ from django.core.validators import validate_email
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
-from smartmin.views import (SmartCreateView, SmartCRUDL, SmartFormView,
-                            SmartListView, SmartReadView, SmartTemplateView,
-                            SmartUpdateView)
 
 from .forms import CreateOrgLoginForm, OrgForm
 from .models import Invitation, Org, OrgBackend, OrgBackground, TaskState

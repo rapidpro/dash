@@ -1,8 +1,7 @@
-from __future__ import unicode_literals
+from django_redis import get_redis_connection
 
 from django.db import models
 from django.utils.translation import ugettext as _
-from django_redis import get_redis_connection
 
 from dash.orgs.models import Org, OrgBackend
 from dash.utils.sync import BaseSyncer

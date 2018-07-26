@@ -1,4 +1,4 @@
+black
 coverage
-mock
 flake8
 funcsigs

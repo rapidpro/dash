@@ -1,8 +1,9 @@
-from __future__ import unicode_literals
+
+
+from smartmin.models import SmartModel
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from smartmin.models import SmartModel
 
 from dash.categories.models import Category
 from dash.orgs.models import Org
