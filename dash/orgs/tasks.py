@@ -3,7 +3,6 @@
 import inspect
 import json
 import logging
-import sys
 from functools import wraps
 
 from django_redis import get_redis_connection
