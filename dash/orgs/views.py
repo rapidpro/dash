@@ -165,6 +165,7 @@ class OrgCRUDL(SmartCRUDL):
 
     class List(SmartListView):
         fields = ("name", "timezone", "created_on", "modified_on")
+        ordering = ("name",)
 
     class Choose(SmartFormView):
         class ChooseForm(forms.Form):
@@ -651,6 +652,7 @@ class OrgBackgroundCRUDL(SmartCRUDL):
 
     class List(OrgPermsMixin, SmartListView):
         fields = ("name", "background_type")
+        ordering = ("name",)
 
         def derive_fields(self):
             if self.request.user.is_superuser:
@@ -695,6 +697,7 @@ class TaskCRUDL(SmartCRUDL):
         title = _("Tasks")
         link_fields = ("org",)
         default_order = ("org__name", "task_key")
+        ordering = ("org__name", "task_key")
 
         def lookup_field_link(self, context, field, obj):
             if field == "org":
@@ -725,6 +728,7 @@ class OrgBackendCRUDL(SmartCRUDL):
 
     class List(OrgPermsMixin, SmartListView):
         fields = ("org", "slug", "backend_type", "modified_on", "created_on")
+        ordering = ("org__name", "slug")
 
         def get_queryset(self, **kwargs):
             queryset = super(OrgBackendCRUDL.List, self).get_queryset(**kwargs)

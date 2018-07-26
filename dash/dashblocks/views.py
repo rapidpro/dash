@@ -17,6 +17,7 @@ class DashBlockTypeCRUDL(SmartCRUDL):
         title = _("Content Types")
         fields = ("name", "slug", "description")
         link_fields = ("name",)
+        ordering = ("name", )
 
 
 class DashBlockFormMixin(object):
@@ -94,6 +95,7 @@ class DashBlockCRUDL(SmartCRUDL):
         fields = ("title", "priority", "dashblock_type", "tags")
         link_fields = ("title",)
         default_order = "-modified_on"
+        ordering = ("-modified_on",)
         search_fields = ("title__icontains", "content__icontains", "summary__icontains")
 
         def derive_fields(self):
@@ -195,6 +197,8 @@ class DashBlockImageCRUDL(SmartCRUDL):
     model = DashBlockImage
     actions = ("create", "update", "list")
 
+    class List(SmartListView):
+        ordering = ("dashblock__title",)
     class Update(SmartUpdateView):
         exclude = ("dashblock", "modified_by", "modified_on", "created_on", "created_by", "width", "height")
         title = "Edit Image"

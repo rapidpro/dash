@@ -73,6 +73,7 @@ class StoryCRUDL(SmartCRUDL):
         search_fields = ("title__icontains",)
         link_fields = ("title", "images")
         default_order = ("-created_on",)
+        ordering = ("-created_on",)
 
         def get_featured(self, obj):
             if obj.featured:

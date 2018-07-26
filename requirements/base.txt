@@ -1,5 +1,5 @@
 celery
-django<=2.0.7
+django<2.1
 django-compressor
 django-hamlpy
 django-redis
@@ -7,7 +7,7 @@ django-timezone-field
 enum34
 Pillow
 phonenumbers
-psycopg2==2.7.1
+psycopg2-binary
 python-dateutil
 rapidpro-python
 redis
