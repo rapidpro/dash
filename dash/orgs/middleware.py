@@ -7,10 +7,10 @@ from django.conf import settings
 from django.core.exceptions import DisallowedHost
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from django.utils import translation, timezone
+from django.utils import timezone, translation
 from django.utils.deprecation import MiddlewareMixin
-from .models import Org
 
+from .models import Org
 
 ALLOW_NO_ORG = (
     'users.user_login',

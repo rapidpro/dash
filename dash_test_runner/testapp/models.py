@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-
 from dash.orgs.models import Org, OrgBackend
 from dash.utils.sync import BaseSyncer
 from django.db import models

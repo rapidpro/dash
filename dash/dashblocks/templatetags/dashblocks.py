@@ -1,5 +1,9 @@
 from __future__ import unicode_literals
 
+from dash.dashblocks.models import DashBlock, DashBlockType
+from django import template
+from django.conf import settings
+
 """
 This module offers one templatetag called ``load_dashblocks``.
 
@@ -42,9 +46,6 @@ Example usage::
     the value of the DASHBLOCK_STRING_IF_INVALID setting.
 
 """
-from dash.dashblocks.models import DashBlockType, DashBlock
-from django import template
-from django.conf import settings
 
 
 register = template.Library()

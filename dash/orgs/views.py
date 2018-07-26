@@ -12,11 +12,12 @@ from django.core.urlresolvers import reverse
 from django.core.validators import validate_email
 from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext_lazy as _
-from smartmin.views import (
-    SmartCRUDL, SmartCreateView, SmartReadView, SmartUpdateView,
-    SmartListView, SmartFormView, SmartTemplateView)
+from smartmin.views import (SmartCreateView, SmartCRUDL, SmartFormView,
+                            SmartListView, SmartReadView, SmartTemplateView,
+                            SmartUpdateView)
+
 from .forms import CreateOrgLoginForm, OrgForm
-from .models import Org, OrgBackground, Invitation, TaskState, OrgBackend
+from .models import Invitation, Org, OrgBackend, OrgBackground, TaskState
 
 
 class OrgPermsMixin(object):

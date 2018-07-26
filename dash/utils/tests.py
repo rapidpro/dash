@@ -1,15 +1,16 @@
 from __future__ import unicode_literals
 
 import json
+from datetime import datetime
+from itertools import chain
+
 import pytz
 
-from datetime import datetime
 from django.core.cache import cache
-from itertools import chain
-from . import (
-    intersection, union, random_string, filter_dict, get_cacheable, get_obj_cacheable, get_month_range,
-    chunks, is_dict_equal, datetime_to_ms, ms_to_datetime
-)
+
+from . import (chunks, datetime_to_ms, filter_dict, get_cacheable,
+               get_month_range, get_obj_cacheable, intersection, is_dict_equal,
+               ms_to_datetime, random_string, union)
 from ..test import DashTest
 
 

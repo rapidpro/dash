@@ -1,14 +1,17 @@
 from __future__ import unicode_literals
 
+from abc import ABCMeta, abstractmethod
+from collections import defaultdict
+from enum import Enum
+
+import six
+
+
 """
 Sync support
 """
 
-import six
 
-from abc import ABCMeta, abstractmethod
-from collections import defaultdict
-from enum import Enum
 
 
 class SyncOutcome(Enum):

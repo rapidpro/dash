@@ -1,5 +1,11 @@
 from __future__ import unicode_literals
 
+import logging
+import os
+import warnings
+
+from django.utils.translation import ugettext_lazy as _
+
 """
 Django settings for dash_test_runner project.
 
@@ -10,11 +16,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/dev/ref/settings/
 """
 
-import logging
-import os
-import warnings
 
-from django.utils.translation import ugettext_lazy as _
 
 logging.disable(logging.WARN)
 

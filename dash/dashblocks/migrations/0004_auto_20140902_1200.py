@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations
+from django.db import migrations, models
+
 
 def generate_initial_block_types(apps, schema_editor):
     User = apps.get_model("auth", "User")

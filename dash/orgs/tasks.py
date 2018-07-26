@@ -3,16 +3,17 @@ from __future__ import unicode_literals
 import inspect
 import json
 import logging
-import six
 import sys
+from functools import wraps
+
+import six
 
 from celery import shared_task, signature
-from django_redis import get_redis_connection
 from django.apps import apps
 from django.utils import timezone
-from functools import wraps
-from .models import Invitation
+from django_redis import get_redis_connection
 
+from .models import Invitation
 
 ORG_TASK_LOCK_KEY = 'org-task-lock:%s:%s'
 

@@ -1,11 +1,13 @@
 from __future__ import unicode_literals
 
 from dash.categories.fields import CategoryChoiceField
-from dash.orgs.views import OrgPermsMixin, OrgObjPermsMixin
+from dash.orgs.views import OrgObjPermsMixin, OrgPermsMixin
 from django import forms
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
-from smartmin.views import SmartCRUDL, SmartCreateView, SmartListView, SmartUpdateView
+from smartmin.views import (SmartCreateView, SmartCRUDL, SmartListView,
+                            SmartUpdateView)
+
 from .models import Category, Story, StoryImage
 
 

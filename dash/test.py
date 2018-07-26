@@ -1,10 +1,11 @@
 from __future__ import unicode_literals
 
-import json
 import itertools
-import redis
+import json
+
 import six
 
+import redis
 from dash.orgs.models import Org
 from dash.utils import random_string
 from django.contrib.auth.models import User
