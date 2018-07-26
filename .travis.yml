@@ -11,6 +11,7 @@ env:
 services:
  - redis-server
 install:
+ - pip install pip --upgrade
  - pip install -q -rrequirements/base.txt
  - pip install -q -rrequirements/tests.txt
  - pip install -q Django==$DJANGO_VERSION
