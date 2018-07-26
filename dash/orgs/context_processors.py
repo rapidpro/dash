@@ -50,7 +50,7 @@ def user_group_perms_processor(request):
     group = None
 
     if hasattr(request, "user"):
-        if request.user.is_anonymous():
+        if request.user.is_anonymous:
             group = None
         else:
             group = request.user.get_org_group()

@@ -50,18 +50,18 @@ INSTALLED_APPS = (
     'dash_test_runner.testapp'
 )
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'smartmin.users.middleware.ChangePasswordMiddleware',
     'smartmin.middleware.TimezoneMiddleware',
     'dash.orgs.middleware.SetOrgMiddleware',
-)
+]
 
 warnings.filterwarnings('error', r"DateTimeField received a naive datetime",
                         RuntimeWarning, r'django\.db\.models\.fields')

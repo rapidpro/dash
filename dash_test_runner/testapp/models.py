@@ -8,7 +8,7 @@ from django_redis import get_redis_connection
 
 
 class Contact(models.Model):
-    org = models.ForeignKey(Org)
+    org = models.ForeignKey(Org, on_delete=models.PROTECT)
 
     uuid = models.CharField(max_length=36, unique=True)
 
@@ -16,7 +16,7 @@ class Contact(models.Model):
 
     is_active = models.BooleanField(default=True)
 
-    backend = models.ForeignKey(OrgBackend)
+    backend = models.ForeignKey(OrgBackend, on_delete=models.PROTECT)
 
     @classmethod
     def lock(cls, org, uuid):

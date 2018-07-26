@@ -16,6 +16,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='contact',
             name='backend',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='orgs.OrgBackend'),
+            field=models.ForeignKey(on_delete=models.PROTECT, to='orgs.OrgBackend'),
         ),
     ]

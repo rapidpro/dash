@@ -12,7 +12,7 @@ from dash.dashblocks.models import DashBlock, DashBlockImage, DashBlockType
 from dash.dashblocks.templatetags.dashblocks import load_qbs
 from dash.orgs.context_processors import GroupPermWrapper
 from dash.orgs.middleware import SetOrgMiddleware
-from dash.orgs.models import Invitation, Org, OrgBackground, TaskState
+from dash.orgs.models import Invitation, Org, OrgBackend, OrgBackground, TaskState
 from dash.orgs.tasks import org_task
 from dash.orgs.templatetags.dashorgs import display_time, national_phone
 from dash.stories.models import Story, StoryImage
@@ -21,7 +21,7 @@ from django.conf import settings
 from django.contrib.auth.models import Group, User
 from django.core import mail
 from django.core.exceptions import DisallowedHost
-from django.core.urlresolvers import ResolverMatch, reverse
+from django.urls import ResolverMatch, reverse
 from django.db.utils import IntegrityError
 from django.http import HttpRequest
 from django.utils.encoding import force_text
@@ -645,6 +645,7 @@ class OrgTest(DashTest):
     def test_org_choose(self):
         choose_url = reverse('orgs.org_choose')
 
+        OrgBackend.objects.all().delete()
         Org.objects.all().delete()
 
         response = self.client.get(choose_url)

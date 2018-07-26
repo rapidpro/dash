@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                 ("last_successfully_started_on", models.DateTimeField(null=True)),
                 ("last_results", models.TextField(null=True)),
                 ("is_failing", models.BooleanField(default=False)),
-                ("org", models.ForeignKey(related_name="task_states", to="orgs.Org")),
+                ("org", models.ForeignKey(related_name="task_states", on_delete=models.PROTECT, to="orgs.Org")),
             ],
         ),
         migrations.AlterUniqueTogether(name="taskstate", unique_together=set([("org", "task_key")])),

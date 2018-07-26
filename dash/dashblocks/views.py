@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
 from dash.orgs.views import OrgObjPermsMixin, OrgPermsMixin
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 from smartmin.views import SmartCreateView, SmartCRUDL, SmartListView, SmartUpdateView

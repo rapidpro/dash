@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
                     "created_by",
                     models.ForeignKey(
                         help_text="The user which originally created this item",
-                        on_delete=django.db.models.deletion.CASCADE,
+                        on_delete=models.PROTECT,
                         related_name="orgs_orgbackend_creations",
                         to=settings.AUTH_USER_MODEL,
                     ),
@@ -66,15 +66,16 @@ class Migration(migrations.Migration):
                     "modified_by",
                     models.ForeignKey(
                         help_text="The user which last modified this item",
-                        on_delete=django.db.models.deletion.CASCADE,
                         related_name="orgs_orgbackend_modifications",
+                        on_delete=models.PROTECT,
                         to=settings.AUTH_USER_MODEL,
                     ),
                 ),
                 (
                     "org",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, related_name="backends", to="orgs.Org"
+                        on_delete=models.PROTECT,
+                        related_name="backends", to="orgs.Org"
                     ),
                 ),
             ],

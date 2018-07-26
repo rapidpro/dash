@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.validators import validate_email
 from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext_lazy as _
@@ -57,7 +57,7 @@ class OrgPermsMixin(object):
         if self.get_user().is_superuser:
             return True
 
-        if self.get_user().is_anonymous():
+        if self.get_user().is_anonymous:
             return False
 
         if self.org:
@@ -96,7 +96,7 @@ class OrgObjPermsMixin(OrgPermsMixin):
         if has_org_perm:
             user = self.get_user()
 
-            if user.is_anonymous():
+            if user.is_anonymous:
                 return True
             return user.get_org() == self.get_object_org()
 
@@ -181,7 +181,7 @@ class OrgCRUDL(SmartCRUDL):
         title = _("Select your Organization")
 
         def pre_process(self, request, *args, **kwargs):
-            if self.request.user.is_authenticated():
+            if self.request.user.is_authenticated:
                 user_orgs = self.request.user.get_user_orgs()
 
                 if self.request.user.is_superuser:
@@ -210,7 +210,7 @@ class OrgCRUDL(SmartCRUDL):
             return context
 
         def has_permission(self, request, *args, **kwargs):
-            return self.request.user.is_authenticated()
+            return self.request.user.is_authenticated
 
         def get_form_kwargs(self):
             kwargs = super(OrgCRUDL.Choose, self).get_form_kwargs()
@@ -589,7 +589,7 @@ class OrgCRUDL(SmartCRUDL):
                 redirect_path = org.build_host_link() + reverse("orgs.org_join", args=[secret])
                 return HttpResponseRedirect(redirect_path)
 
-            if not request.user.is_authenticated():
+            if not request.user.is_authenticated:
                 return HttpResponseRedirect(reverse("orgs.org_create_login", args=[secret]))
             return None
 

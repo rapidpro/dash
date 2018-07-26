@@ -256,6 +256,7 @@ USER_GROUPS = (("A", _("Administrator")), ("E", _("Editor")), ("V", _("Viewer"))
 class Invitation(SmartModel):
     org = models.ForeignKey(
         Org,
+        on_delete=models.PROTECT,
         verbose_name=_("Org"),
         related_name="invitations",
         help_text=_("The organization to which the account is invited to view"),
@@ -320,6 +321,7 @@ class OrgBackground(SmartModel):
 
     org = models.ForeignKey(
         Org,
+        on_delete=models.PROTECT,
         verbose_name=_("Org"),
         related_name="backgrounds",
         help_text=_("The organization in which the image will be used"),
@@ -341,7 +343,7 @@ class TaskState(models.Model):
     Holds org specific state for a scheduled task
     """
 
-    org = models.ForeignKey(Org, related_name="task_states")
+    org = models.ForeignKey(Org, on_delete=models.PROTECT, related_name="task_states")
 
     task_key = models.CharField(max_length=32)
 
@@ -387,7 +389,7 @@ class TaskState(models.Model):
 
 
 class OrgBackend(SmartModel):
-    org = models.ForeignKey(Org, related_name="backends")
+    org = models.ForeignKey(Org, on_delete=models.PROTECT, related_name="backends")
 
     slug = models.CharField(max_length=16)
 

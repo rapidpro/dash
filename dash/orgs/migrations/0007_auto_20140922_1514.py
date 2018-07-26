@@ -16,6 +16,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 related_name="orgs_invitation_creations",
                 to=settings.AUTH_USER_MODEL,
+                on_delete=models.PROTECT,
                 help_text="The user which originally created this item",
             ),
         ),
@@ -25,6 +26,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 related_name="orgs_invitation_modifications",
                 to=settings.AUTH_USER_MODEL,
+                on_delete=models.PROTECT,
                 help_text="The user which last modified this item",
             ),
         ),
@@ -34,6 +36,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 related_name="invitations",
                 verbose_name="Org",
+                on_delete=models.PROTECT,
                 to="orgs.Org",
                 help_text="The organization to which the account is invited to view",
             ),
@@ -54,6 +57,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 related_name="orgs_org_creations",
                 to=settings.AUTH_USER_MODEL,
+                on_delete=models.PROTECT,
                 help_text="The user which originally created this item",
             ),
         ),
@@ -73,6 +77,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 related_name="orgs_org_modifications",
                 to=settings.AUTH_USER_MODEL,
+                on_delete=models.PROTECT,
                 help_text="The user which last modified this item",
             ),
         ),
@@ -92,6 +97,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 related_name="orgs_orgbackground_creations",
                 to=settings.AUTH_USER_MODEL,
+                on_delete=models.PROTECT,
                 help_text="The user which originally created this item",
             ),
         ),
@@ -101,6 +107,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 related_name="orgs_orgbackground_modifications",
                 to=settings.AUTH_USER_MODEL,
+                on_delete=models.PROTECT,
                 help_text="The user which last modified this item",
             ),
         ),
@@ -110,6 +117,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 related_name="backgrounds",
                 verbose_name="Org",
+                on_delete=models.PROTECT,
                 to="orgs.Org",
                 help_text="The organization in which the image will be used",
             ),

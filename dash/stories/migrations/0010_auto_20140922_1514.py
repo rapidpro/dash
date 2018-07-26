@@ -15,6 +15,7 @@ class Migration(migrations.Migration):
             name="created_by",
             field=models.ForeignKey(
                 related_name="stories_story_creations",
+                on_delete=models.PROTECT,
                 to=settings.AUTH_USER_MODEL,
                 help_text="The user which originally created this item",
             ),
@@ -24,6 +25,7 @@ class Migration(migrations.Migration):
             name="modified_by",
             field=models.ForeignKey(
                 related_name="stories_story_modifications",
+                on_delete=models.PROTECT,
                 to=settings.AUTH_USER_MODEL,
                 help_text="The user which last modified this item",
             ),
@@ -42,6 +44,7 @@ class Migration(migrations.Migration):
             model_name="storyimage",
             name="created_by",
             field=models.ForeignKey(
+                on_delete=models.PROTECT,
                 related_name="stories_storyimage_creations",
                 to=settings.AUTH_USER_MODEL,
                 help_text="The user which originally created this item",
@@ -51,6 +54,7 @@ class Migration(migrations.Migration):
             model_name="storyimage",
             name="modified_by",
             field=models.ForeignKey(
+                on_delete=models.PROTECT,
                 related_name="stories_storyimage_modifications",
                 to=settings.AUTH_USER_MODEL,
                 help_text="The user which last modified this item",
@@ -59,6 +63,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="storyimage",
             name="story",
-            field=models.ForeignKey(related_name="images", to="stories.Story", help_text="The story to associate to"),
+            field=models.ForeignKey(related_name="images",on_delete=models.PROTECT, to="stories.Story", help_text="The story to associate to"),
         ),
     ]

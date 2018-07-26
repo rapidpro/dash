@@ -23,7 +23,7 @@ class Category(SmartModel):
         upload_to="categories", null=True, blank=True, help_text=_("An optional image that can describe this category")
     )
 
-    org = models.ForeignKey(Org, related_name="categories", help_text=_("The organization this category applies to"))
+    org = models.ForeignKey(Org, on_delete=models.PROTECT, related_name="categories", help_text=_("The organization this category applies to"))
 
     def get_first_image(self):
         cat_images = self.images.filter(is_active=True).exclude(image="")
@@ -51,7 +51,7 @@ class Category(SmartModel):
 class CategoryImage(SmartModel):
     name = models.CharField(max_length=64, help_text=_("The name to describe this image"))
 
-    category = models.ForeignKey(Category, related_name="images", help_text=_("The category this image represents"))
+    category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name="images", help_text=_("The category this image represents"))
 
     image = models.ImageField(upload_to="categories", help_text=_("The image file to use"))
 
