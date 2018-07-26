@@ -8,42 +8,42 @@ from smartmin.models import SmartModel
 
 
 class Story(SmartModel):
-    title = models.CharField(
-        max_length=255,
-        help_text=_("The title for this story"))
+    title = models.CharField(max_length=255, help_text=_("The title for this story"))
 
-    featured = models.BooleanField(
-        default=False,
-        help_text=_("Whether this story is featured"))
-    summary = models.TextField(
-        null=True, blank=True,
-        help_text=_("The summary for the story"))
+    featured = models.BooleanField(default=False, help_text=_("Whether this story is featured"))
+    summary = models.TextField(null=True, blank=True, help_text=_("The summary for the story"))
 
     content = models.TextField(help_text=_("The body of text for the story"))
 
     written_by = models.CharField(max_length=255, help_text=_("The writer of the story"), null=True, blank=True)
 
-    audio_link = models.URLField(max_length=255, blank=True, null=True,
-                                 help_text=_("A link to an mp3 file to publish on this story"))
+    audio_link = models.URLField(
+        max_length=255, blank=True, null=True, help_text=_("A link to an mp3 file to publish on this story")
+    )
 
     video_id = models.CharField(
-        blank=True, null=True, max_length=255,
-        help_text=_("The id of the YouTube video that should be linked to "
-                    "this story (this is the text that comes afer v= and "
-                    "before & in the YouTube URL)"))
+        blank=True,
+        null=True,
+        max_length=255,
+        help_text=_(
+            "The id of the YouTube video that should be linked to "
+            "this story (this is the text that comes afer v= and "
+            "before & in the YouTube URL)"
+        ),
+    )
 
     tags = models.CharField(
-        blank=True, null=True, max_length=255,
-        help_text=_("Any tags for this story, separated by spaces, can be "
-                    "used to do more advanced filtering, optional"))
+        blank=True,
+        null=True,
+        max_length=255,
+        help_text=_(
+            "Any tags for this story, separated by spaces, can be " "used to do more advanced filtering, optional"
+        ),
+    )
 
-    category = models.ForeignKey(
-        Category, null=True, blank=True,
-        help_text=_("The category for this story"))
+    category = models.ForeignKey(Category, null=True, blank=True, help_text=_("The category for this story"))
 
-    org = models.ForeignKey(
-        Org,
-        help_text=_("The organization this story belongs to"))
+    org = models.ForeignKey(Org, help_text=_("The organization this story belongs to"))
 
     @classmethod
     def format_audio_link(cls, link):
@@ -51,11 +51,11 @@ class Story(SmartModel):
         if not formatted_link:
             return formatted_link
 
-        if formatted_link == 'http://':
-            return ''
+        if formatted_link == "http://":
+            return ""
 
-        if not formatted_link.startswith('http://'):
-            formatted_link = 'http://' + formatted_link
+        if not formatted_link.startswith("http://"):
+            formatted_link = "http://" + formatted_link
         return formatted_link
 
     @classmethod
@@ -96,7 +96,7 @@ class Story(SmartModel):
             return full_name.strip()
 
     def get_featured_images(self):
-        return self.images.filter(is_active=True).exclude(image='')
+        return self.images.filter(is_active=True).exclude(image="")
 
     def get_category_image(self):
         cat_image = None
@@ -125,11 +125,8 @@ class Story(SmartModel):
 
 
 class StoryImage(SmartModel):
-    name = models.CharField(max_length=64,
-                            help_text=_("The name to describe this image"))
+    name = models.CharField(max_length=64, help_text=_("The name to describe this image"))
 
-    story = models.ForeignKey(Story, related_name="images",
-                              help_text=_("The story to associate to"))
+    story = models.ForeignKey(Story, related_name="images", help_text=_("The story to associate to"))
 
-    image = models.ImageField(upload_to='stories',
-                              help_text=_("The image file to use"))
+    image = models.ImageField(upload_to="stories", help_text=_("The image file to use"))

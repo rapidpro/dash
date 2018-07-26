@@ -10,23 +10,23 @@ from django.core.management.base import BaseCommand, CommandError
 class Command(BaseCommand):
     help = "Manages org specific tasks"
 
-    RUNNING = 'running'
-    FAILING = 'failing'
-    ENABLE = 'enable'
-    DISABLE = 'disable'
+    RUNNING = "running"
+    FAILING = "failing"
+    ENABLE = "enable"
+    DISABLE = "disable"
     ACTION_CHOICES = (RUNNING, FAILING, ENABLE, DISABLE)
 
     def add_arguments(self, parser):
-        parser.add_argument('action', choices=self.ACTION_CHOICES, help="The action to perform")
-        parser.add_argument('task', nargs='?', default=None, help="Key of a task")
-        parser.add_argument('org_ids', metavar='ORG', type=int, nargs='*', help="The ids of the orgs")
+        parser.add_argument("action", choices=self.ACTION_CHOICES, help="The action to perform")
+        parser.add_argument("task", nargs="?", default=None, help="Key of a task")
+        parser.add_argument("org_ids", metavar="ORG", type=int, nargs="*", help="The ids of the orgs")
 
     def handle(self, *args, **options):
-        org_ids = options['org_ids']
-        action = options['action']
-        task_key = options['task']
+        org_ids = options["org_ids"]
+        action = options["action"]
+        task_key = options["task"]
 
-        orgs = Org.objects.order_by('pk')
+        orgs = Org.objects.order_by("pk")
         if org_ids:
             orgs = orgs.filter(pk__in=org_ids)
         else:
@@ -46,7 +46,7 @@ class Command(BaseCommand):
 
     def do_running(self, orgs, task_key):
         tasks = TaskState.objects.filter(org__in=orgs, ended_on=None).exclude(started_on=None)
-        tasks = tasks.select_related('org').order_by('org_id', 'task_key')
+        tasks = tasks.select_related("org").order_by("org_id", "task_key")
         if task_key:
             tasks = tasks.filter(task_key=task_key)
 
@@ -54,7 +54,7 @@ class Command(BaseCommand):
 
     def do_failing(self, orgs, task_key):
         tasks = TaskState.objects.filter(org__in=orgs, is_failing=True)
-        tasks = tasks.select_related('org').order_by('org_id', 'task_key')
+        tasks = tasks.select_related("org").order_by("org_id", "task_key")
         if task_key:
             tasks = tasks.filter(task_key=task_key)
 
@@ -66,7 +66,7 @@ class Command(BaseCommand):
             task = TaskState.objects.filter(org=org, task_key=task_key).first()
             if task:
                 task.is_disabled = False
-                task.save(update_fields=('is_disabled',))
+                task.save(update_fields=("is_disabled",))
                 num_updated += 1
             else:
                 self.stdout.write("No such task for org #%d" % org.pk)
@@ -79,7 +79,7 @@ class Command(BaseCommand):
             task = TaskState.objects.filter(org=org, task_key=task_key).first()
             if task:
                 task.is_disabled = True
-                task.save(update_fields=('is_disabled',))
+                task.save(update_fields=("is_disabled",))
                 num_updated += 1
             else:
                 self.stdout.write("No such task for org #%d" % org.pk)
@@ -87,12 +87,7 @@ class Command(BaseCommand):
         self.stdout.write("Task %s disabled for %d orgs" % (task_key, num_updated))
 
     def render_task_table(self, tasks):
-        header = [
-            cell("Org ID", 8),
-            cell("Org Name", 20),
-            cell("Key", 20),
-            cell("Started On", 20),
-        ]
+        header = [cell("Org ID", 8), cell("Org Name", 20), cell("Key", 20), cell("Started On", 20)]
 
         self.stdout.write("".join(header))
         self.stdout.write("==================================================================")
@@ -102,7 +97,7 @@ class Command(BaseCommand):
                 cell(task.org.pk, 8),
                 cell(task.org.name, 20),
                 cell(task.task_key, 20),
-                cell(format_date(task.started_on), 20)
+                cell(format_date(task.started_on), 20),
             ]
             self.stdout.write("".join(row))
 
@@ -112,4 +107,4 @@ def cell(val, width):
 
 
 def format_date(dt):
-    return dt.astimezone(pytz.UTC).strftime('%b %d, %Y %H:%M') if dt else ''
+    return dt.astimezone(pytz.UTC).strftime("%b %d, %Y %H:%M") if dt else ""

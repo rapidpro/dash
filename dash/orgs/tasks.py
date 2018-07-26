@@ -3,36 +3,37 @@ from __future__ import unicode_literals
 import inspect
 import json
 import logging
-import six
 import sys
+from functools import wraps
+
+import six
 
 from celery import shared_task, signature
-from django_redis import get_redis_connection
 from django.apps import apps
 from django.utils import timezone
-from functools import wraps
+from django_redis import get_redis_connection
+
 from .models import Invitation
 
-
-ORG_TASK_LOCK_KEY = 'org-task-lock:%s:%s'
+ORG_TASK_LOCK_KEY = "org-task-lock:%s:%s"
 
 logger = logging.getLogger(__name__)
 
 
-@shared_task(track_started=True, name='send_invitation_email_task')
+@shared_task(track_started=True, name="send_invitation_email_task")
 def send_invitation_email_task(invitation_id):
     invitation = Invitation.objects.get(pk=invitation_id)
     invitation.send_email()
 
 
 @shared_task
-def trigger_org_task(task_name, queue='celery'):
+def trigger_org_task(task_name, queue="celery"):
     """
     Triggers the given org task to be run for all active orgs
     :param task_name: the full task name, e.g. 'myproj.myapp.tasks.do_stuff'
     :param queue: the name of the queue to send org sub-tasks to
     """
-    active_orgs = apps.get_model('orgs', 'Org').objects.filter(is_active=True)
+    active_orgs = apps.get_model("orgs", "Org").objects.filter(is_active=True)
     for org in active_orgs:
         sig = signature(task_name, args=[org.pk])
         sig.apply_async(queue=queue)
@@ -46,12 +47,14 @@ def org_task(task_key, lock_timeout=None):
     :param task_key: the task key used for state storage and locking, e.g. 'do-stuff'
     :param lock_timeout: the lock timeout in seconds
     """
+
     def _org_task(task_func):
         def _decorator(org_id):
-            org = apps.get_model('orgs', 'Org').objects.get(pk=org_id)
+            org = apps.get_model("orgs", "Org").objects.get(pk=org_id)
             maybe_run_for_org(org, task_func, task_key, lock_timeout)
 
         return shared_task(wraps(task_func)(_decorator))
+
     return _org_task
 
 
@@ -81,7 +84,7 @@ def maybe_run_for_org(org, task_func, task_key, lock_timeout):
 
             state.started_on = this_started_on
             state.ended_on = None
-            state.save(update_fields=('started_on', 'ended_on'))
+            state.save(update_fields=("started_on", "ended_on"))
 
             num_task_args = len(inspect.getargspec(task_func).args)
 
@@ -97,7 +100,7 @@ def maybe_run_for_org(org, task_func, task_key, lock_timeout):
                 state.last_successfully_started_on = this_started_on
                 state.last_results = json.dumps(results)
                 state.is_failing = False
-                state.save(update_fields=('ended_on', 'last_successfully_started_on', 'last_results', 'is_failing'))
+                state.save(update_fields=("ended_on", "last_successfully_started_on", "last_results", "is_failing"))
 
                 logger.info("Succeeded for org #%d with result: %s" % (org.pk, json.dumps(results)))
 
@@ -105,6 +108,6 @@ def maybe_run_for_org(org, task_func, task_key, lock_timeout):
                 state.ended_on = timezone.now()
                 state.last_results = None
                 state.is_failing = True
-                state.save(update_fields=('ended_on', 'last_results', 'is_failing'))
+                state.save(update_fields=("ended_on", "last_results", "is_failing"))
 
                 six.reraise(*sys.exc_info())  # re-raise with original stack trace

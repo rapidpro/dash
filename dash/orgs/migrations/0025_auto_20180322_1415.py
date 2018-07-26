@@ -7,31 +7,26 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('orgs', '0024_populate_org_backend'),
-    ]
+    dependencies = [("orgs", "0024_populate_org_backend")]
 
     operations = [
         migrations.AlterField(
-            model_name='orgbackend',
-            name='api_token',
-            field=models.CharField(default='', help_text='The API token for this backend', max_length=128),
+            model_name="orgbackend",
+            name="api_token",
+            field=models.CharField(default="", help_text="The API token for this backend", max_length=128),
             preserve_default=False,
         ),
         migrations.AlterField(
-            model_name='orgbackend',
-            name='backend_type',
-            field=models.CharField(default='', max_length=256),
+            model_name="orgbackend",
+            name="backend_type",
+            field=models.CharField(default="", max_length=256),
             preserve_default=False,
         ),
         migrations.AlterField(
-            model_name='orgbackend',
-            name='host',
-            field=models.CharField(default='', max_length=128),
+            model_name="orgbackend",
+            name="host",
+            field=models.CharField(default="", max_length=128),
             preserve_default=False,
         ),
-        migrations.AlterUniqueTogether(
-            name='orgbackend',
-            unique_together=set([('org', 'slug')]),
-        ),
+        migrations.AlterUniqueTogether(name="orgbackend", unique_together=set([("org", "slug")])),
     ]

@@ -1,12 +1,11 @@
-from __future__ import unicode_literals, print_function
+from __future__ import print_function, unicode_literals
 
 import os
 
 from celery import Celery
+from django.conf import settings  # noqa
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dash_test_runner.settings')
-
-from django.conf import settings  # noqa
 
 
 app = Celery('dash_test_runner')

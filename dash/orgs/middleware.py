@@ -7,40 +7,40 @@ from django.conf import settings
 from django.core.exceptions import DisallowedHost
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from django.utils import translation, timezone
+from django.utils import timezone, translation
 from django.utils.deprecation import MiddlewareMixin
+
 from .models import Org
 
-
 ALLOW_NO_ORG = (
-    'users.user_login',
-    'users.user_logout',
-    'users.user_create',
-    'users.user_list',
-    'users.user_update',
-    'users.user_profile',
-    'users.user_forget',
-    'users.user_recover',
-    'users.user_expired',
-    'users.user_failed',
-    'users.user_newpassword',
-    'users.user_mimic',
-    'orgs.org_create',
-    'orgs.org_list',
-    'orgs.org_update',
-    'orgs.org_choose',
-    'orgs.org_home',
-    'orgs.org_edit',
-    'orgs.org_tokens',
-    'orgs.org_manage_accounts',
-    'orgs.org_create_login',
-    'orgs.org_join',
-    'orgs.orgbackground_create',
-    'orgs.orgbackground_update',
-    'orgs.orgbackground_list',
-    'orgs.orgbackend_list',
-    'orgs.orgbackend_create',
-    'orgs.orgbackend_update',
+    "users.user_login",
+    "users.user_logout",
+    "users.user_create",
+    "users.user_list",
+    "users.user_update",
+    "users.user_profile",
+    "users.user_forget",
+    "users.user_recover",
+    "users.user_expired",
+    "users.user_failed",
+    "users.user_newpassword",
+    "users.user_mimic",
+    "orgs.org_create",
+    "orgs.org_list",
+    "orgs.org_update",
+    "orgs.org_choose",
+    "orgs.org_home",
+    "orgs.org_edit",
+    "orgs.org_tokens",
+    "orgs.org_manage_accounts",
+    "orgs.org_create_login",
+    "orgs.org_join",
+    "orgs.orgbackground_create",
+    "orgs.orgbackground_update",
+    "orgs.orgbackground_list",
+    "orgs.orgbackend_list",
+    "orgs.orgbackend_create",
+    "orgs.orgbackend_update",
 )
 
 
@@ -48,6 +48,7 @@ class SetOrgMiddleware(MiddlewareMixin):
     """
     Sets the org on the request, based on the subdomain
     """
+
     def process_request(self, request):
 
         # try looking the domain level
@@ -98,8 +99,8 @@ class SetOrgMiddleware(MiddlewareMixin):
     def process_view(self, request, view_func, view_args, view_kwargs):
         if not request.org:
             # serve static files
-            media_url = getattr(settings, 'MEDIA_URL', None)
-            static_url = getattr(settings, 'STATIC_URL', None)
+            media_url = getattr(settings, "MEDIA_URL", None)
+            static_url = getattr(settings, "STATIC_URL", None)
             path = request.path
 
             if media_url and path.startswith(media_url):
@@ -109,17 +110,17 @@ class SetOrgMiddleware(MiddlewareMixin):
 
             # only some pages can be viewed without an org
             url_name = request.resolver_match.url_name
-            whitelist = ALLOW_NO_ORG + getattr(settings, 'SITE_ALLOW_NO_ORG', ())
+            whitelist = ALLOW_NO_ORG + getattr(settings, "SITE_ALLOW_NO_ORG", ())
 
             # make sure the chooser view is whitelisted
-            chooser_view = getattr(settings, 'SITE_CHOOSER_URL_NAME', 'orgs.org_chooser')
+            chooser_view = getattr(settings, "SITE_CHOOSER_URL_NAME", "orgs.org_chooser")
             whitelist += (chooser_view,)
 
             if url_name not in whitelist:
                 return HttpResponseRedirect(reverse(chooser_view))
 
     def get_host_parts(self, request):
-        host = 'localhost'
+        host = "localhost"
         try:
             host = request.get_host()
         except DisallowedHost:
@@ -129,7 +130,7 @@ class SetOrgMiddleware(MiddlewareMixin):
         if re.match("^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$", host):
             return []
 
-        return host.split('.')
+        return host.split(".")
 
     def get_subdomain(self, request):
 
@@ -138,7 +139,7 @@ class SetOrgMiddleware(MiddlewareMixin):
         host_string = ".".join(parts)
 
         # we only look up subdomains for localhost and the configured hostname only
-        top_domains = ['localhost:8000', 'localhost', getattr(settings, 'HOSTNAME', "")]
+        top_domains = ["localhost:8000", "localhost", getattr(settings, "HOSTNAME", "")]
         allowed_top_domain = False
         for top in top_domains:
             if host_string.endswith(top):
@@ -156,7 +157,7 @@ class SetOrgMiddleware(MiddlewareMixin):
 
             # we keep stripping subdomains if the subdomain is something
             # like 'www' and there are more parts
-            while subdomain.lower() == 'www' and len(parts) > 1:
+            while subdomain.lower() == "www" and len(parts) > 1:
                 subdomain = parts[0]
                 parts = parts[1:]
 
@@ -165,12 +166,12 @@ class SetOrgMiddleware(MiddlewareMixin):
             subdomain = parts[0]
 
         # get the configured hostname
-        hostname = getattr(settings, 'HOSTNAME', '')
-        domain_first_part = hostname.lower().split('.')[0]
+        hostname = getattr(settings, "HOSTNAME", "")
+        domain_first_part = hostname.lower().split(".")[0]
 
         # if the subdomain is the same as the first part of hostname
         # ignore than and return ''
-        if subdomain.lower() in [domain_first_part, 'localhost']:
+        if subdomain.lower() in [domain_first_part, "localhost"]:
             subdomain = ""
 
         return subdomain

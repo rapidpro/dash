@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations
+from django.db import migrations, models
+
 
 def pollcategory_to_category(apps, schema_editor):
-    Category = apps.get_model('categories', "Category")
+    Category = apps.get_model("categories", "Category")
     User = apps.get_model("auth", "User")
     Org = apps.get_model("orgs", "Org")
     # from ureport.polls.models import PollCategory
 
     root = User.objects.filter(username="root").first()
-    
+
     if not root:
         root = User.objects.filter(username="root2").first()
 
@@ -26,12 +27,9 @@ def pollcategory_to_category(apps, schema_editor):
     #                             created_by=root,
     #                             modified_by=root)
 
+
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('categories', '0001_initial'),
-    ]
+    dependencies = [("categories", "0001_initial")]
 
-    operations = [
-        migrations.RunPython(pollcategory_to_category),
-    ]
+    operations = [migrations.RunPython(pollcategory_to_category)]

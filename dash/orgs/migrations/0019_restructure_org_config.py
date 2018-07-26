@@ -3,14 +3,13 @@
 from __future__ import unicode_literals
 
 import json
+
 from django.db import migrations
 
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('orgs', '0018_auto_20170301_0914'),
-    ]
+    dependencies = [("orgs", "0018_auto_20170301_0914")]
 
     def migrate_api_token_and_common_org_config(apps, schema_editor):
         Org = apps.get_model("orgs", "Org")
@@ -33,6 +32,4 @@ class Migration(migrations.Migration):
     def noop(apps, schema_editor):
         pass
 
-    operations = [
-        migrations.RunPython(migrate_api_token_and_common_org_config, noop)
-    ]
+    operations = [migrations.RunPython(migrate_api_token_and_common_org_config, noop)]
