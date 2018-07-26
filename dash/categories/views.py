@@ -31,7 +31,7 @@ class CategoryCRUDL(SmartCRUDL):
         fields = ("is_active", "name")
 
     class List(OrgPermsMixin, SmartListView):
-        ordering = ("name", )
+        ordering = ("name",)
 
         def derive_fields(self):
             if self.request.user.is_superuser:
