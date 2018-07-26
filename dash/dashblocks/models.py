@@ -1,10 +1,11 @@
 from __future__ import unicode_literals
 
-from dash.orgs.models import Org
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from smartmin.models import SmartModel
+
+from dash.orgs.models import Org
 
 
 @python_2_unicode_compatible
@@ -55,7 +56,10 @@ class DashBlock(SmartModel):
     """
 
     dashblock_type = models.ForeignKey(
-        DashBlockType, on_delete=models.PROTECT, verbose_name=_("Content Type"), help_text=_("The category, or type for this content block")
+        DashBlockType,
+        on_delete=models.PROTECT,
+        verbose_name=_("Content Type"),
+        help_text=_("The category, or type for this content block"),
     )
 
     title = models.CharField(
@@ -100,7 +104,9 @@ class DashBlock(SmartModel):
         default=0, help_text=_("The priority for this block, higher priority blocks " "come first")
     )
 
-    org = models.ForeignKey(Org, on_delete=models.PROTECT, help_text=_("The organization this content block belongs to"))
+    org = models.ForeignKey(
+        Org, on_delete=models.PROTECT, help_text=_("The organization this content block belongs to")
+    )
 
     def teaser(self, field, length):
         words = field.split(" ")

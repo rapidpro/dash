@@ -1,8 +1,9 @@
 from __future__ import unicode_literals
 
-from dash.dashblocks.models import DashBlock, DashBlockType
 from django import template
 from django.conf import settings
+
+from dash.dashblocks.models import DashBlock, DashBlockType
 
 """
 This module offers one templatetag called ``load_dashblocks``.

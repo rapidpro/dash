@@ -4,31 +4,32 @@ from __future__ import unicode_literals
 import json
 
 import pytz
-
 import redis
+from django.conf import settings
+from django.contrib.auth.models import Group, User
+from django.core import mail
+from django.core.exceptions import DisallowedHost
+from django.db.utils import IntegrityError
+from django.http import HttpRequest
+from django.urls import ResolverMatch, reverse
+from django.utils.encoding import force_text
+from mock import Mock, patch
+from smartmin.tests import SmartminTest
+from temba_client import __version__ as client_version
+from temba_client.v2 import TembaClient
+
 from dash.categories.fields import CategoryChoiceField
 from dash.categories.models import Category, CategoryImage
 from dash.dashblocks.models import DashBlock, DashBlockImage, DashBlockType
 from dash.dashblocks.templatetags.dashblocks import load_qbs
 from dash.orgs.context_processors import GroupPermWrapper
 from dash.orgs.middleware import SetOrgMiddleware
-from dash.orgs.models import Invitation, Org, OrgBackend, OrgBackground, TaskState
+from dash.orgs.models import (Invitation, Org, OrgBackend, OrgBackground,
+                              TaskState)
 from dash.orgs.tasks import org_task
 from dash.orgs.templatetags.dashorgs import display_time, national_phone
 from dash.stories.models import Story, StoryImage
 from dash.utils import random_string
-from django.conf import settings
-from django.contrib.auth.models import Group, User
-from django.core import mail
-from django.core.exceptions import DisallowedHost
-from django.urls import ResolverMatch, reverse
-from django.db.utils import IntegrityError
-from django.http import HttpRequest
-from django.utils.encoding import force_text
-from mock import Mock, patch
-from smartmin.tests import SmartminTest
-from temba_client import __version__ as client_version
-from temba_client.v2 import TembaClient
 
 
 class UserTest(SmartminTest):

@@ -7,7 +7,6 @@ import sys
 from functools import wraps
 
 import six
-
 from celery import shared_task, signature
 from django.apps import apps
 from django.utils import timezone

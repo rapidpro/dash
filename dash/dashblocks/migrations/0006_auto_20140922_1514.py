@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="dashblockimage",
             name="dashblock",
-            field=models.ForeignKey(related_name="images",on_delete=models.PROTECT, to="dashblocks.DashBlock"),
+            field=models.ForeignKey(related_name="images", on_delete=models.PROTECT, to="dashblocks.DashBlock"),
         ),
         migrations.AlterField(
             model_name="dashblockimage",

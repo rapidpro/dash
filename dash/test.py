@@ -3,14 +3,14 @@ from __future__ import unicode_literals
 import itertools
 import json
 
-import six
-
 import redis
-from dash.orgs.models import Org
-from dash.utils import random_string
+import six
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.test import TestCase
+
+from dash.orgs.models import Org
+from dash.utils import random_string
 
 
 class DashTest(TestCase):

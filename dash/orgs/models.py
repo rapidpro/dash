@@ -4,7 +4,6 @@ import json
 import random
 from pydoc import locate
 
-from dash.utils.email import send_dash_email
 from django.conf import settings
 from django.contrib.auth.models import Group, User
 from django.contrib.postgres.fields import JSONField
@@ -15,6 +14,8 @@ from django.utils.translation import ugettext_lazy as _
 from smartmin.models import SmartModel
 from temba_client.v2 import TembaClient
 from timezone_field import TimeZoneField
+
+from dash.utils.email import send_dash_email
 
 STATE = 1
 DISTRICT = 2

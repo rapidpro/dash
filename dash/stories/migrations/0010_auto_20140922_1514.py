@@ -63,6 +63,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="storyimage",
             name="story",
-            field=models.ForeignKey(related_name="images",on_delete=models.PROTECT, to="stories.Story", help_text="The story to associate to"),
+            field=models.ForeignKey(
+                related_name="images",
+                on_delete=models.PROTECT,
+                to="stories.Story",
+                help_text="The story to associate to",
+            ),
         ),
     ]

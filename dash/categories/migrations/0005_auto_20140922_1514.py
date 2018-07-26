@@ -34,7 +34,10 @@ class Migration(migrations.Migration):
             model_name="categoryimage",
             name="category",
             field=models.ForeignKey(
-                related_name="images",on_delete=models.PROTECT, to="categories.Category", help_text="The category this image represents"
+                related_name="images",
+                on_delete=models.PROTECT,
+                to="categories.Category",
+                help_text="The category this image represents",
             ),
         ),
         migrations.AlterField(

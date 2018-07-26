@@ -5,22 +5,11 @@ from datetime import datetime
 from itertools import chain
 
 import pytz
-
 from django.core.cache import cache
 
-from . import (
-    chunks,
-    datetime_to_ms,
-    filter_dict,
-    get_cacheable,
-    get_month_range,
-    get_obj_cacheable,
-    intersection,
-    is_dict_equal,
-    ms_to_datetime,
-    random_string,
-    union,
-)
+from . import (chunks, datetime_to_ms, filter_dict, get_cacheable,
+               get_month_range, get_obj_cacheable, intersection, is_dict_equal,
+               ms_to_datetime, random_string, union)
 from ..test import DashTest
 
 

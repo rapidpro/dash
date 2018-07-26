@@ -71,13 +71,7 @@ class Migration(migrations.Migration):
                         to=settings.AUTH_USER_MODEL,
                     ),
                 ),
-                (
-                    "org",
-                    models.ForeignKey(
-                        on_delete=models.PROTECT,
-                        related_name="backends", to="orgs.Org"
-                    ),
-                ),
+                ("org", models.ForeignKey(on_delete=models.PROTECT, related_name="backends", to="orgs.Org")),
             ],
             options={"abstract": False},
         )

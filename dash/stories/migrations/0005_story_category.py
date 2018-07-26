@@ -13,7 +13,11 @@ class Migration(migrations.Migration):
             model_name="story",
             name="category",
             field=models.ForeignKey(
-                blank=True, to="categories.Category",on_delete=models.PROTECT, help_text="The category for this story", null=True
+                blank=True,
+                to="categories.Category",
+                on_delete=models.PROTECT,
+                help_text="The category for this story",
+                null=True,
             ),
             preserve_default=True,
         )
