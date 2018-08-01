@@ -397,6 +397,7 @@ class OrgBackendTest(DashTest):
 
         self.assertEqual(str(self.nigeria_backend), 'rapidpro')
 
+
 class OrgTest(DashTest):
 
     def setUp(self):
