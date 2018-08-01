@@ -395,6 +395,7 @@ class OrgBackendTest(DashTest):
         self.assertTrue(self.uganda_backend in response.context['object_list'])
         self.assertEquals(len(response.context['object_list']), 1)
 
+        self.assertEqual(str(self.nigeria_backend), 'rapidpro')
 
 class OrgTest(DashTest):
 
@@ -1269,6 +1270,7 @@ class OrgTaskTest(DashTest):
         self.assertEqual(task1_state1.get_last_results(), None)
         self.assertEqual(task2_state1.get_time_taken(), task1_timetaken)
         self.assertFalse(task1_state1.is_failing)
+        self.assertTrue(task1_state1.has_ever_run())
 
         self.assertIsNotNone(task2_state1.started_on)
         self.assertIsNotNone(task2_state1.ended_on)
