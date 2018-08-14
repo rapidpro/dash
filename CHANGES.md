@@ -1,3 +1,9 @@
+1.4 (2018-08-14)
+=================
+* Supports Python 3 only
+* Support Django 1.11 and 2.0
+* Code format tools (isort, black)
+
 1.3.7 (2018-05-28)
 =================
 * Include static folder in release
