@@ -4,7 +4,6 @@ django-compressor
 django-hamlpy
 django-redis
 django-timezone-field
-enum34
 Pillow
 phonenumbers
 psycopg2-binary
