@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 from smartmin.users.views import UserCRUDL as SmartUserCRUDL
 
 
@@ -32,4 +30,4 @@ class UserCRUDL(SmartUserCRUDL):
             return obj
 
         def has_permission(self, request, *args, **kwargs):
-            return self.request.user.is_authenticated()
+            return self.request.user.is_authenticated

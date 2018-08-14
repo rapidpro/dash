@@ -1,10 +1,10 @@
-from __future__ import unicode_literals
+from smartmin.views import SmartCreateView, SmartCRUDL, SmartListView, SmartUpdateView
 
-from dash.orgs.views import OrgObjPermsMixin, OrgPermsMixin
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
-from smartmin.views import SmartCreateView, SmartCRUDL, SmartListView, SmartUpdateView
+
+from dash.orgs.views import OrgObjPermsMixin, OrgPermsMixin
 
 from .models import DashBlock, DashBlockImage, DashBlockType
 
@@ -17,6 +17,7 @@ class DashBlockTypeCRUDL(SmartCRUDL):
         title = _("Content Types")
         fields = ("name", "slug", "description")
         link_fields = ("name",)
+        ordering = ("name",)
 
 
 class DashBlockFormMixin(object):
@@ -94,6 +95,7 @@ class DashBlockCRUDL(SmartCRUDL):
         fields = ("title", "priority", "dashblock_type", "tags")
         link_fields = ("title",)
         default_order = "-modified_on"
+        ordering = ("-modified_on",)
         search_fields = ("title__icontains", "content__icontains", "summary__icontains")
 
         def derive_fields(self):
@@ -194,6 +196,9 @@ class DashBlockCRUDL(SmartCRUDL):
 class DashBlockImageCRUDL(SmartCRUDL):
     model = DashBlockImage
     actions = ("create", "update", "list")
+
+    class List(SmartListView):
+        ordering = ("dashblock__title",)
 
     class Update(SmartUpdateView):
         exclude = ("dashblock", "modified_by", "modified_on", "created_on", "created_by", "width", "height")

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 from django.conf import settings
 from django.db import migrations, models
@@ -54,12 +54,18 @@ class Migration(migrations.Migration):
                 (
                     "created_by",
                     models.ForeignKey(
-                        help_text="The user which originally created this item", to=settings.AUTH_USER_MODEL
+                        help_text="The user which originally created this item",
+                        on_delete=models.PROTECT,
+                        to=settings.AUTH_USER_MODEL,
                     ),
                 ),
                 (
                     "modified_by",
-                    models.ForeignKey(help_text="The user which last modified this item", to=settings.AUTH_USER_MODEL),
+                    models.ForeignKey(
+                        help_text="The user which last modified this item",
+                        on_delete=models.PROTECT,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
                 ),
             ],
             options={"abstract": False},
@@ -126,13 +132,19 @@ class Migration(migrations.Migration):
                 (
                     "created_by",
                     models.ForeignKey(
-                        help_text="The user which originally created this item", to=settings.AUTH_USER_MODEL
+                        help_text="The user which originally created this item",
+                        on_delete=models.PROTECT,
+                        to=settings.AUTH_USER_MODEL,
                     ),
                 ),
                 ("editors", models.ManyToManyField(to=settings.AUTH_USER_MODEL, verbose_name="Editors")),
                 (
                     "modified_by",
-                    models.ForeignKey(help_text="The user which last modified this item", to=settings.AUTH_USER_MODEL),
+                    models.ForeignKey(
+                        help_text="The user which last modified this item",
+                        on_delete=models.PROTECT,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
                 ),
                 ("viewers", models.ManyToManyField(to=settings.AUTH_USER_MODEL, verbose_name="Viewers")),
             ],
@@ -143,7 +155,10 @@ class Migration(migrations.Migration):
             model_name="invitation",
             name="org",
             field=models.ForeignKey(
-                verbose_name="Org", to="orgs.Org", help_text="The organization to which the account is invited to view"
+                verbose_name="Org",
+                to="orgs.Org",
+                on_delete=models.PROTECT,
+                help_text="The organization to which the account is invited to view",
             ),
             preserve_default=True,
         ),

@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.db import migrations, models
 
 
@@ -13,7 +10,10 @@ class Migration(migrations.Migration):
             model_name="category",
             name="org",
             field=models.ForeignKey(
-                related_name="categories", to="orgs.Org", help_text="The organization this category applies to"
+                related_name="categories",
+                to="orgs.Org",
+                on_delete=models.PROTECT,
+                help_text="The organization this category applies to",
             ),
         )
     ]

@@ -1,11 +1,11 @@
-from __future__ import unicode_literals
+from smartmin.views import SmartCreateView, SmartCRUDL, SmartListView, SmartUpdateView
+
+from django import forms
+from django.urls import reverse
+from django.utils.translation import ugettext_lazy as _
 
 from dash.categories.fields import CategoryChoiceField
 from dash.orgs.views import OrgObjPermsMixin, OrgPermsMixin
-from django import forms
-from django.core.urlresolvers import reverse
-from django.utils.translation import ugettext_lazy as _
-from smartmin.views import SmartCreateView, SmartCRUDL, SmartListView, SmartUpdateView
 
 from .models import Category, Story, StoryImage
 
@@ -73,6 +73,7 @@ class StoryCRUDL(SmartCRUDL):
         search_fields = ("title__icontains",)
         link_fields = ("title", "images")
         default_order = ("-created_on",)
+        ordering = ("-created_on",)
 
         def get_featured(self, obj):
             if obj.featured:

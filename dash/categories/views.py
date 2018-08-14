@@ -1,9 +1,9 @@
-from __future__ import unicode_literals
+from smartmin.views import SmartCreateView, SmartCRUDL, SmartListView, SmartUpdateView
+
+from django import forms
 
 from dash.categories.fields import CategoryChoiceField
 from dash.orgs.views import OrgObjPermsMixin, OrgPermsMixin
-from django import forms
-from smartmin.views import SmartCreateView, SmartCRUDL, SmartListView, SmartUpdateView
 
 from .models import Category, CategoryImage
 
@@ -31,6 +31,8 @@ class CategoryCRUDL(SmartCRUDL):
         fields = ("is_active", "name")
 
     class List(OrgPermsMixin, SmartListView):
+        ordering = ("name",)
+
         def derive_fields(self):
             if self.request.user.is_superuser:
                 return ("name", "modified_on", "created_on", "org")
@@ -77,6 +79,7 @@ class CategoryImageCRUDL(SmartCRUDL):
 
     class List(OrgPermsMixin, SmartListView):
         fields = ("name", "category", "modified_on", "created_on")
+        ordering = ("name", "category")
 
         def get_queryset(self, **kwargs):
             queryset = super(CategoryImageCRUDL.List, self).get_queryset(**kwargs)

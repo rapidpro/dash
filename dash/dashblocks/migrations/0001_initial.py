@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.conf import settings
 from django.db import migrations, models
 
@@ -98,14 +95,27 @@ class Migration(migrations.Migration):
                 (
                     "created_by",
                     models.ForeignKey(
-                        help_text="The user which originally created this item", to=settings.AUTH_USER_MODEL
+                        help_text="The user which originally created this item",
+                        on_delete=models.PROTECT,
+                        to=settings.AUTH_USER_MODEL,
                     ),
                 ),
                 (
                     "modified_by",
-                    models.ForeignKey(help_text="The user which last modified this item", to=settings.AUTH_USER_MODEL),
+                    models.ForeignKey(
+                        help_text="The user which last modified this item",
+                        on_delete=models.PROTECT,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
                 ),
-                ("org", models.ForeignKey(help_text="The organization this content block belongs to", to="orgs.Org")),
+                (
+                    "org",
+                    models.ForeignKey(
+                        help_text="The organization this content block belongs to",
+                        on_delete=models.PROTECT,
+                        to="orgs.Org",
+                    ),
+                ),
             ],
             options={"abstract": False},
             bases=(models.Model,),
@@ -136,13 +146,19 @@ class Migration(migrations.Migration):
                 (
                     "created_by",
                     models.ForeignKey(
-                        help_text="The user which originally created this item", to=settings.AUTH_USER_MODEL
+                        help_text="The user which originally created this item",
+                        on_delete=models.PROTECT,
+                        to=settings.AUTH_USER_MODEL,
                     ),
                 ),
-                ("dashblock", models.ForeignKey(to="dashblocks.DashBlock")),
+                ("dashblock", models.ForeignKey(to="dashblocks.DashBlock", on_delete=models.PROTECT)),
                 (
                     "modified_by",
-                    models.ForeignKey(help_text="The user which last modified this item", to=settings.AUTH_USER_MODEL),
+                    models.ForeignKey(
+                        help_text="The user which last modified this item",
+                        on_delete=models.PROTECT,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
                 ),
             ],
             options={"abstract": False},
@@ -221,12 +237,18 @@ class Migration(migrations.Migration):
                 (
                     "created_by",
                     models.ForeignKey(
-                        help_text="The user which originally created this item", to=settings.AUTH_USER_MODEL
+                        help_text="The user which originally created this item",
+                        on_delete=models.PROTECT,
+                        to=settings.AUTH_USER_MODEL,
                     ),
                 ),
                 (
                     "modified_by",
-                    models.ForeignKey(help_text="The user which last modified this item", to=settings.AUTH_USER_MODEL),
+                    models.ForeignKey(
+                        help_text="The user which last modified this item",
+                        on_delete=models.PROTECT,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
                 ),
             ],
             options={"abstract": False},
@@ -237,6 +259,7 @@ class Migration(migrations.Migration):
             name="dashblock_type",
             field=models.ForeignKey(
                 verbose_name="Content Type",
+                on_delete=models.PROTECT,
                 to="dashblocks.DashBlockType",
                 help_text="The category, or type for this content block",
             ),

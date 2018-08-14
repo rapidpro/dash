@@ -1,34 +1,32 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import json
+from unittest.mock import Mock, patch
 
 import pytz
-
 import redis
+from smartmin.tests import SmartminTest
+from temba_client import __version__ as client_version
+from temba_client.v2 import TembaClient
+
+from django.conf import settings
+from django.contrib.auth.models import Group, User
+from django.core import mail
+from django.core.exceptions import DisallowedHost
+from django.db.utils import IntegrityError
+from django.http import HttpRequest
+from django.urls import ResolverMatch, reverse
+from django.utils.encoding import force_text
+
 from dash.categories.fields import CategoryChoiceField
 from dash.categories.models import Category, CategoryImage
 from dash.dashblocks.models import DashBlock, DashBlockImage, DashBlockType
 from dash.dashblocks.templatetags.dashblocks import load_qbs
 from dash.orgs.context_processors import GroupPermWrapper
 from dash.orgs.middleware import SetOrgMiddleware
-from dash.orgs.models import Invitation, Org, OrgBackground, TaskState
+from dash.orgs.models import Invitation, Org, OrgBackend, OrgBackground, TaskState
 from dash.orgs.tasks import org_task
 from dash.orgs.templatetags.dashorgs import display_time, national_phone
 from dash.stories.models import Story, StoryImage
 from dash.utils import random_string
-from django.conf import settings
-from django.contrib.auth.models import Group, User
-from django.core import mail
-from django.core.exceptions import DisallowedHost
-from django.core.urlresolvers import ResolverMatch, reverse
-from django.db.utils import IntegrityError
-from django.http import HttpRequest
-from django.utils.encoding import force_text
-from mock import Mock, patch
-from smartmin.tests import SmartminTest
-from temba_client import __version__ as client_version
-from temba_client.v2 import TembaClient
 
 
 class UserTest(SmartminTest):
@@ -397,6 +395,8 @@ class OrgBackendTest(DashTest):
         self.assertTrue(self.uganda_backend in response.context['object_list'])
         self.assertEquals(len(response.context['object_list']), 1)
 
+        self.assertEqual(str(self.nigeria_backend), 'rapidpro')
+
 
 class OrgTest(DashTest):
 
@@ -645,6 +645,7 @@ class OrgTest(DashTest):
     def test_org_choose(self):
         choose_url = reverse('orgs.org_choose')
 
+        OrgBackend.objects.all().delete()
         Org.objects.all().delete()
 
         response = self.client.get(choose_url)
@@ -1270,6 +1271,7 @@ class OrgTaskTest(DashTest):
         self.assertEqual(task1_state1.get_last_results(), None)
         self.assertEqual(task2_state1.get_time_taken(), task1_timetaken)
         self.assertFalse(task1_state1.is_failing)
+        self.assertTrue(task1_state1.has_ever_run())
 
         self.assertIsNotNone(task2_state1.started_on)
         self.assertIsNotNone(task2_state1.ended_on)

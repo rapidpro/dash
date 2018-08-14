@@ -1,9 +1,8 @@
-from __future__ import unicode_literals
+from smartmin.users.views import login
 
 from django.conf import settings
 from django.conf.urls import url
 from django.contrib.auth.views import logout
-from smartmin.users.views import login
 
 from . import views
 

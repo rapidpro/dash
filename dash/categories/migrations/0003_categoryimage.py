@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.conf import settings
 from django.db import migrations, models
 
@@ -32,17 +29,27 @@ class Migration(migrations.Migration):
                 ("image", models.ImageField(help_text="The image file to use", upload_to="categories")),
                 (
                     "category",
-                    models.ForeignKey(help_text="The category this image represents", to="categories.Category"),
+                    models.ForeignKey(
+                        help_text="The category this image represents",
+                        on_delete=models.PROTECT,
+                        to="categories.Category",
+                    ),
                 ),
                 (
                     "created_by",
                     models.ForeignKey(
-                        help_text="The user which originally created this item", to=settings.AUTH_USER_MODEL
+                        help_text="The user which originally created this item",
+                        on_delete=models.PROTECT,
+                        to=settings.AUTH_USER_MODEL,
                     ),
                 ),
                 (
                     "modified_by",
-                    models.ForeignKey(help_text="The user which last modified this item", to=settings.AUTH_USER_MODEL),
+                    models.ForeignKey(
+                        help_text="The user which last modified this item",
+                        on_delete=models.PROTECT,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
                 ),
             ],
             options={"abstract": False},

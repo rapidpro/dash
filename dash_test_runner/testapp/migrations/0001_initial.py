@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.db import migrations, models
 
 
@@ -18,7 +15,7 @@ class Migration(migrations.Migration):
                 ('uuid', models.CharField(unique=True, max_length=36)),
                 ('name', models.CharField(max_length=128, verbose_name='Name')),
                 ('is_active', models.BooleanField(default=True)),
-                ('org', models.ForeignKey(to='orgs.Org')),
+                ('org', models.ForeignKey(to='orgs.Org', on_delete=models.PROTECT)),
             ],
         ),
     ]

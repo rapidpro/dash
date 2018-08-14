@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 from django.conf import settings
 from django.db import migrations, models
@@ -30,14 +30,25 @@ class Migration(migrations.Migration):
                 (
                     "created_by",
                     models.ForeignKey(
-                        help_text="The user which originally created this item", to=settings.AUTH_USER_MODEL
+                        on_delete=models.PROTECT,
+                        help_text="The user which originally created this item",
+                        to=settings.AUTH_USER_MODEL,
                     ),
                 ),
                 (
                     "modified_by",
-                    models.ForeignKey(help_text="The user which last modified this item", to=settings.AUTH_USER_MODEL),
+                    models.ForeignKey(
+                        help_text="The user which last modified this item",
+                        on_delete=models.PROTECT,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
                 ),
-                ("story", models.ForeignKey(help_text="The story to associate to", to="stories.Story")),
+                (
+                    "story",
+                    models.ForeignKey(
+                        help_text="The story to associate to", on_delete=models.PROTECT, to="stories.Story"
+                    ),
+                ),
             ],
             options={"abstract": False},
             bases=(models.Model,),

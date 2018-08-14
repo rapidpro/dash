@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 from django.db import migrations, models
 
@@ -13,7 +13,11 @@ class Migration(migrations.Migration):
             model_name="story",
             name="category",
             field=models.ForeignKey(
-                blank=True, to="categories.Category", help_text="The category for this story", null=True
+                blank=True,
+                to="categories.Category",
+                on_delete=models.PROTECT,
+                help_text="The category for this story",
+                null=True,
             ),
             preserve_default=True,
         )

@@ -1,12 +1,12 @@
-from __future__ import unicode_literals
+
 
 import re
 import traceback
 
 from django.conf import settings
 from django.core.exceptions import DisallowedHost
-from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
+from django.urls import reverse
 from django.utils import timezone, translation
 from django.utils.deprecation import MiddlewareMixin
 
@@ -49,6 +49,9 @@ class SetOrgMiddleware(MiddlewareMixin):
     Sets the org on the request, based on the subdomain
     """
 
+    def __init__(self, get_response=None):
+        self.get_response = get_response
+
     def process_request(self, request):
 
         # try looking the domain level
@@ -77,7 +80,7 @@ class SetOrgMiddleware(MiddlewareMixin):
 
             org = Org.objects.filter(subdomain__iexact=subdomain, is_active=True).first()
 
-        if not request.user.is_anonymous():
+        if not request.user.is_anonymous:
             request.user.set_org(org)
 
         request.org = org

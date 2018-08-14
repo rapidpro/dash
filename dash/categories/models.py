@@ -1,13 +1,10 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+from smartmin.models import SmartModel
 
-import six
-
-from dash.orgs.models import Org
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
-from smartmin.models import SmartModel
+
+from dash.orgs.models import Org
 
 
 @python_2_unicode_compatible
@@ -23,7 +20,12 @@ class Category(SmartModel):
         upload_to="categories", null=True, blank=True, help_text=_("An optional image that can describe this category")
     )
 
-    org = models.ForeignKey(Org, related_name="categories", help_text=_("The organization this category applies to"))
+    org = models.ForeignKey(
+        Org,
+        on_delete=models.PROTECT,
+        related_name="categories",
+        help_text=_("The organization this category applies to"),
+    )
 
     def get_first_image(self):
         cat_images = self.images.filter(is_active=True).exclude(image="")
@@ -32,7 +34,7 @@ class Category(SmartModel):
 
     def get_label_from_instance(self):
         label = str(self)
-        if isinstance(label, six.binary_type):
+        if isinstance(label, bytes):
             label = label.decode("utf-8")
 
         if not self.is_active:
@@ -51,7 +53,9 @@ class Category(SmartModel):
 class CategoryImage(SmartModel):
     name = models.CharField(max_length=64, help_text=_("The name to describe this image"))
 
-    category = models.ForeignKey(Category, related_name="images", help_text=_("The category this image represents"))
+    category = models.ForeignKey(
+        Category, on_delete=models.PROTECT, related_name="images", help_text=_("The category this image represents")
+    )
 
     image = models.ImageField(upload_to="categories", help_text=_("The image file to use"))
 

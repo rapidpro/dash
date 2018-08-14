@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.conf import settings
 from django.db import migrations, models
 
@@ -38,14 +35,25 @@ class Migration(migrations.Migration):
                 (
                     "created_by",
                     models.ForeignKey(
-                        help_text="The user which originally created this item", to=settings.AUTH_USER_MODEL
+                        help_text="The user which originally created this item",
+                        on_delete=models.PROTECT,
+                        to=settings.AUTH_USER_MODEL,
                     ),
                 ),
                 (
                     "modified_by",
-                    models.ForeignKey(help_text="The user which last modified this item", to=settings.AUTH_USER_MODEL),
+                    models.ForeignKey(
+                        help_text="The user which last modified this item",
+                        on_delete=models.PROTECT,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
                 ),
-                ("org", models.ForeignKey(help_text="The organization this category applies to", to="orgs.Org")),
+                (
+                    "org",
+                    models.ForeignKey(
+                        help_text="The organization this category applies to", on_delete=models.PROTECT, to="orgs.Org"
+                    ),
+                ),
             ],
             options={"verbose_name_plural": "Categories"},
             bases=(models.Model,),

@@ -1,17 +1,16 @@
-from __future__ import unicode_literals
+
 
 import inspect
 import json
 import logging
-import sys
 from functools import wraps
 
-import six
+from django_redis import get_redis_connection
 
-from celery import shared_task, signature
 from django.apps import apps
 from django.utils import timezone
-from django_redis import get_redis_connection
+
+from celery import shared_task, signature
 
 from .models import Invitation
 
@@ -104,10 +103,10 @@ def maybe_run_for_org(org, task_func, task_key, lock_timeout):
 
                 logger.info("Succeeded for org #%d with result: %s" % (org.pk, json.dumps(results)))
 
-            except Exception:
+            except Exception as e:
                 state.ended_on = timezone.now()
                 state.last_results = None
                 state.is_failing = True
                 state.save(update_fields=("ended_on", "last_results", "is_failing"))
 
-                six.reraise(*sys.exc_info())  # re-raise with original stack trace
+                raise e  # re-raise with original stack trace

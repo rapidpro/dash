@@ -1,10 +1,8 @@
-from __future__ import unicode_literals
+from temba_client.v2.types import Contact as TembaContact
 
 from dash.test import DashTest, MockClientQuery
 from dash.utils import random_string
-from dash.utils.sync import (SyncOutcome, sync_from_remote,
-                             sync_local_to_changes, sync_local_to_set)
-from temba_client.v2.types import Contact as TembaContact
+from dash.utils.sync import SyncOutcome, sync_from_remote, sync_local_to_changes, sync_local_to_set
 
 from .models import APIBackend, Contact, ContactSyncer
 

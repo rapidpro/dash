@@ -1,10 +1,12 @@
-from __future__ import unicode_literals
+
+
+from smartmin.models import SmartModel
+
+from django.db import models
+from django.utils.translation import ugettext_lazy as _
 
 from dash.categories.models import Category
 from dash.orgs.models import Org
-from django.db import models
-from django.utils.translation import ugettext_lazy as _
-from smartmin.models import SmartModel
 
 
 class Story(SmartModel):
@@ -41,9 +43,11 @@ class Story(SmartModel):
         ),
     )
 
-    category = models.ForeignKey(Category, null=True, blank=True, help_text=_("The category for this story"))
+    category = models.ForeignKey(
+        Category, on_delete=models.PROTECT, null=True, blank=True, help_text=_("The category for this story")
+    )
 
-    org = models.ForeignKey(Org, help_text=_("The organization this story belongs to"))
+    org = models.ForeignKey(Org, on_delete=models.PROTECT, help_text=_("The organization this story belongs to"))
 
     @classmethod
     def format_audio_link(cls, link):
@@ -127,6 +131,8 @@ class Story(SmartModel):
 class StoryImage(SmartModel):
     name = models.CharField(max_length=64, help_text=_("The name to describe this image"))
 
-    story = models.ForeignKey(Story, related_name="images", help_text=_("The story to associate to"))
+    story = models.ForeignKey(
+        Story, on_delete=models.PROTECT, related_name="images", help_text=_("The story to associate to")
+    )
 
     image = models.ImageField(upload_to="stories", help_text=_("The image file to use"))

@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 from compressor.management.commands.compress import Command as CompressCommand
 
 

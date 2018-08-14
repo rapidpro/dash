@@ -1,10 +1,10 @@
-from __future__ import unicode_literals
+
 
 from datetime import datetime
 
+import phonenumbers
 import pytz
 
-import phonenumbers
 from django import template
 
 register = template.Library()

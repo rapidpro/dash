@@ -1,10 +1,10 @@
 from __future__ import absolute_import, unicode_literals
 
 import pytz
-import six
+
+from django.core.management.base import BaseCommand, CommandError
 
 from dash.orgs.models import Org, TaskState
-from django.core.management.base import BaseCommand, CommandError
 
 
 class Command(BaseCommand):
@@ -103,7 +103,7 @@ class Command(BaseCommand):
 
 
 def cell(val, width):
-    return six.text_type(val).ljust(width)
+    return str(val).ljust(width)
 
 
 def format_date(dt):

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 from django.conf import settings
 from django.db import migrations, models
@@ -44,17 +44,26 @@ class Migration(migrations.Migration):
                 (
                     "created_by",
                     models.ForeignKey(
-                        help_text="The user which originally created this item", to=settings.AUTH_USER_MODEL
+                        help_text="The user which originally created this item",
+                        on_delete=models.PROTECT,
+                        to=settings.AUTH_USER_MODEL,
                     ),
                 ),
                 (
                     "modified_by",
-                    models.ForeignKey(help_text="The user which last modified this item", to=settings.AUTH_USER_MODEL),
+                    models.ForeignKey(
+                        help_text="The user which last modified this item",
+                        on_delete=models.PROTECT,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
                 ),
                 (
                     "org",
                     models.ForeignKey(
-                        verbose_name="Org", to="orgs.Org", help_text="The organization in which the image will be used"
+                        verbose_name="Org",
+                        on_delete=models.PROTECT,
+                        to="orgs.Org",
+                        help_text="The organization in which the image will be used",
                     ),
                 ),
             ],

@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.conf import settings
 from django.db import migrations, models
 
@@ -16,6 +13,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 related_name="dashblocks_dashblock_creations",
                 to=settings.AUTH_USER_MODEL,
+                on_delete=models.PROTECT,
                 help_text="The user which originally created this item",
             ),
         ),
@@ -25,6 +23,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 related_name="dashblocks_dashblock_modifications",
                 to=settings.AUTH_USER_MODEL,
+                on_delete=models.PROTECT,
                 help_text="The user which last modified this item",
             ),
         ),
@@ -34,13 +33,14 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 related_name="dashblocks_dashblockimage_creations",
                 to=settings.AUTH_USER_MODEL,
+                on_delete=models.PROTECT,
                 help_text="The user which originally created this item",
             ),
         ),
         migrations.AlterField(
             model_name="dashblockimage",
             name="dashblock",
-            field=models.ForeignKey(related_name="images", to="dashblocks.DashBlock"),
+            field=models.ForeignKey(related_name="images", on_delete=models.PROTECT, to="dashblocks.DashBlock"),
         ),
         migrations.AlterField(
             model_name="dashblockimage",
@@ -48,6 +48,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 related_name="dashblocks_dashblockimage_modifications",
                 to=settings.AUTH_USER_MODEL,
+                on_delete=models.PROTECT,
                 help_text="The user which last modified this item",
             ),
         ),
@@ -57,6 +58,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 related_name="dashblocks_dashblocktype_creations",
                 to=settings.AUTH_USER_MODEL,
+                on_delete=models.PROTECT,
                 help_text="The user which originally created this item",
             ),
         ),
@@ -66,6 +68,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 related_name="dashblocks_dashblocktype_modifications",
                 to=settings.AUTH_USER_MODEL,
+                on_delete=models.PROTECT,
                 help_text="The user which last modified this item",
             ),
         ),
