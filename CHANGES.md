@@ -1,24 +1,24 @@
-1.5 (2019-01-09)
+1.4.1 (2019-01-09)
 =================
-* Support Django 2.0 and 2.1
+ * Upgrade to latest smartmin
 
 1.4 (2018-08-14)
 =================
-* Supports Python 3 only
-* Support Django 1.11 and 2.0
-* Code format tools (isort, black)
+ * Supports Python 3 only
+ * Support Django 1.11 and 2.0
+ * Code format tools (isort, black)
 
 1.3.7 (2018-05-28)
 =================
-* Include static folder in release
+ * Include static folder in release
 
 1.3.6 (2018-05-28)
 =================
-* Switch Text editor to Summernote JS library
+ * Switch Text editor to Summernote JS library
 
 1.3.4 (2018-04-27)
 =================
-  * Add migrations to clean up org config
+ * Add migrations to clean up org config
  
 1.3.3 (2018-04-26)
 =================
