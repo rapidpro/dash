@@ -1,5 +1,5 @@
 celery
-django<2.1
+django
 django-compressor
 django-hamlpy
 django-redis
