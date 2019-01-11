@@ -1,3 +1,7 @@
+1.4.3 (2019-01-11)
+=================
+ * Update summernote WYSIWYG library
+
 1.4.2 (2019-01-11)
 =================
  * Updates to support Django 2.1
