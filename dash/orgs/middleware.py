@@ -1,5 +1,3 @@
-
-
 import re
 import traceback
 
@@ -130,7 +128,7 @@ class SetOrgMiddleware(MiddlewareMixin):
             traceback.print_exc()
 
         # does the host look like an IP? return []
-        if re.match("^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$", host):
+        if re.match(r"^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$", host):
             return []
 
         return host.split(".")
