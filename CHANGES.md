@@ -1,3 +1,8 @@
+1.4.2 (2019-01-11)
+=================
+ * Updates to support Django 2.1
+ * Drop support for django 1.11
+
 1.4.1 (2019-01-09)
 =================
  * Upgrade to latest smartmin
