@@ -36,6 +36,8 @@ INSTALLED_APPS = (
     'sorl.thumbnail',
     'timezone_field',
 
+    'django.contrib.admin',
+
     'smartmin',
     'smartmin.users',
 

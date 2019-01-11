@@ -6,8 +6,8 @@ python:
 addons:
   postgresql: "9.6"
 env:
- - DJANGO_VERSION=1.11.15
  - DJANGO_VERSION=2.0.10
+ - DJANGO_VERSION=2.1.5
 services:
  - redis-server
 install:
