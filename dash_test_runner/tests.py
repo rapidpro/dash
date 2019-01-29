@@ -1364,14 +1364,21 @@ class TaskCRUDLTest(DashTest):
     def test_list(self):
         url = reverse('orgs.task_list', args=[])
 
-        TaskState.get_or_create(self.org, 'test-task-1')
-        TaskState.get_or_create(self.org, 'test-task-2')
+        task1 = TaskState.get_or_create(self.org, 'test-task-1')
+        task2 = TaskState.get_or_create(self.org, 'test-task-2')
+
+        task2.is_failing = True
+        task2.save()
 
         self.login(self.superuser)
 
         response = self.client.get(url)
         self.assertEquals(response.status_code, 200)
-        self.assertEquals(len(response.context['object_list']), 2)
+        self.assertEquals(list(response.context['object_list']), [task1, task2])
+
+        response = self.client.get(url + "?failing=1")
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(list(response.context['object_list']), [task2])
 
 
 class MockResponse(object):

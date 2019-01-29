@@ -345,6 +345,8 @@ class TaskState(models.Model):
     Holds org specific state for a scheduled task
     """
 
+    LOCK_KEY = "org-task-lock:%s:%s"
+
     org = models.ForeignKey(Org, on_delete=models.PROTECT, related_name="task_states")
 
     task_key = models.CharField(max_length=32)
@@ -368,6 +370,10 @@ class TaskState(models.Model):
             return existing
 
         return cls.objects.create(org=org, task_key=task_key)
+
+    @classmethod
+    def get_lock_key(cls, org, task_key):
+        return cls.LOCK_KEY % (org.id, task_key)
 
     @classmethod
     def get_failing(cls):
