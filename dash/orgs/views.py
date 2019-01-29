@@ -705,6 +705,14 @@ class TaskCRUDL(SmartCRUDL):
             else:
                 return super(TaskCRUDL.List, self).lookup_field_link(context, field, obj)
 
+        def derive_queryset(self, **kwargs):
+            qs = super().derive_queryset(**kwargs)
+
+            if self.request.GET.get("failing"):
+                qs = qs.filter(is_failing=True)
+
+            return qs
+
 
 class OrgBackendForm(forms.ModelForm):
     backend_type = forms.ChoiceField(choices=settings.DATA_API_BACKEND_TYPES)

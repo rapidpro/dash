@@ -12,7 +12,7 @@ from django.utils import timezone
 
 from celery import shared_task, signature
 
-from .models import Invitation
+from .models import Invitation, TaskState
 
 ORG_TASK_LOCK_KEY = "org-task-lock:%s:%s"
 
@@ -66,17 +66,19 @@ def maybe_run_for_org(org, task_func, task_key, lock_timeout):
     :param lock_timeout: the lock timeout in seconds
     """
     r = get_redis_connection()
-    key = ORG_TASK_LOCK_KEY % (org.pk, task_key)
+
+    key = TaskState.get_lock_key(org, task_key)
+
     if r.get(key):
-        logger.warn("Skipping for org #%d as it is still running" % org.pk)
+        logger.warning("Skipping task %s for org #%d as it is still running" % (task_key, org.id))
     else:
         with r.lock(key, timeout=lock_timeout):
             state = org.get_task_state(task_key)
             if state.is_disabled:
-                logger.info("Skipping for org #%d as task is marked disabled" % org.pk)
+                logger.info("Skipping task %s for org #%d as is marked disabled" % (task_key, org.id))
                 return
 
-            logger.info("Started for org #%d..." % org.pk)
+            logger.info("Started task %s for org #%d..." % (task_key, org.id))
 
             prev_started_on = state.last_successfully_started_on
             this_started_on = timezone.now()
@@ -101,7 +103,7 @@ def maybe_run_for_org(org, task_func, task_key, lock_timeout):
                 state.is_failing = False
                 state.save(update_fields=("ended_on", "last_successfully_started_on", "last_results", "is_failing"))
 
-                logger.info("Succeeded for org #%d with result: %s" % (org.pk, json.dumps(results)))
+                logger.info("Finished task %s for org #%d with result: %s" % (task_key, org.id, json.dumps(results)))
 
             except Exception as e:
                 state.ended_on = timezone.now()
