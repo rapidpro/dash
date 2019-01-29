@@ -70,15 +70,15 @@ def maybe_run_for_org(org, task_func, task_key, lock_timeout):
     key = TaskState.get_lock_key(org, task_key)
 
     if r.get(key):
-        logger.warning(f"Skipping {task_key} for org #{org.id} as it is still running")
+        logger.warning("Skipping task %s for org #%d as it is still running" % (task_key, org.id))
     else:
         with r.lock(key, timeout=lock_timeout):
             state = org.get_task_state(task_key)
             if state.is_disabled:
-                logger.info(f"Skipping {task_key} for org #{org.id} as task is marked disabled")
+                logger.info("Skipping task %s for org #%d as is marked disabled" % (task_key, org.id))
                 return
 
-            logger.info(f"Started {task_key} for org #{org.id}...")
+            logger.info("Started task %s for org #%d..." % (task_key, org.id))
 
             prev_started_on = state.last_successfully_started_on
             this_started_on = timezone.now()
@@ -103,7 +103,7 @@ def maybe_run_for_org(org, task_func, task_key, lock_timeout):
                 state.is_failing = False
                 state.save(update_fields=("ended_on", "last_successfully_started_on", "last_results", "is_failing"))
 
-                logger.info(f"Finished {task_key} for org #{org.id} with result: {json.dumps(results)}")
+                logger.info("Finished task %s for org #%d with result: %s" % (task_key, org.id, json.dumps(results)))
 
             except Exception as e:
                 state.ended_on = timezone.now()
