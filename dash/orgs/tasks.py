@@ -111,4 +111,5 @@ def maybe_run_for_org(org, task_func, task_key, lock_timeout):
                 state.is_failing = True
                 state.save(update_fields=("ended_on", "last_results", "is_failing"))
 
+                logger.exception("Task %s for org #%d failed" % (task_key, org.id))
                 raise e  # re-raise with original stack trace
