@@ -1,6 +1,7 @@
 from smartmin.views import SmartCreateView, SmartCRUDL, SmartListView, SmartUpdateView
 
 from django import forms
+from django.core.validators import validate_image_file_extension
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 
@@ -113,6 +114,7 @@ class StoryCRUDL(SmartCRUDL):
                     initial=image.image,
                     label=_("Image %d") % idx,
                     help_text=_("Image to display on story page and in previews. (optional)"),
+                    validators=[validate_image_file_extension],
                 )
 
                 self.form.fields[image_field_name] = image_field
@@ -123,6 +125,7 @@ class StoryCRUDL(SmartCRUDL):
                     required=False,
                     label=_("Image %d") % idx,
                     help_text=_("Image to display on story page and in previews (optional)"),
+                    validators=[validate_image_file_extension],
                 )
                 idx += 1
 
