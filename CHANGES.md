@@ -1,3 +1,15 @@
+1.4.6 (2020-07-09)
+=================
+ * Explicitly log failing org task to sentry
+
+1.4.5 (2019-02-06)
+=================
+ * Explicitly log failing org task to sentry
+
+1.4.4 (2019-02-01)
+=================
+ * Remove f-strings as we still test on python 3.5
+
 1.4.3 (2019-01-11)
 =================
  * Update summernote WYSIWYG library
