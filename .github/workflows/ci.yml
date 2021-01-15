@@ -13,6 +13,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v1
 
+    - name: Install Redis
+      uses: zhulik/redis-action@v1.0.0
+      with:
+        redis version: '5'
+
     - name: Install PostgreSQL
       uses: harmon758/postgresql-action@v1
       with:
