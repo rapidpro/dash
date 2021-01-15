@@ -1,3 +1,7 @@
+v1.5.0
+----------
+ * Convert to poetry
+
 1.4.6 (2020-07-09)
 =================
  * Explicitly log failing org task to sentry
