@@ -2,7 +2,7 @@ from django.conf.urls import include, url
 from django.contrib import admin
 
 urlpatterns = [
-    url(r'^/', include('dash_test_runner.testapp.urls')),
+    url(r'^/', include('test_runner.testapp.urls')),
 
     url(r'^manage/', include('dash.orgs.urls')),
     url(r'^manage/', include('dash.stories.urls')),

@@ -66,7 +66,7 @@ MIDDLEWARE = [
 warnings.filterwarnings('error', r"DateTimeField received a naive datetime",
                         RuntimeWarning, r'django\.db\.models\.fields')
 
-ROOT_URLCONF = 'dash_test_runner.urls'
+ROOT_URLCONF = 'test_runner.urls'
 
 WSGI_APPLICATION = 'dash_test_runner.wsgi.application'
 

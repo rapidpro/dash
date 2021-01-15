@@ -4,6 +4,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'dash',
-        'USER': 'postgres',
+        'USER': 'dash',
+        'PASSWORD': 'rapidpro',
     }
 }

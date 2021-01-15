@@ -1,0 +1,45 @@
+[tool.poetry]
+name = "rapidpro-dash"
+version = "1.4.6"
+description = "Support library for RapidPro dashboards"
+authors = ["Nyaruka Ltd <code@nyaruka.com>"]
+license = "BSD"
+classifiers=[
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Framework :: Django",
+]
+packages = [
+    { include = "dash" },
+]
+
+[tool.poetry.urls]
+repository = "http://github.com/rapidpro/dash"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+Django = "<3.0"
+celery = "<5.0"
+django-compressor = "^2.4"
+django-hamlpy = "^1.4.3"
+django-redis = "^4.12.1"
+django-timezone-field = "^4.1.1"
+Pillow = "^8.1.0"
+phonenumbers = "^8.12.16"
+psycopg2-binary = "^2.8.6"
+python-dateutil = "^2.8.1"
+rapidpro-python = "^2.8.1"
+smartmin = "^2.3.1"
+sorl-thumbnail = "^12.7.0"
+
+[tool.poetry.dev-dependencies]
+flake8 = "^3.8.4"
+codecov = "^2.1.11"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
