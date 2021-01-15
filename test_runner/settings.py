@@ -5,7 +5,7 @@ import warnings
 from django.utils.translation import ugettext_lazy as _
 
 """
-Django settings for dash_test_runner project.
+Django settings for test_runner project.
 
 For more information on this file, see
 https://docs.djangoproject.com/en/dev/topics/settings/
@@ -47,7 +47,7 @@ INSTALLED_APPS = (
     'dash.stories',
     'dash.utils',
 
-    'dash_test_runner.testapp'
+    'test_runner.testapp'
 )
 
 MIDDLEWARE = [
@@ -68,13 +68,19 @@ warnings.filterwarnings('error', r"DateTimeField received a naive datetime",
 
 ROOT_URLCONF = 'test_runner.urls'
 
-WSGI_APPLICATION = 'dash_test_runner.wsgi.application'
+WSGI_APPLICATION = 'test_runner.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'dash',
-        'USER': 'postgres',
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": "dash",
+        "USER": "dash",
+        "PASSWORD": "rapidpro",
+        "HOST": "localhost",
+        "PORT": "5432",
+        "ATOMIC_REQUESTS": True,
+        "CONN_MAX_AGE": 60,
+        "OPTIONS": {},
     }
 }
 
