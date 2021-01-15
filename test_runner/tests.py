@@ -4,7 +4,6 @@ from unittest.mock import Mock, patch
 import pytz
 import redis
 from smartmin.tests import SmartminTest
-from temba_client import __version__ as client_version
 from temba_client.v2 import TembaClient
 
 from django.conf import settings
@@ -425,14 +424,13 @@ class OrgTest(DashTest):
         self.assertEqual(client.root_url, 'http://localhost:8001/api/v2')
         self.assertEqual(client.headers['Authorization'],
                          'Token %s' % self.org.backends.filter(slug="rapidpro").first().api_token)
-        self.assertEqual(client.headers['User-Agent'], 'rapidpro-python/%s' % client_version)
+        self.assertRegex(client.headers['User-Agent'], 'rapidpro-python/[\d\.]+')
 
         client = self.org.get_temba_client(api_version=2)
         self.assertIsInstance(client, TembaClient)
         self.assertEqual(client.root_url, 'http://localhost:8001/api/v2')
         self.assertEqual(client.headers['Authorization'],
                          'Token %s' % self.org.backends.filter(slug="rapidpro").first().api_token)
-        self.assertEqual(client.headers['User-Agent'], 'rapidpro-python/%s' % client_version)
 
         org_backend = self.org.backends.filter(slug="rapidpro").first()
         org_backend.host = 'http://example.com/'
@@ -443,7 +441,6 @@ class OrgTest(DashTest):
         self.assertEqual(client.root_url, 'http://example.com/api/v2')
         self.assertEqual(client.headers['Authorization'],
                          'Token %s' % self.org.backends.filter(slug="rapidpro").first().api_token)
-        self.assertEqual(client.headers['User-Agent'], 'rapidpro-python/%s' % client_version)
 
         self.assertEquals(self.org.get_user(), self.admin)
 
@@ -1250,7 +1247,7 @@ class OrgTaskTest(DashTest):
 
         self.org = self.create_org("uganda", self.admin)
 
-    @patch('dash_test_runner.tests.test_over_time_window')
+    @patch('test_runner.tests.test_over_time_window')
     def test_org_task(self, mock_over_time_window):
         mock_over_time_window.return_value = {'foo': "bar", 'zed': 123}
 

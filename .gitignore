@@ -62,3 +62,5 @@ target/
 db.sqlite3
 
 .vscode/
+fabric
+fabfile.*

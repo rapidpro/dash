@@ -39,7 +39,7 @@ class SyncTest(DashTest):
     def test_get_backend(self):
         org_backend = self.unicef.backends.filter(slug="rapidpro").first()
         org_backend.host = 'http://example.com/'
-        org_backend.backend_type = 'dash_test_runner.testapp.models.APIBackend'
+        org_backend.backend_type = 'test_runner.testapp.models.APIBackend'
         org_backend.save()
 
         self.assertIsInstance(self.unicef.get_backend(), APIBackend)
