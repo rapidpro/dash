@@ -706,7 +706,7 @@ class TaskCRUDL(SmartCRUDL):
                 return super(TaskCRUDL.List, self).lookup_field_link(context, field, obj)
 
         def derive_queryset(self, **kwargs):
-            qs = super().derive_queryset(**kwargs)
+            qs = super().derive_queryset(**kwargs).filter(org__is_active=True)
 
             if self.request.GET.get("failing"):
                 qs = qs.filter(is_failing=True)
