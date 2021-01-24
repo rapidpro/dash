@@ -1,3 +1,8 @@
+v1.5.1
+----------
+ * Task list shouldn't include inactive orgs
+ * Bump CI testin to PG 11 and 12
+
 v1.5.0
 ----------
  * Convert to poetry
