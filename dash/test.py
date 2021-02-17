@@ -6,9 +6,24 @@ import redis
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.test import TestCase
+from django.utils.encoding import force_text
 
 from dash.orgs.models import Org
 from dash.utils import random_string
+
+
+class MockResponse:
+
+    def __init__(self, status_code, content=''):
+        self.content = content
+        self.status_code = status_code
+
+    def raise_for_status(self):
+        if self.status_code != 200:
+            raise Exception("Server returned %s" % force_text(self.status_code))
+
+    def json(self, **kwargs):
+        return json.loads(self.content)
 
 
 class DashTest(TestCase):
