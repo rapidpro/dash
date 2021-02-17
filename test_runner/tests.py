@@ -1,4 +1,3 @@
-import json
 from unittest.mock import Mock, patch
 
 import pytz
@@ -26,6 +25,7 @@ from dash.orgs.tasks import org_task
 from dash.orgs.templatetags.dashorgs import display_time, national_phone
 from dash.stories.models import Story, StoryImage
 from dash.utils import random_string
+from dash.test import MockResponse
 
 
 class UserTest(SmartminTest):
@@ -424,7 +424,7 @@ class OrgTest(DashTest):
         self.assertEqual(client.root_url, 'http://localhost:8001/api/v2')
         self.assertEqual(client.headers['Authorization'],
                          'Token %s' % self.org.backends.filter(slug="rapidpro").first().api_token)
-        self.assertRegex(client.headers['User-Agent'], 'rapidpro-python/[\d\.]+')
+        self.assertRegex(client.headers['User-Agent'], r'rapidpro-python/[\d\.]+')
 
         client = self.org.get_temba_client(api_version=2)
         self.assertIsInstance(client, TembaClient)
@@ -1376,20 +1376,6 @@ class TaskCRUDLTest(DashTest):
         response = self.client.get(url + "?failing=1")
         self.assertEquals(response.status_code, 200)
         self.assertEquals(list(response.context['object_list']), [task2])
-
-
-class MockResponse(object):
-
-    def __init__(self, status_code, content=''):
-        self.content = content
-        self.status_code = status_code
-
-    def raise_for_status(self):
-        if self.status_code != 200:
-            raise Exception("Server returned %s" % force_text(self.status_code))
-
-    def json(self, **kwargs):
-        return json.loads(self.content)
 
 
 class CategoryTest(DashTest):
