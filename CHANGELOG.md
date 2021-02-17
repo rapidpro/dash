@@ -1,3 +1,8 @@
+v1.5.2
+----------
+ * Merge pull request #119 from rapidpro/move-mock-response
+ * Move MockResponse to dash.test to allow reuse
+
 v1.5.1
 ----------
  * Task list shouldn't include inactive orgs
