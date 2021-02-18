@@ -1,3 +1,7 @@
+v1.5.3
+----------
+ * Add some extra functionality to MockResponse
+
 v1.5.2
 ----------
  * Merge pull request #119 from rapidpro/move-mock-response
