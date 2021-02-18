@@ -2,25 +2,41 @@ import itertools
 import json
 
 import redis
+import requests
+from requests.structures import CaseInsensitiveDict
 
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.test import TestCase
-from django.utils.encoding import force_text
 
 from dash.orgs.models import Org
 from dash.utils import random_string
 
 
 class MockResponse:
+    """
+    Mock response object with a status code and some content
+    """
 
-    def __init__(self, status_code, content=''):
-        self.content = content
+    def __init__(self, status_code, content=None, headers=None):
         self.status_code = status_code
+        self.content = content or ""
+        self.headers = CaseInsensitiveDict()
+
+        if headers:
+            self.headers.update(headers)
 
     def raise_for_status(self):
-        if self.status_code != 200:
-            raise Exception("Server returned %s" % force_text(self.status_code))
+        http_error_msg = ""
+
+        if 400 <= self.status_code < 500:
+            http_error_msg = "%s Client Error: ..." % self.status_code
+
+        elif 500 <= self.status_code < 600:
+            http_error_msg = "%s Server Error: ..." % self.status_code
+
+        if http_error_msg:
+            raise requests.HTTPError(http_error_msg, response=self)
 
     def json(self, **kwargs):
         return json.loads(self.content)
