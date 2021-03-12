@@ -1,3 +1,7 @@
+v1.5.4
+----------
+ * Rework dependencies to support older redis
+
 v1.5.3
 ----------
  * Add some extra functionality to MockResponse
