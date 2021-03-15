@@ -1,3 +1,7 @@
+v1.5.5
+----------
+ * Update to latest smartmin
+
 v1.5.4
 ----------
  * Rework dependencies to support older redis
