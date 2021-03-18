@@ -1,6 +1,7 @@
 from abc import ABCMeta, abstractmethod
-from collections import defaultdict
 from enum import Enum
+from typing import Optional, Tuple
+import time
 
 
 """
@@ -155,7 +156,7 @@ def sync_from_remote(org, syncer, remote):
     return SyncOutcome.ignored
 
 
-def sync_local_to_set(org, syncer, remote_set):
+def sync_local_to_set(org, syncer, remote_set) -> dict:
     """
     Syncs an org's set of local instances of a model to match the set of remote objects. Local objects not in the remote
     set are deleted.
@@ -165,7 +166,7 @@ def sync_local_to_set(org, syncer, remote_set):
     :param remote_set: the set of remote objects
     :return: tuple of number of local objects created, updated, deleted and ignored
     """
-    outcome_counts = defaultdict(int)
+    outcome_counts = {SyncOutcome.created: 0, SyncOutcome.updated: 0, SyncOutcome.deleted: 0, SyncOutcome.ignored: 0}
 
     remote_identities = set()
 
@@ -184,15 +185,10 @@ def sync_local_to_set(org, syncer, remote_set):
             syncer.delete_local(local)
             outcome_counts[SyncOutcome.deleted] += 1
 
-    return (
-        outcome_counts[SyncOutcome.created],
-        outcome_counts[SyncOutcome.updated],
-        outcome_counts[SyncOutcome.deleted],
-        outcome_counts[SyncOutcome.ignored],
-    )
+    return outcome_counts
 
 
-def sync_local_to_changes(org, syncer, fetches, deleted_fetches, progress_callback=None):
+def sync_local_to_changes(org, syncer, fetches, deleted_fetches, progress_callback=None, time_limit : int = None) -> Tuple[dict, Optional[str]]:
     """
     Sync local instances against iterators which return fetches of changed and deleted remote objects.
 
@@ -201,10 +197,14 @@ def sync_local_to_changes(org, syncer, fetches, deleted_fetches, progress_callba
     :param * fetches: an iterator returning fetches of modified remote objects
     :param * deleted_fetches: an iterator returning fetches of deleted remote objects
     :param * progress_callback: callable for tracking progress - called for each fetch with number of contacts fetched
-    :return: tuple containing counts of created, updated and deleted local instances
+    :return: tuple of a dict of counts of created, updated, deleted ignored local instances and a possible cursor if
+             fetching didn't complete
     """
     num_synced = 0
-    outcome_counts = defaultdict(int)
+    outcome_counts = {SyncOutcome.created: 0, SyncOutcome.updated: 0, SyncOutcome.deleted: 0, SyncOutcome.ignored: 0}
+    resume_cursor = None
+
+    start = time.time()
 
     for fetch in fetches:
         for remote in fetch:
@@ -214,6 +214,10 @@ def sync_local_to_changes(org, syncer, fetches, deleted_fetches, progress_callba
         num_synced += len(fetch)
         if progress_callback:
             progress_callback(num_synced)
+
+        if time_limit and time.time() - start > time_limit:
+            resume_cursor = fetches.get_cursor()
+            break
 
     # any item that has been deleted remotely should also be released locally
     for deleted_fetch in deleted_fetches:
@@ -229,9 +233,4 @@ def sync_local_to_changes(org, syncer, fetches, deleted_fetches, progress_callba
         if progress_callback:
             progress_callback(num_synced)
 
-    return (
-        outcome_counts[SyncOutcome.created],
-        outcome_counts[SyncOutcome.updated],
-        outcome_counts[SyncOutcome.deleted],
-        outcome_counts[SyncOutcome.ignored],
-    )
+    return outcome_counts, resume_cursor
