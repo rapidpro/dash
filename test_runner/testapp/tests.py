@@ -1,3 +1,5 @@
+import time
+
 from temba_client.v2.types import Contact as TembaContact
 
 from dash.test import DashTest, MockClientQuery
@@ -107,7 +109,10 @@ class SyncTest(DashTest):
             TembaContact.create(uuid="C-004", name="Donald", blocked=True)
         ]
 
-        self.assertEqual(sync_local_to_set(self.unicef, self.syncer, remote_set), (3, 0, 0, 1))
+        self.assertEqual(
+            {SyncOutcome.created: 3, SyncOutcome.updated: 0, SyncOutcome.deleted: 0, SyncOutcome.ignored: 1},
+            sync_local_to_set(self.unicef, self.syncer, remote_set),
+        )
         self.assertEqual(Contact.objects.count(), 3)
 
         remote_set = [
@@ -117,7 +122,10 @@ class SyncTest(DashTest):
             TembaContact.create(uuid="C-005", name="Edward", blocked=False)  # new contact
         ]
 
-        self.assertEqual(sync_local_to_set(self.unicef, self.syncer, remote_set), (1, 1, 1, 1))
+        self.assertEqual(
+            {SyncOutcome.created: 1, SyncOutcome.updated: 1, SyncOutcome.deleted: 1, SyncOutcome.ignored: 1},
+            sync_local_to_set(self.unicef, self.syncer, remote_set),
+        )
 
         self.assertEqual(Contact.objects.count(), 4)
         Contact.objects.get(org=self.unicef, uuid="C-001", name="Anne", is_active=False)
@@ -131,7 +139,10 @@ class SyncTest(DashTest):
             TembaContact.create(uuid="CF-003", name="Colm", blocked=False),   # changed name
             TembaContact.create(uuid="CF-005", name="Edward", blocked=False)  # new contact
         ]
-        self.assertEqual(sync_local_to_set(self.unicef, self.syncer2, remote_set), (3, 0, 0, 0))
+        self.assertEqual(
+            {SyncOutcome.created: 3, SyncOutcome.updated: 0, SyncOutcome.deleted: 0, SyncOutcome.ignored: 0},
+            sync_local_to_set(self.unicef, self.syncer2, remote_set),
+        )
         self.assertEqual(Contact.objects.count(), 7)
         Contact.objects.get(org=self.unicef, uuid="CF-002", name="Bob", backend=self.floip_backend, is_active=True)
         Contact.objects.get(org=self.unicef, uuid="CF-003", name="Colm", backend=self.floip_backend, is_active=True)
@@ -148,7 +159,10 @@ class SyncTest(DashTest):
         ])
         deleted_fetches = MockClientQuery([])  # no deleted contacts this time
 
-        self.assertEqual(sync_local_to_changes(self.unicef, self.syncer, fetches, deleted_fetches), (3, 0, 0, 1))
+        self.assertEqual(
+            ({SyncOutcome.created: 3, SyncOutcome.updated: 0, SyncOutcome.deleted: 0, SyncOutcome.ignored: 1}, None),
+            sync_local_to_changes(self.unicef, self.syncer, fetches, deleted_fetches),
+        )
 
         fetches = MockClientQuery([
             TembaContact.create(uuid="C-005", name="Edward", blocked=False),  # new contact
@@ -158,7 +172,10 @@ class SyncTest(DashTest):
             TembaContact.create(uuid="C-001", name=None, blocked=None),       # deleted
         ])
 
-        self.assertEqual(sync_local_to_changes(self.unicef, self.syncer, fetches, deleted_fetches), (2, 0, 1, 0))
+        self.assertEqual(
+            ({SyncOutcome.created: 2, SyncOutcome.updated: 0, SyncOutcome.deleted: 1, SyncOutcome.ignored: 0}, None),
+            sync_local_to_changes(self.unicef, self.syncer, fetches, deleted_fetches),
+        )
 
         fetches = MockClientQuery([
             TembaContact.create(uuid="C-002", name="Bob", blocked=True),   # blocked so locally invalid
@@ -166,7 +183,10 @@ class SyncTest(DashTest):
         ])
         deleted_fetches = MockClientQuery([])
 
-        self.assertEqual(sync_local_to_changes(self.unicef, self.syncer, fetches, deleted_fetches), (0, 1, 1, 0))
+        self.assertEqual(
+            ({SyncOutcome.created: 0, SyncOutcome.updated: 1, SyncOutcome.deleted: 1, SyncOutcome.ignored: 0}, None),
+            sync_local_to_changes(self.unicef, self.syncer, fetches, deleted_fetches),
+        )
 
         fetches = MockClientQuery([
             TembaContact.create(uuid="CF-001", name="Anne", blocked=False),
@@ -176,7 +196,10 @@ class SyncTest(DashTest):
         ])
         deleted_fetches = MockClientQuery([])  # no deleted contacts this time
 
-        self.assertEqual(sync_local_to_changes(self.unicef, self.syncer2, fetches, deleted_fetches), (3, 0, 0, 1))
+        self.assertEqual(
+            ({SyncOutcome.created: 3, SyncOutcome.updated: 0, SyncOutcome.deleted: 0, SyncOutcome.ignored: 1}, None),
+            sync_local_to_changes(self.unicef, self.syncer2, fetches, deleted_fetches),
+        )
 
         fetches = MockClientQuery([
             TembaContact.create(uuid="CF-005", name="Edward", blocked=False),  # new contact
@@ -186,7 +209,10 @@ class SyncTest(DashTest):
             TembaContact.create(uuid="CF-001", name=None, blocked=None),       # deleted
         ])
 
-        self.assertEqual(sync_local_to_changes(self.unicef, self.syncer2, fetches, deleted_fetches), (2, 0, 1, 0))
+        self.assertEqual(
+            ({SyncOutcome.created: 2, SyncOutcome.updated: 0, SyncOutcome.deleted: 1, SyncOutcome.ignored: 0}, None),
+            sync_local_to_changes(self.unicef, self.syncer2, fetches, deleted_fetches),
+        )
 
         fetches = MockClientQuery([
             TembaContact.create(uuid="CF-002", name="Bob", blocked=True),   # blocked so locally invalid
@@ -194,4 +220,43 @@ class SyncTest(DashTest):
         ])
         deleted_fetches = MockClientQuery([])
 
-        self.assertEqual(sync_local_to_changes(self.unicef, self.syncer2, fetches, deleted_fetches), (0, 1, 1, 0))
+        self.assertEqual(
+            ({SyncOutcome.created: 0, SyncOutcome.updated: 1, SyncOutcome.deleted: 1, SyncOutcome.ignored: 0}, None),
+            sync_local_to_changes(self.unicef, self.syncer2, fetches, deleted_fetches),
+        )
+
+    def test_sync_local_to_changes_partial(self):
+        Contact.objects.all().delete()  # start with no contacts...
+
+        fetches = MockClientQuery(
+            [
+                TembaContact.create(uuid="C-001", name="Anne"),
+                TembaContact.create(uuid="C-002", name="Bob"),
+            ],
+            [
+                TembaContact.create(uuid="C-003", name="Colin"),
+                TembaContact.create(uuid="C-004", name="Donald"),
+            ]
+        )
+        deleted_fetches = MockClientQuery([])  # no deleted contacts this time
+
+        # make each fetch take at least a second by putting a delay in the progress function
+        def progress(num):
+            time.sleep(1)
+
+        # try syncing with a time limit of 1 second
+        counts, cursor = sync_local_to_changes(
+            self.unicef,
+            self.syncer,
+            fetches,
+            deleted_fetches,
+            progress,
+            time_limit=1
+        )
+
+        # only had time for the first fetch of two contacts and we have a cursor we can resume from
+        self.assertEqual(
+            {SyncOutcome.created: 2, SyncOutcome.updated: 0, SyncOutcome.deleted: 0, SyncOutcome.ignored: 0},
+            counts,
+        )
+        self.assertIsNotNone(cursor)
