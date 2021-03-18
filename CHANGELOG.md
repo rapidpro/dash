@@ -1,3 +1,7 @@
+v1.5.7
+----------
+ * Allow previous results to be passed to org tasks
+
 v1.5.6
 ----------
  * Update to latest smartmin
