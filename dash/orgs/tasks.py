@@ -80,6 +80,7 @@ def maybe_run_for_org(org, task_func, task_key, lock_timeout):
 
             logger.info("Started task %s for org #%d..." % (task_key, org.id))
 
+            prev_results = json.loads(state.last_results) if state.last_results else None
             prev_started_on = state.last_successfully_started_on
             this_started_on = timezone.now()
 
@@ -89,13 +90,17 @@ def maybe_run_for_org(org, task_func, task_key, lock_timeout):
 
             num_task_args = len(inspect.getargspec(task_func).args)
 
+            assert num_task_args >= 1, "task signature must be foo(org) or foo(org, since, until)"
+
+            task_args = [org]
+
             try:
-                if num_task_args == 3:
-                    results = task_func(org, prev_started_on, this_started_on)
-                elif num_task_args == 1:
-                    results = task_func(org)
-                else:
-                    raise ValueError("Task signature must be foo(org) or foo(org, since, until)")  # pragma: no cover
+                if num_task_args >= 3:
+                    task_args += [prev_started_on, this_started_on]
+                if num_task_args >= 4:
+                    task_args.append(prev_results)
+
+                results = task_func(*task_args)
 
                 state.ended_on = timezone.now()
                 state.last_successfully_started_on = this_started_on
