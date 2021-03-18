@@ -1,3 +1,7 @@
+v1.6.0
+----------
+ * Add support for partial syncs in sync_local_to_changes
+
 v1.5.7
 ----------
  * Allow previous results to be passed to org tasks
