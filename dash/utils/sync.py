@@ -164,7 +164,7 @@ def sync_local_to_set(org, syncer, remote_set) -> dict:
     :param org: the org
     :param * syncer: the local model syncer
     :param remote_set: the set of remote objects
-    :return: tuple of number of local objects created, updated, deleted and ignored
+    :return: dict of counts of created, updated, deleted, ignored local instances
     """
     outcome_counts = {SyncOutcome.created: 0, SyncOutcome.updated: 0, SyncOutcome.deleted: 0, SyncOutcome.ignored: 0}
 
@@ -197,7 +197,8 @@ def sync_local_to_changes(org, syncer, fetches, deleted_fetches, progress_callba
     :param * fetches: an iterator returning fetches of modified remote objects
     :param * deleted_fetches: an iterator returning fetches of deleted remote objects
     :param * progress_callback: callable for tracking progress - called for each fetch with number of contacts fetched
-    :return: tuple of a dict of counts of created, updated, deleted ignored local instances and a possible cursor if
+    :param * time_limit: number of seconds to limit fetching too (optional)
+    :return: tuple of a dict of counts of created, updated, deleted, ignored local instances and a possible cursor if
              fetching didn't complete
     """
     num_synced = 0
