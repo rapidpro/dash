@@ -327,7 +327,7 @@ python-versions = "*"
 
 [[package]]
 name = "rapidpro-python"
-version = "2.8.1"
+version = "2.8.3"
 description = "Python client library for the RapidPro API"
 category = "main"
 optional = false
@@ -335,7 +335,7 @@ python-versions = ">=3.6,<4.0"
 
 [package.dependencies]
 iso8601 = ">=0.1.13,<0.2.0"
-pytz = ">=2020.4,<2021.0"
+pytz = "*"
 requests = ">=2.25.0,<3.0.0"
 
 [[package]]
@@ -492,7 +492,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pyt
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "f7499c72e95c482fc6098e44f4e1abba69bdd64c89cd59cb5aa7240e7700b8fe"
+content-hash = "ce23155f65b17af9bc498d8b99863bd15b22e71bcce9a9449eeaada7beafb99d"
 
 [metadata.files]
 amqp = [
@@ -715,8 +715,8 @@ pytz = [
     {file = "pytz-2020.5.tar.gz", hash = "sha256:180befebb1927b16f6b57101720075a984c019ac16b1b7575673bea42c6c3da5"},
 ]
 rapidpro-python = [
-    {file = "rapidpro-python-2.8.1.tar.gz", hash = "sha256:df3d51f82dab55bf65a63aeaa442679df99318f40266aa67ea372dbdc3e6308a"},
-    {file = "rapidpro_python-2.8.1-py3-none-any.whl", hash = "sha256:5385b97d5e4bd70aece61a37aa35c4792cccb010d916a9f9b6443ab03b5bd4ee"},
+    {file = "rapidpro-python-2.8.3.tar.gz", hash = "sha256:6f41f1a34bc2e8df7bcc54f29b5f1db8e50b1e95221ecf7ec040952e845b1b1e"},
+    {file = "rapidpro_python-2.8.3-py3-none-any.whl", hash = "sha256:cf69357a037d7dd6a487631f1350fe8fca73ce6ea0ae75f2c86ae22545261225"},
 ]
 rcssmin = [
     {file = "rcssmin-1.0.6.tar.gz", hash = "sha256:ca87b695d3d7864157773a61263e5abb96006e9ff0e021eff90cbe0e1ba18270"},
