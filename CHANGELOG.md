@@ -1,3 +1,7 @@
+v1.6.1
+----------
+ * Update rapidpro-python
+
 v1.6.0
 ----------
  * Add support for partial syncs in sync_local_to_changes
