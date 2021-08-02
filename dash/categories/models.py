@@ -1,13 +1,11 @@
 from smartmin.models import SmartModel
 
 from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 from dash.orgs.models import Org
 
 
-@python_2_unicode_compatible
 class Category(SmartModel):
     """
     Every organization can choose to categorize their polls or stories
@@ -49,7 +47,6 @@ class Category(SmartModel):
         verbose_name_plural = _("Categories")
 
 
-@python_2_unicode_compatible
 class CategoryImage(SmartModel):
     name = models.CharField(max_length=64, help_text=_("The name to describe this image"))
 

@@ -1,5 +1,3 @@
-
-
 import json
 import random
 from pydoc import locate
@@ -13,7 +11,7 @@ from django.contrib.auth.models import Group, User
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils import timezone
-from django.utils.encoding import force_text, python_2_unicode_compatible
+from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 
 from dash.utils.email import send_dash_email
@@ -29,7 +27,6 @@ BOUNDARY_LEVEL_1_KEY = "geojson:%d"
 BOUNDARY_LEVEL_2_KEY = "geojson:%d:%s"
 
 
-@python_2_unicode_compatible
 class Org(SmartModel):
     name = models.CharField(verbose_name=_("Name"), max_length=128, help_text=_("The name of this organization"))
 
