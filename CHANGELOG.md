@@ -1,3 +1,7 @@
+v1.7.0
+----------
+ * Add support for Django 3.2 LTS
+
 v1.6.1
 ----------
  * Update rapidpro-python
