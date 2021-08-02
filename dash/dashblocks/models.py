@@ -1,13 +1,11 @@
 from smartmin.models import SmartModel
 
 from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 from dash.orgs.models import Org
 
 
-@python_2_unicode_compatible
 class DashBlockType(SmartModel):
     """
     Dash Block Types just group fields by a slug.. letting you do lookups by
@@ -47,7 +45,6 @@ class DashBlockType(SmartModel):
         return self.name
 
 
-@python_2_unicode_compatible
 class DashBlock(SmartModel):
     """
     A DashBlock is just a block of content, organized by type and priority.
@@ -144,7 +141,6 @@ class DashBlock(SmartModel):
         return "%s - %d" % (self.dashblock_type, self.pk)
 
 
-@python_2_unicode_compatible
 class DashBlockImage(SmartModel):
     dashblock = models.ForeignKey(DashBlock, on_delete=models.PROTECT, related_name="images")
     image = models.ImageField(upload_to="dashblock_images/", width_field="width", height_field="height")
