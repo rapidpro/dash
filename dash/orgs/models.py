@@ -8,6 +8,7 @@ from timezone_field import TimeZoneField
 
 from django.conf import settings
 from django.contrib.auth.models import Group, User
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils import timezone
 from django.utils.encoding import force_text
@@ -80,7 +81,7 @@ class Org(SmartModel):
         verbose_name=_("Timezone"), default="UTC", help_text=_("The timezone your organization is in.")
     )
 
-    config = models.JSONField(
+    config = JSONField(
         default=dict,
         help_text=_("JSON blob used to store configuration information " "associated with this organization"),
     )
