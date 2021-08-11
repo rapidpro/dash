@@ -120,8 +120,7 @@ class BaseSyncer(object, metaclass=ABCMeta):
         :param remote_as_kwargs: the generated kwargs from remote object
         :return: the created instance
         """
-        obj = self.model.objects.create(**remote_as_kwargs)
-        return obj
+        return self.model.objects.create(**remote_as_kwargs)
 
     def update_local(self, local, remote_as_kwargs):
         """
