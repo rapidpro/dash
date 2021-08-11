@@ -114,6 +114,27 @@ class BaseSyncer(object, metaclass=ABCMeta):
         local.is_active = False
         local.save(update_fields=("is_active",))
 
+    def create_local(self, remote_as_kwargs):
+        """
+        Create a local instance
+        :param remote_as_kwargs: the generated kwargs from remote object
+        :return: the created instance
+        """
+        return self.model.objects.create(**remote_as_kwargs)
+
+    def update_local(self, local, remote_as_kwargs):
+        """
+        Update a local instance
+        :param local: the local instance
+        :param remote_as_kwargs: the generated kwargs from remote object
+        :return: the updated instance
+        """
+        for field, value in remote_as_kwargs.items():
+            setattr(local, field, value)
+        local.is_active = True
+        local.save()
+        return local
+
 
 def sync_from_remote(org, syncer, remote):
     """
@@ -138,11 +159,7 @@ def sync_from_remote(org, syncer, remote):
 
             if remote_as_kwargs:
                 if syncer.update_required(existing, remote, remote_as_kwargs) or not existing.is_active:
-                    for field, value in remote_as_kwargs.items():
-                        setattr(existing, field, value)
-
-                    existing.is_active = True
-                    existing.save()
+                    syncer.update_local(existing, remote_as_kwargs)
                     return SyncOutcome.updated
 
             elif existing.is_active:  # exists locally, but shouldn't now to due to model changes
@@ -150,7 +167,7 @@ def sync_from_remote(org, syncer, remote):
                 return SyncOutcome.deleted
 
         elif remote_as_kwargs:
-            syncer.model.objects.create(**remote_as_kwargs)
+            syncer.create_local(remote_as_kwargs)
             return SyncOutcome.created
 
     return SyncOutcome.ignored
@@ -188,7 +205,14 @@ def sync_local_to_set(org, syncer, remote_set) -> dict:
     return outcome_counts
 
 
-def sync_local_to_changes(org, syncer, fetches, deleted_fetches, progress_callback=None, time_limit : int = None) -> Tuple[dict, Optional[str]]:
+def sync_local_to_changes(
+            org,
+            syncer,
+            fetches,
+            deleted_fetches,
+            progress_callback=None,
+            time_limit: int = None
+        ) -> Tuple[dict, Optional[str]]:
     """
     Sync local instances against iterators which return fetches of changed and deleted remote objects.
 
