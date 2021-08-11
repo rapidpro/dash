@@ -1,3 +1,7 @@
+v1.7.1
+----------
+ * Allow a way to customize the creation and update of the local instance, defaults to the current behavior
+
 v1.7.0
 ----------
  * Add support for Django 3.2 LTS
