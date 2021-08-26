@@ -1,5 +1,3 @@
-
-
 from . import views
 
 urlpatterns = views.OrgCRUDL().as_urlpatterns()

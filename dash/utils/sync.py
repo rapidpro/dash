@@ -1,7 +1,7 @@
+import time
 from abc import ABCMeta, abstractmethod
 from enum import Enum
 from typing import Optional, Tuple
-import time
 
 
 """
@@ -206,13 +206,8 @@ def sync_local_to_set(org, syncer, remote_set) -> dict:
 
 
 def sync_local_to_changes(
-            org,
-            syncer,
-            fetches,
-            deleted_fetches,
-            progress_callback=None,
-            time_limit: int = None
-        ) -> Tuple[dict, Optional[str]]:
+    org, syncer, fetches, deleted_fetches, progress_callback=None, time_limit: int = None
+) -> Tuple[dict, Optional[str]]:
     """
     Sync local instances against iterators which return fetches of changed and deleted remote objects.
 

@@ -1,5 +1,3 @@
-
-
 import re
 
 from smartmin.views import (
