@@ -1,5 +1,3 @@
-
-
 from smartmin.models import SmartModel
 
 from django.db import models

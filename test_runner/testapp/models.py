@@ -20,23 +20,18 @@ class Contact(models.Model):
 
     @classmethod
     def lock(cls, org, uuid):
-        return get_redis_connection().lock('contact-lock:%d:%s' % (org.pk, uuid), timeout=60)
+        return get_redis_connection().lock("contact-lock:%d:%s" % (org.pk, uuid), timeout=60)
 
 
 class ContactSyncer(BaseSyncer):
     model = Contact
-    local_backend_attr = 'backend'
+    local_backend_attr = "backend"
 
     def local_kwargs(self, org, remote):
         if remote.blocked:  # we don't store blocked contacts
             return None
 
-        return {
-            'org': org,
-            'uuid': remote.uuid,
-            'name': remote.name,
-            self.local_backend_attr: self.backend
-        }
+        return {"org": org, "uuid": remote.uuid, "name": remote.name, self.local_backend_attr: self.backend}
 
     def update_required(self, local, remote, remote_as_kwargs):
         return local.name != remote.name
