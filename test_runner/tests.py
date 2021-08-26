@@ -2789,12 +2789,12 @@ class TagTest(DashTest):
         response = self.client.get(create_url, SERVER_NAME="uganda.ureport.io")
         self.assertEquals(response.status_code, 200)
         self.assertEquals(len(response.context["form"].fields), 2)
-        self.assertTrue("org" not in response.context["form"].fields)
+        self.assertNotIn("org", response.context["form"].fields)
 
         post_data = dict()
         response = self.client.post(create_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
         self.assertTrue(response.context["form"].errors)
-        self.assertTrue("name" in response.context["form"].errors)
+        self.assertIn("name", response.context["form"].errors)
 
         post_data = dict(name="Health")
         response = self.client.post(create_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
@@ -2808,7 +2808,7 @@ class TagTest(DashTest):
         response = self.client.get(create_url, SERVER_NAME="uganda.ureport.io")
         self.assertEquals(response.status_code, 200)
         self.assertEquals(len(response.context["form"].fields), 3)
-        self.assertTrue("org" in response.context["form"].fields)
+        self.assertIn("org", response.context["form"].fields)
 
         post_data = dict(name="Education", org=self.uganda.pk)
         response = self.client.post(create_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
@@ -2839,24 +2839,24 @@ class TagTest(DashTest):
         self.login(self.admin)
         response = self.client.get(list_url, SERVER_NAME="uganda.ureport.io")
         self.assertEquals(len(response.context["object_list"]), 2)
-        self.assertTrue(nigeria_health_tag not in response.context["object_list"])
-        self.assertTrue(uganda_health_tag in response.context["object_list"])
-        self.assertTrue(uganda_education_tag in response.context["object_list"])
+        self.assertNotIn(nigeria_health_tag, response.context["object_list"])
+        self.assertIn(uganda_health_tag, response.context["object_list"])
+        self.assertIn(uganda_education_tag, response.context["object_list"])
 
         response = self.client.get(list_url, SERVER_NAME="nigeria.ureport.io")
         self.assertEquals(len(response.context["object_list"]), 1)
-        self.assertTrue(uganda_health_tag not in response.context["object_list"])
-        self.assertTrue(uganda_education_tag not in response.context["object_list"])
-        self.assertTrue(nigeria_health_tag in response.context["object_list"])
+        self.assertNotIn(uganda_health_tag, response.context["object_list"])
+        self.assertNotIn(uganda_education_tag, response.context["object_list"])
+        self.assertIn(nigeria_health_tag, response.context["object_list"])
         self.assertEquals(len(response.context["fields"]), 3)
 
         self.login(self.superuser)
         response = self.client.get(list_url, SERVER_NAME="uganda.ureport.io")
         self.assertEquals(len(response.context["fields"]), 4)
         self.assertEquals(len(response.context["object_list"]), 2)
-        self.assertTrue(uganda_health_tag in response.context["object_list"])
-        self.assertTrue(uganda_education_tag in response.context["object_list"])
-        self.assertTrue(nigeria_health_tag not in response.context["object_list"])
+        self.assertIn(uganda_health_tag, response.context["object_list"])
+        self.assertIn(uganda_education_tag, response.context["object_list"])
+        self.assertNotIn(nigeria_health_tag, response.context["object_list"])
 
     def test_tag_update(self):
         uganda_health_tag = Tag.objects.create(
