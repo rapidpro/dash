@@ -1,3 +1,4 @@
+from dash.tags.models import Tag
 from unittest.mock import Mock, patch, call
 
 import pytz
@@ -2762,3 +2763,130 @@ class TemplateTagsTest(DashTest):
         self.assertNotContains(response, "TAG1-NO")
         self.assertNotContains(response, "TAG2-YES")
         self.assertContains(response, "TAG2-NO")
+
+
+class TagTest(DashTest):
+    def setUp(self):
+        super(TagTest, self).setUp()
+        self.uganda = self.create_org("uganda", self.admin)
+        self.nigeria = self.create_org("nigeria", self.admin)
+
+    def test_tag_model(self):
+        tag1 = Tag.objects.create(name="tag 1", org=self.uganda, created_by=self.admin, modified_by=self.admin)
+
+        self.assertEquals(force_text(tag1), "uganda - tag 1")
+
+        with self.assertRaises(IntegrityError):
+            Tag.objects.create(name="tag 1", org=self.uganda, created_by=self.admin, modified_by=self.admin)
+
+    def test_create_tag(self):
+        create_url = reverse("tags.tag_create")
+
+        response = self.client.get(create_url, SERVER_NAME="uganda.ureport.io")
+        self.assertLoginRedirect(response)
+
+        self.login(self.admin)
+        response = self.client.get(create_url, SERVER_NAME="uganda.ureport.io")
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(len(response.context["form"].fields), 2)
+        self.assertTrue("org" not in response.context["form"].fields)
+
+        post_data = dict()
+        response = self.client.post(create_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
+        self.assertTrue(response.context["form"].errors)
+        self.assertTrue("name" in response.context["form"].errors)
+
+        post_data = dict(name="Health")
+        response = self.client.post(create_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
+        tag = Tag.objects.order_by("-pk")[0]
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(response.request["PATH_INFO"], reverse("tags.tag_list"))
+        self.assertEquals(tag.name, "Health")
+        self.assertEquals(tag.org, self.uganda)
+
+        self.login(self.superuser)
+        response = self.client.get(create_url, SERVER_NAME="uganda.ureport.io")
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(len(response.context["form"].fields), 3)
+        self.assertTrue("org" in response.context["form"].fields)
+
+        post_data = dict(name="Education", org=self.uganda.pk)
+        response = self.client.post(create_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
+        tag = Tag.objects.order_by("-pk")[0]
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(response.request["PATH_INFO"], reverse("tags.tag_list"))
+        self.assertEquals(tag.name, "Education")
+        self.assertEquals(tag.org, self.uganda)
+
+    def test_list_tags(self):
+        uganda_health_tag = Tag.objects.create(
+            name="Health", org=self.uganda, created_by=self.admin, modified_by=self.admin
+        )
+
+        uganda_education_tag = Tag.objects.create(
+            name="Education", org=self.uganda, created_by=self.admin, modified_by=self.admin
+        )
+
+        nigeria_health_tag = Tag.objects.create(
+            name="Health", org=self.nigeria, created_by=self.admin, modified_by=self.admin
+        )
+
+        list_url = reverse("tags.tag_list")
+
+        response = self.client.get(list_url, SERVER_NAME="uganda.ureport.io")
+        self.assertLoginRedirect(response)
+
+        self.login(self.admin)
+        response = self.client.get(list_url, SERVER_NAME="uganda.ureport.io")
+        self.assertEquals(len(response.context["object_list"]), 2)
+        self.assertTrue(nigeria_health_tag not in response.context["object_list"])
+        self.assertTrue(uganda_health_tag in response.context["object_list"])
+        self.assertTrue(uganda_education_tag in response.context["object_list"])
+
+        response = self.client.get(list_url, SERVER_NAME="nigeria.ureport.io")
+        self.assertEquals(len(response.context["object_list"]), 1)
+        self.assertTrue(uganda_health_tag not in response.context["object_list"])
+        self.assertTrue(uganda_education_tag not in response.context["object_list"])
+        self.assertTrue(nigeria_health_tag in response.context["object_list"])
+        self.assertEquals(len(response.context["fields"]), 3)
+
+        self.login(self.superuser)
+        response = self.client.get(list_url, SERVER_NAME="uganda.ureport.io")
+        self.assertEquals(len(response.context["fields"]), 4)
+        self.assertEquals(len(response.context["object_list"]), 2)
+        self.assertTrue(uganda_health_tag in response.context["object_list"])
+        self.assertTrue(uganda_education_tag in response.context["object_list"])
+        self.assertTrue(nigeria_health_tag not in response.context["object_list"])
+
+    def test_tag_update(self):
+        uganda_health_tag = Tag.objects.create(
+            name="Health", org=self.uganda, created_by=self.admin, modified_by=self.admin
+        )
+
+        nigeria_health_tag = Tag.objects.create(
+            name="Health", org=self.nigeria, created_by=self.admin, modified_by=self.admin
+        )
+
+        uganda_update_url = reverse("tags.tag_update", args=[uganda_health_tag.pk])
+        nigeria_update_url = reverse("tags.tag_update", args=[nigeria_health_tag.pk])
+
+        response = self.client.get(uganda_update_url, SERVER_NAME="uganda.ureport.io")
+        self.assertLoginRedirect(response)
+
+        self.login(self.admin)
+
+        response = self.client.get(uganda_update_url, SERVER_NAME="nigeria.ureport.io")
+        self.assertLoginRedirect(response)
+
+        response = self.client.get(nigeria_update_url, SERVER_NAME="uganda.ureport.io")
+        self.assertLoginRedirect(response)
+
+        response = self.client.get(uganda_update_url, SERVER_NAME="uganda.ureport.io")
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(len(response.context["form"].fields), 3)
+
+        post_data = dict(name="Sanitation", is_active=True)
+        response = self.client.post(uganda_update_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
+        self.assertEquals(response.request["PATH_INFO"], reverse("tags.tag_list"))
+        tag = Tag.objects.get(pk=uganda_health_tag.pk)
+        self.assertEquals(tag.name, "Sanitation")
