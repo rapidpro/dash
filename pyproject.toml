@@ -37,7 +37,10 @@ smartmin = "^3.0.0"
 sorl-thumbnail = "^12.7.0"
 
 [tool.poetry.dev-dependencies]
-black = "^20.8b1"
+black = [
+    { version = "^20.8b1", python = "^3.6.0", allow-prereleases = true},
+    { version = "^21.7b0", python = ">3.7.0", allow-prereleases = true}
+]
 isort = "4.3.4"
 flake8 = "^3.8.4"
 colorama = "^0.4.3"
