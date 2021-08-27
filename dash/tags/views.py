@@ -9,18 +9,14 @@ class TagCRUDL(SmartCRUDL):
     actions = ("create", "list", "update")
 
     class Create(OrgPermsMixin, SmartCreateView):
-        def derive_fields(self):
-            if self.request.user.is_superuser:
-                return ("name", "org")
-            return ("name",)
+        fields = ("name",)
 
         def pre_save(self, obj):
             obj = super(TagCRUDL.Create, self).pre_save(obj)
 
-            if not self.get_user().is_superuser:
-                org = self.derive_org()
-                if org:
-                    obj.org = org
+            org = self.derive_org()
+            if org:
+                obj.org = org
 
             return obj
 
@@ -28,12 +24,8 @@ class TagCRUDL(SmartCRUDL):
         fields = ("is_active", "name")
 
     class List(OrgPermsMixin, SmartListView):
+        fields = ("name", "modified_on", "created_on")
         ordering = ("name",)
-
-        def derive_fields(self):
-            if self.request.user.is_superuser:
-                return ("name", "modified_on", "created_on", "org")
-            return ("name", "modified_on", "created_on")
 
         def get_queryset(self, **kwargs):
             queryset = super(TagCRUDL.List, self).get_queryset(**kwargs)
