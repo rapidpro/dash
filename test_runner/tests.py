@@ -2774,7 +2774,7 @@ class TagTest(DashTest):
     def test_tag_model(self):
         tag1 = Tag.objects.create(name="tag 1", org=self.uganda, created_by=self.admin, modified_by=self.admin)
 
-        self.assertEquals(force_text(tag1), "uganda - tag 1")
+        self.assertEquals(force_text(tag1), "tag 1")
 
         with self.assertRaises(IntegrityError):
             Tag.objects.create(name="tag 1", org=self.uganda, created_by=self.admin, modified_by=self.admin)
