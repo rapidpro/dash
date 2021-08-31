@@ -1,4 +1,6 @@
-from smartmin.views import SmartCreateView, SmartCRUDL, SmartListView, SmartUpdateView
+from smartmin.views import SmartCreateView, SmartCRUDL, SmartDeleteView, SmartListView, SmartUpdateView
+
+from django.utils.translation import ugettext_lazy as _
 
 from dash.orgs.views import OrgObjPermsMixin, OrgPermsMixin
 from dash.tags.models import Tag
@@ -6,7 +8,7 @@ from dash.tags.models import Tag
 
 class TagCRUDL(SmartCRUDL):
     model = Tag
-    actions = ("create", "list", "update")
+    actions = ("create", "list", "update", "delete")
 
     class Create(OrgPermsMixin, SmartCreateView):
         fields = ("name",)
@@ -21,7 +23,8 @@ class TagCRUDL(SmartCRUDL):
             return obj
 
     class Update(OrgObjPermsMixin, SmartUpdateView):
-        fields = ("is_active", "name")
+        fields = ("name",)
+        delete_url = "id@tags.tag_delete"
 
     class List(OrgPermsMixin, SmartListView):
         fields = ("name", "modified_on", "created_on")
@@ -32,3 +35,9 @@ class TagCRUDL(SmartCRUDL):
             queryset = queryset.filter(org=self.derive_org())
 
             return queryset
+
+    class Delete(OrgObjPermsMixin, SmartDeleteView):
+        cancel_url = "id@tags.tag_update"
+        redirect_url = "@tags.tag_list"
+        default_template = "smartmin/delete_confirm.html"
+        submit_button_name = _("Delete")

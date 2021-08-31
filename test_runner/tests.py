@@ -2883,10 +2883,44 @@ class TagTest(DashTest):
 
         response = self.client.get(uganda_update_url, SERVER_NAME="uganda.ureport.io")
         self.assertEquals(response.status_code, 200)
-        self.assertEquals(len(response.context["form"].fields), 3)
+        self.assertEquals(len(response.context["form"].fields), 2)
 
         post_data = dict(name="Sanitation", is_active=True)
         response = self.client.post(uganda_update_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
         self.assertEquals(response.request["PATH_INFO"], reverse("tags.tag_list"))
         tag = Tag.objects.get(pk=uganda_health_tag.pk)
         self.assertEquals(tag.name, "Sanitation")
+
+    def test_tag_delete(self):
+        uganda_health_tag = Tag.objects.create(
+            name="Health", org=self.uganda, created_by=self.admin, modified_by=self.admin
+        )
+
+        nigeria_health_tag = Tag.objects.create(
+            name="Health", org=self.nigeria, created_by=self.admin, modified_by=self.admin
+        )
+
+        uganda_delete_url = reverse("tags.tag_delete", args=[uganda_health_tag.pk])
+        nigeria_delete_url = reverse("tags.tag_delete", args=[nigeria_health_tag.pk])
+
+        response = self.client.get(uganda_delete_url, SERVER_NAME="uganda.ureport.io")
+        self.assertLoginRedirect(response)
+
+        response = self.client.post(uganda_delete_url, {"id": uganda_health_tag.pk}, SERVER_NAME="uganda.ureport.io")
+        self.assertLoginRedirect(response)
+
+        self.login(self.admin)
+
+        response = self.client.get(uganda_delete_url, SERVER_NAME="nigeria.ureport.io")
+        self.assertLoginRedirect(response)
+
+        response = self.client.get(nigeria_delete_url, SERVER_NAME="uganda.ureport.io")
+        self.assertLoginRedirect(response)
+
+        response = self.client.get(uganda_delete_url, SERVER_NAME="uganda.ureport.io")
+        self.assertEquals(response.status_code, 200)
+
+        response = self.client.post(uganda_delete_url, {"id": uganda_health_tag.pk}, SERVER_NAME="uganda.ureport.io")
+        self.assertEquals(response.status_code, 302)
+
+        self.assertFalse(Tag.objects.filter(pk=uganda_health_tag.pk))
