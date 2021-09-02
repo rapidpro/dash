@@ -1,3 +1,17 @@
+v1.7.2
+----------
+ * Merge pull request #126 from rapidpro/add-tags
+ * Address PR comments
+ * Few tweaks for ordering
+ * Add delete tag view
+ * Remove org name on tags str representation
+ * Adjust black dep specification
+ * Use the request org in the context for tags views
+ * Tweak asserts
+ * Add tags app
+ * Merge pull request #127 from rapidpro/blackify
+ * blackify
+
 v1.7.1
 ----------
  * Allow a way to customize the creation and update of the local instance, defaults to the current behavior
