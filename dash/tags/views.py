@@ -1,5 +1,6 @@
 from smartmin.views import SmartCreateView, SmartCRUDL, SmartDeleteView, SmartListView, SmartUpdateView
 
+from django.db.models.functions import Lower
 from django.utils.translation import ugettext_lazy as _
 
 from dash.orgs.views import OrgObjPermsMixin, OrgPermsMixin
@@ -32,7 +33,7 @@ class TagCRUDL(SmartCRUDL):
 
         def get_queryset(self, **kwargs):
             queryset = super(TagCRUDL.List, self).get_queryset(**kwargs)
-            queryset = queryset.filter(org=self.derive_org())
+            queryset = queryset.filter(org=self.derive_org()).order_by(Lower("name"))
 
             return queryset
 

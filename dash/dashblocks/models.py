@@ -44,6 +44,9 @@ class DashBlockType(SmartModel):
     def __str__(self):
         return self.name
 
+    class Meta:
+        ordering = ["name"]
+
 
 class DashBlock(SmartModel):
     """
@@ -139,6 +142,9 @@ class DashBlock(SmartModel):
         if self.dashblock_type.has_title:
             return self.title
         return "%s - %d" % (self.dashblock_type, self.pk)
+
+    class Meta:
+        ordering = ["dashblock_type", "title"]
 
 
 class DashBlockImage(SmartModel):
