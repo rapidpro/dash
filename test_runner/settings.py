@@ -41,6 +41,7 @@ INSTALLED_APPS = (
     "dash.categories",
     "dash.dashblocks",
     "dash.stories",
+    "dash.tags",
     "dash.utils",
     "test_runner.testapp",
 )
@@ -151,6 +152,7 @@ GROUP_PERMISSIONS = {
         "orgs.org_manage_accounts",
         "orgs.orgbackground.*",
         "stories.story.*",
+        "tags.tag.*",
     ),
     "Editors": (
         "categories.category.*",
@@ -167,6 +169,7 @@ GROUP_PERMISSIONS = {
         "polls.featuredresponse.*",
         "stories.story.*",
         "stories.storyimage.*",
+        "tags.tag.*",
         "users.user_profile",
     ),
     "Viewers": [],

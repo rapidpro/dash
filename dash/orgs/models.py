@@ -219,6 +219,9 @@ class Org(SmartModel):
     def __str__(self):
         return self.name
 
+    class Meta:
+        ordering = ["name"]
+
 
 def get_org(obj):
     return getattr(obj, "_org", None)

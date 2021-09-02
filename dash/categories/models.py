@@ -43,6 +43,7 @@ class Category(SmartModel):
         return "%s - %s" % (self.org, self.name)
 
     class Meta:
+        ordering = ["name"]
         unique_together = ("name", "org")
         verbose_name_plural = _("Categories")
 
