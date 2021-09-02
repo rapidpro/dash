@@ -12,7 +12,7 @@ class Tag(SmartModel):
     org = models.ForeignKey(Org, on_delete=models.PROTECT)
 
     def __str__(self) -> str:
-        return f"{self.name}"
+        return self.name
 
     class Meta:
         unique_together = ("name", "org")

@@ -18,8 +18,7 @@ class TagCRUDL(SmartCRUDL):
             obj = super(TagCRUDL.Create, self).pre_save(obj)
 
             org = self.derive_org()
-            if org:
-                obj.org = org
+            obj.org = org
 
             return obj
 
@@ -29,7 +28,6 @@ class TagCRUDL(SmartCRUDL):
 
     class List(OrgPermsMixin, SmartListView):
         fields = ("name", "modified_on", "created_on")
-        ordering = ("name",)
 
         def get_queryset(self, **kwargs):
             queryset = super(TagCRUDL.List, self).get_queryset(**kwargs)
