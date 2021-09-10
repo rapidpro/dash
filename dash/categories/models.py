@@ -1,9 +1,12 @@
+from functools import partial
+
 from smartmin.models import SmartModel
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from dash.orgs.models import Org
+from dash.utils import generate_file_path
 
 
 class Category(SmartModel):
@@ -15,7 +18,10 @@ class Category(SmartModel):
     name = models.CharField(max_length=64, help_text=_("The name of this category"))
 
     image = models.ImageField(
-        upload_to="categories", null=True, blank=True, help_text=_("An optional image that can describe this category")
+        upload_to=partial(generate_file_path, "categories"),
+        null=True,
+        blank=True,
+        help_text=_("An optional image that can describe this category"),
     )
 
     org = models.ForeignKey(
@@ -55,7 +61,9 @@ class CategoryImage(SmartModel):
         Category, on_delete=models.PROTECT, related_name="images", help_text=_("The category this image represents")
     )
 
-    image = models.ImageField(upload_to="categories", help_text=_("The image file to use"))
+    image = models.ImageField(
+        upload_to=partial(generate_file_path, "categories"), help_text=_("The image file to use")
+    )
 
     def __str__(self):
         return "%s - %s" % (self.category.name, self.name)

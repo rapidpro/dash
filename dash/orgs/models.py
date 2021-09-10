@@ -1,5 +1,6 @@
 import json
 import random
+from functools import partial
 from pydoc import locate
 
 from smartmin.models import SmartModel
@@ -13,6 +14,7 @@ from django.utils import timezone
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 
+from dash.utils import generate_file_path
 from dash.utils.email import send_dash_email
 
 STATE = 1
@@ -30,7 +32,10 @@ class Org(SmartModel):
     name = models.CharField(verbose_name=_("Name"), max_length=128, help_text=_("The name of this organization"))
 
     logo = models.ImageField(
-        upload_to="logos", null=True, blank=True, help_text=_("The logo that should be used for this organization")
+        upload_to=partial(generate_file_path, "logos"),
+        null=True,
+        blank=True,
+        help_text=_("The logo that should be used for this organization"),
     )
 
     administrators = models.ManyToManyField(
@@ -336,7 +341,7 @@ class OrgBackground(SmartModel):
         max_length=1, choices=BACKGROUND_TYPES, default="P", verbose_name=_("Background type")
     )
 
-    image = models.ImageField(upload_to="org_bgs", help_text=_("The image file"))
+    image = models.ImageField(upload_to=partial(generate_file_path, "org_bgs"), help_text=_("The image file"))
 
 
 class TaskState(models.Model):

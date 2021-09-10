@@ -5,12 +5,14 @@ import datetime
 import json
 import pytz
 import random
+import os
 
 from collections import OrderedDict
 from dateutil.relativedelta import relativedelta
 from django.core.cache import cache
 from django.utils import timezone
 from itertools import islice
+from uuid import uuid4
 
 
 def intersection(*args):
@@ -166,3 +168,11 @@ def is_dict_equal(d1, d2, keys=None, ignore_none_values=True):
         d2 = {k: v for k, v in d2.items() if (keys is None or k in keys) and (v is not None or not ignore_none_values)}
 
     return d1 == d2
+
+
+def generate_file_path(folder_name, instance, filename):
+    name, extension = os.path.splitext(filename)
+
+    new_filename = "%s-%s%s" % (instance.__class__.__name__.lower(), uuid4(), extension)
+
+    return "%s/%s" % (folder_name, new_filename)
