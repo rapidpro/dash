@@ -173,6 +173,6 @@ def is_dict_equal(d1, d2, keys=None, ignore_none_values=True):
 def generate_file_path(folder_name, instance, filename):
     name, extension = os.path.splitext(filename)
 
-    new_filename = "%s-%s%s" % (instance.__class__.__name__.lower(), uuid4(), extension)
+    new_filename = f"{name[:36]}-{instance.__class__.__name__.lower()}-{uuid4()}{extension}"
 
-    return "%s/%s" % (folder_name, new_filename)
+    return f"{folder_name}/{new_filename}"
