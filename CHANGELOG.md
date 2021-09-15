@@ -1,3 +1,7 @@
+v1.7.3
+----------
+ * Update Org.config to newer JSONField to remove deprecaction warning
+
 v1.7.2
 ----------
  * Merge pull request #126 from rapidpro/add-tags
