@@ -1,3 +1,7 @@
+v1.7.4
+----------
+ * Add missing migration
+
 v1.7.3
 ----------
  * Update Org.config to newer JSONField to remove deprecaction warning
