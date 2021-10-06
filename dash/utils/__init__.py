@@ -3,14 +3,15 @@ from __future__ import division, unicode_literals
 import calendar
 import datetime
 import json
-import pytz
 import random
-
 from collections import OrderedDict
+from itertools import islice
+
+import pytz
 from dateutil.relativedelta import relativedelta
+
 from django.core.cache import cache
 from django.utils import timezone
-from itertools import islice
 
 
 def intersection(*args):
