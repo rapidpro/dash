@@ -1,3 +1,7 @@
+v1.8.0
+----------
+ * Update to latest celery 5.x and test on Python 3.9.x
+
 v1.7.4
 ----------
  * Add missing migration
