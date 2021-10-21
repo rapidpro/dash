@@ -1,5 +1,6 @@
 from smartmin.views import SmartCreateView, SmartCRUDL, SmartListView, SmartUpdateView
 
+from django import forms
 from django.urls import reverse
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
@@ -86,6 +87,26 @@ class DashBlockFormMixin(object):
         return obj
 
 
+class DashBlockForm(forms.ModelForm):
+    class Meta:
+        model = DashBlock
+        fields = (
+            "title",
+            "summary",
+            "content",
+            "image",
+            "color",
+            "link",
+            "video_id",
+            "tags",
+            "dashblock_type",
+            "priority",
+            "is_active",
+        )
+        labels = {"link": _("Link Slug")}
+        help_texts = {"link": _("The slug or word to use in the link of the page")}
+
+
 class DashBlockCRUDL(SmartCRUDL):
     model = DashBlock
     permissions = True
@@ -148,6 +169,7 @@ class DashBlockCRUDL(SmartCRUDL):
             return context
 
     class Update(OrgObjPermsMixin, DashBlockFormMixin, SmartUpdateView):
+        form_class = DashBlockForm
         fields = (
             "title",
             "summary",
@@ -169,6 +191,7 @@ class DashBlockCRUDL(SmartCRUDL):
             return _("Edit %s") % self.get_type().name
 
     class Create(OrgPermsMixin, DashBlockFormMixin, SmartCreateView):
+        form_class = DashBlockForm
         grant_permissions = ("dashblocks.change_dashblock",)
 
         def derive_initial(self, *args, **kwargs):
