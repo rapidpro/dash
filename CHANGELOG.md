@@ -1,3 +1,14 @@
+v1.8.1
+----------
+ * Merge pull request #129 from rapidpro/images-names-conflicting
+ * Merge pull request #131 from rapidpro/fix-dashblocks-link-label
+ * Run code_checks
+ * Add migrations
+ * Fix conflicts
+ * Fix confusing label for the link slug on the dashblock forms
+ * Keep filename first 36 characters in the new filename
+ * Generate a random name for images when uploading them
+
 v1.8.0
 ----------
  * Update to latest celery 5.x and test on Python 3.9.x
