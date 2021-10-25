@@ -6,7 +6,6 @@ import json
 import os
 import random
 
-
 from collections import OrderedDict
 from itertools import islice
 from uuid import uuid4
