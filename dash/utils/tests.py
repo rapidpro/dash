@@ -6,7 +6,8 @@ import pytz
 
 from django.core.cache import cache
 
-from ..test import DashTest
+from dash.test import DashTest
+
 from . import (
     chunks,
     datetime_to_ms,

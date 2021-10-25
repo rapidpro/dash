@@ -1,9 +1,12 @@
+from functools import partial
+
 from smartmin.models import SmartModel
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from dash.orgs.models import Org
+from dash.utils import generate_file_path
 
 
 class DashBlockType(SmartModel):
@@ -69,7 +72,7 @@ class DashBlock(SmartModel):
     image = models.ImageField(
         blank=True,
         null=True,
-        upload_to="dashblocks",
+        upload_to=partial(generate_file_path, "dashblocks"),
         help_text=_("Any image that should be displayed with this content " "block, optional"),
     )
     color = models.CharField(
@@ -149,7 +152,9 @@ class DashBlock(SmartModel):
 
 class DashBlockImage(SmartModel):
     dashblock = models.ForeignKey(DashBlock, on_delete=models.PROTECT, related_name="images")
-    image = models.ImageField(upload_to="dashblock_images/", width_field="width", height_field="height")
+    image = models.ImageField(
+        upload_to=partial(generate_file_path, "dashblock_images/"), width_field="width", height_field="height"
+    )
     caption = models.CharField(max_length=64)
     priority = models.IntegerField(default=0, blank=True, null=True)
     width = models.IntegerField()

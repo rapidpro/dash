@@ -1,3 +1,5 @@
+from functools import partial
+
 from smartmin.models import SmartModel
 
 from django.db import models
@@ -5,6 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from dash.categories.models import Category
 from dash.orgs.models import Org
+from dash.utils import generate_file_path
 
 
 class Story(SmartModel):
@@ -133,4 +136,4 @@ class StoryImage(SmartModel):
         Story, on_delete=models.PROTECT, related_name="images", help_text=_("The story to associate to")
     )
 
-    image = models.ImageField(upload_to="stories", help_text=_("The image file to use"))
+    image = models.ImageField(upload_to=partial(generate_file_path, "stories"), help_text=_("The image file to use"))
