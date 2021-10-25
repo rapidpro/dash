@@ -6,6 +6,8 @@ import pytz
 
 from django.core.cache import cache
 
+from dash.test import DashTest
+
 from . import (
     chunks,
     datetime_to_ms,
@@ -19,7 +21,6 @@ from . import (
     random_string,
     union,
 )
-from ..test import DashTest
 
 
 class InitTest(DashTest):
