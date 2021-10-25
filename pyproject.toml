@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rapidpro-dash"
-version = "1.7.2"
+version = "1.8.0"
 description = "Support library for RapidPro dashboards"
 authors = ["Nyaruka Ltd <code@nyaruka.com>"]
 license = "BSD"
@@ -23,7 +23,7 @@ repository = "http://github.com/rapidpro/dash"
 [tool.poetry.dependencies]
 python = "^3.6"
 Django = "<4.0"
-celery = "<5.0"
+celery = ">4.4.6"
 django-compressor = "^2.4"
 django-hamlpy = "^1.4.3"
 django-redis = "^4.12.1"
@@ -33,7 +33,7 @@ phonenumbers = "^8.12.16"
 psycopg2-binary = "<2.9.0"
 python-dateutil = "^2.8.1"
 rapidpro-python = "^2.8.3"
-smartmin = "^3.0.0"
+smartmin = "^3.1.0"
 sorl-thumbnail = "^12.7.0"
 
 [tool.poetry.dev-dependencies]
@@ -41,7 +41,7 @@ black = [
     { version = "^20.8b1", python = "^3.6.0", allow-prereleases = true},
     { version = "^21.7b0", python = ">3.7.0", allow-prereleases = true}
 ]
-isort = "4.3.4"
+isort = "^4.3.4"
 flake8 = "^3.8.4"
 colorama = "^0.4.3"
 codecov = "^2.1.11"

@@ -1,3 +1,15 @@
+v1.8.0
+----------
+ * Update to latest celery 5.x and test on Python 3.9.x
+
+v1.7.4
+----------
+ * Add missing migration
+
+v1.7.3
+----------
+ * Update Org.config to newer JSONField to remove deprecaction warning
+
 v1.7.2
 ----------
  * Merge pull request #126 from rapidpro/add-tags

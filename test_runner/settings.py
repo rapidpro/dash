@@ -182,13 +182,8 @@ LOGOUT_REDIRECT_URL = "/"
 # ----------------------------------------------------------------------------
 # Async tasks with django-celery
 # ----------------------------------------------------------------------------
-
 CELERY_RESULT_BACKEND = None
-
-BROKER_BACKEND = "redis"
-BROKER_HOST = "localhost"
-BROKER_PORT = 6379
-BROKER_VHOST = "4"
+CELERY_BROKER_URL = "redis://localhost:6379/4"
 
 # RapidPRO
 SITE_API_HOST = "http://localhost:8001"
