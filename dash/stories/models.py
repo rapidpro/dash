@@ -1,13 +1,22 @@
+import os
 from functools import partial
 
 from smartmin.models import SmartModel
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from dash.categories.models import Category
 from dash.orgs.models import Org
 from dash.utils import generate_file_path
+
+
+def validate_file_extension(value):
+    ext = os.path.splitext(value.name)[1]
+    valid_extensions = [".pdf"]
+    if ext not in valid_extensions:
+        raise ValidationError(_("Only PDF files are supported."))
 
 
 class Story(SmartModel):
@@ -22,6 +31,14 @@ class Story(SmartModel):
 
     audio_link = models.URLField(
         max_length=255, blank=True, null=True, help_text=_("A link to an mp3 file to publish on this story")
+    )
+
+    attachment = models.FileField(
+        upload_to=partial(generate_file_path, "story_attachments"),
+        blank=True,
+        null=True,
+        validators=[validate_file_extension],
+        help_text=_("The PDF report to attach"),
     )
 
     video_id = models.CharField(

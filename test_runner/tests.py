@@ -1804,6 +1804,59 @@ class StoryTest(DashTest):
         self.assertFalse(self.story.get_category_image())
         self.assertFalse(self.story.get_image(), "categories/some_image.jpg")
 
+    def test_upload_attachment(self):
+        create_url = reverse("stories.story_create")
+        self.login(self.admin)
+
+        response = self.client.get(create_url, SERVER_NAME="uganda.ureport.io")
+
+        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "rb")
+        post_data = dict(
+            title="foo",
+            content="bar",
+            category=self.health_uganda.pk,
+            attachment=upload,
+            featured=True,
+            summary="baz",
+            audio_link="example.com/foo.mp3",
+            video_id="yt_id",
+            tags="   first SECOND third",
+            written_by="Content Provider",
+        )
+
+        response = self.client.post(create_url, post_data, SERVER_NAME="uganda.ureport.io")
+        self.assertTrue(response.context["form"].errors)
+        errors = response.context["form"].errors
+        self.assertTrue("attachment" in errors)
+        self.assertEqual(errors["attachment"][0], "Only PDF files are supported.")
+
+        upload = open("%s/doc.pdf" % settings.TESTFILES_DIR, "rb")
+        post_data = dict(
+            title="foo",
+            content="bar",
+            category=self.health_uganda.pk,
+            attachment=upload,
+            featured=True,
+            summary="baz",
+            audio_link="example.com/foo.mp3",
+            video_id="yt_id",
+            tags="   first SECOND third",
+            written_by="Content Provider",
+        )
+
+        response = self.client.post(create_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
+        story = Story.objects.get()
+        self.assertEquals(response.request["PATH_INFO"], reverse("stories.story_images", args=[story.pk]))
+        self.assertEquals(story.title, "foo")
+        self.assertEquals(story.content, "bar")
+        self.assertEquals(story.category, self.health_uganda)
+        self.assertTrue(story.featured)
+        self.assertEquals(story.summary, "baz")
+        self.assertEquals(story.written_by, "Content Provider")
+        self.assertEquals(story.audio_link, "http://example.com/foo.mp3")
+        self.assertEquals(story.video_id, "yt_id")
+        self.assertEquals(story.tags, " first second third ")
+
     def test_create_story(self):
         create_url = reverse("stories.story_create")
 
@@ -1822,12 +1875,13 @@ class StoryTest(DashTest):
         self.assertEquals(response.status_code, 200)
         self.assertTrue("form" in response.context)
         fields = response.context["form"].fields
-        self.assertEquals(len(fields), 10)
+        self.assertEquals(len(fields), 11)
         self.assertTrue("loc" in fields)
         self.assertTrue("title" in fields)
         self.assertTrue("featured" in fields)
         self.assertTrue("summary" in fields)
         self.assertTrue("content" in fields)
+        self.assertTrue("attachment" in fields)
         self.assertTrue("written_by" in fields)
         self.assertTrue("audio_link" in fields)
         self.assertTrue("video_id" in fields)
@@ -1945,13 +1999,14 @@ class StoryTest(DashTest):
         self.assertTrue("form" in response.context)
         fields = response.context["form"].fields
 
-        self.assertEquals(len(fields), 11)
+        self.assertEquals(len(fields), 12)
         self.assertTrue("loc" in fields)
         self.assertTrue("is_active" in fields)
         self.assertTrue("title" in fields)
         self.assertTrue("featured" in fields)
         self.assertTrue("summary" in fields)
         self.assertTrue("content" in fields)
+        self.assertTrue("attachment" in fields)
         self.assertTrue("written_by" in fields)
         self.assertTrue("audio_link" in fields)
         self.assertTrue("video_id" in fields)
