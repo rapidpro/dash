@@ -31,6 +31,7 @@ class StoryForm(forms.ModelForm):
             "featured",
             "summary",
             "content",
+            "attachment",
             "written_by",
             "audio_link",
             "video_id",
@@ -51,6 +52,7 @@ class StoryCRUDL(SmartCRUDL):
             "featured",
             "summary",
             "content",
+            "attachment",
             "written_by",
             "audio_link",
             "video_id",
@@ -70,11 +72,16 @@ class StoryCRUDL(SmartCRUDL):
             return kwargs
 
     class List(OrgPermsMixin, SmartListView):
-        fields = ("title", "images", "featured", "created_on")
+        fields = ("title", "images", "featured", "has_report", "created_on")
         search_fields = ("title__icontains",)
         link_fields = ("title", "images")
         default_order = ("-created_on",)
         ordering = ("-created_on",)
+
+        def get_has_report(self, obj):
+            if obj.attachment:
+                return _("Yes")
+            return _("No")
 
         def get_featured(self, obj):
             if obj.featured:
@@ -157,6 +164,7 @@ class StoryCRUDL(SmartCRUDL):
             "featured",
             "summary",
             "content",
+            "attachment",
             "written_by",
             "audio_link",
             "video_id",
