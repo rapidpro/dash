@@ -1,3 +1,9 @@
+v1.8.2
+----------
+ * Merge pull request #132 from rapidpro/report-attachments
+ * Show has report stories
+ * Add attachment field to story to upload PDF reports
+
 v1.8.1
 ----------
  * Merge pull request #129 from rapidpro/images-names-conflicting
