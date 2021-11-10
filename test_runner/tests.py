@@ -2566,9 +2566,6 @@ class DashBlockTest(DashTest):
         self.assertEquals(response.status_code, 200)
         self.assertTrue("form" in response.context)
         fields = response.context["form"].fields
-        import pdb
-
-        pdb.set_trace()
         self.assertEquals(len(fields), 9)
         self.assertTrue("is_active" in fields)
         self.assertTrue("title" in fields)

@@ -35,7 +35,7 @@ if __name__ == "__main__":
     status("Make any missing migrations")
     cmd("python manage.py makemigrations")
     status("Running black")
-    cmd("black --line-length=119 --target-version=py36 dash test_runner")
+    cmd("black --line-length=119 dash test_runner")
     status("Running flake8")
     cmd("flake8")
     status("Running isort")
