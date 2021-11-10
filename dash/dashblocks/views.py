@@ -66,10 +66,6 @@ class DashBlockFormMixin(object):
             if not block_type.has_color:
                 exclude.append("color")
 
-        # if this user does not have global permissins, remove org as a field
-        if not self.request.user.has_perm(self.permission):
-            exclude.append("org")
-
         return exclude
 
     def pre_save(self, obj):
@@ -79,9 +75,7 @@ class DashBlockFormMixin(object):
         if block_type:
             obj.dashblock_type = block_type
 
-        # if the user doesn't have global permissions, set the org appropriately
-        if not self.request.user.has_perm(self.permission):
-            obj.org = self.request.org
+        obj.org = self.request.org
 
         obj.space_tags()
         return obj

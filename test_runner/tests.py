@@ -2560,6 +2560,41 @@ class DashBlockTest(DashTest):
         self.assertFalse("org" in fields)
         self.assertFalse("tags" in fields)
 
+        self.login(self.superuser)
+        response = self.client.get(update_url, SERVER_NAME="uganda.ureport.io")
+
+        self.assertEquals(response.status_code, 200)
+        self.assertTrue("form" in response.context)
+        fields = response.context["form"].fields
+        import pdb
+
+        pdb.set_trace()
+        self.assertEquals(len(fields), 9)
+        self.assertTrue("is_active" in fields)
+        self.assertTrue("title" in fields)
+        self.assertTrue("summary" in fields)
+        self.assertTrue("content" in fields)
+        self.assertTrue("image" in fields)
+        self.assertTrue("link" in fields)
+        self.assertTrue("priority" in fields)
+        self.assertTrue("loc" in fields)
+        self.assertTrue("dashblock_type" in fields)
+        self.assertFalse("video_id" in fields)
+        self.assertFalse("color" in fields)
+        self.assertFalse("gallery" in fields)
+        self.assertFalse("org" in fields)
+        self.assertFalse("tags" in fields)
+
+        post_data = dict(title="Gasabo", content="gasabo", priority=0, dashblock_type=self.type_foo.pk)
+
+        response = self.client.post(update_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
+        self.assertFalse("form" in response.context)
+        updated_dashblock = DashBlock.objects.get(pk=dashblock1.pk)
+        self.assertEquals(updated_dashblock.dashblock_type, self.type_foo)
+        self.assertEquals(updated_dashblock.org, self.uganda)
+        self.assertEquals(updated_dashblock.title, "Gasabo")
+        self.assertEquals(updated_dashblock.content, "gasabo")
+
     def test_list_dashblock(self):
         list_url = reverse("dashblocks.dashblock_list")
 
