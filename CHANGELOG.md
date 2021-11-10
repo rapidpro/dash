@@ -1,3 +1,10 @@
+v1.8.3
+----------
+ * Merge pull request #133 from rapidpro/fix-dashblock_views
+ * pin black
+ * Update code checks
+ * Fix dashblock views
+
 v1.8.2
 ----------
  * Merge pull request #132 from rapidpro/report-attachments
