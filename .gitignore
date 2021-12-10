@@ -62,5 +62,6 @@ target/
 db.sqlite3
 
 .vscode/
+deploy
 fabric
 fabfile.*
