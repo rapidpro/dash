@@ -3,7 +3,7 @@ from smartmin.views import SmartCreateView, SmartCRUDL, SmartListView, SmartUpda
 from django import forms
 from django.core.validators import validate_image_file_extension
 from django.urls import reverse
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from dash.categories.fields import CategoryChoiceField
 from dash.orgs.views import OrgObjPermsMixin, OrgPermsMixin

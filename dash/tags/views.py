@@ -1,7 +1,7 @@
 from smartmin.views import SmartCreateView, SmartCRUDL, SmartDeleteView, SmartListView, SmartUpdateView
 
 from django.db.models.functions import Lower
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from dash.orgs.views import OrgObjPermsMixin, OrgPermsMixin
 from dash.tags.models import Tag

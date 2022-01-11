@@ -1,9 +1,9 @@
 from datetime import datetime
 
 import phonenumbers
-import pytz
 
 from django import template
+from django.utils import timezone
 
 register = template.Library()
 
@@ -14,8 +14,7 @@ def display_time(text_timestamp, org, time_format=None):
     if not time_format:
         time_format = "%b %d, %Y %H:%M"
 
-    utc_tz = pytz.timezone("UTC")
-    parsed_time = utc_tz.localize(datetime.strptime(text_timestamp, "%Y-%m-%dT%H:%M:%SZ"))
+    parsed_time = datetime.strptime(text_timestamp, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
     output_time = parsed_time.astimezone(org.timezone)
 
     return output_time.strftime(time_format)

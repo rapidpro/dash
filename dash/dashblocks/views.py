@@ -2,8 +2,8 @@ from smartmin.views import SmartCreateView, SmartCRUDL, SmartListView, SmartUpda
 
 from django import forms
 from django.urls import reverse
-from django.utils.encoding import force_text
-from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import force_str
+from django.utils.translation import gettext_lazy as _
 
 from dash.orgs.views import OrgObjPermsMixin, OrgPermsMixin
 
@@ -125,7 +125,7 @@ class DashBlockCRUDL(SmartCRUDL):
             block_type = self.get_type()
             if block_type:
                 if not block_type.has_title:
-                    return force_text(obj)
+                    return force_str(obj)
             return obj.title
 
         def derive_title(self):

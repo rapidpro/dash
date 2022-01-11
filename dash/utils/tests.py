@@ -1,10 +1,10 @@
 import json
+import zoneinfo
 from datetime import datetime
 from itertools import chain
 
-import pytz
-
 from django.core.cache import cache
+from django.utils import timezone
 
 from dash.test import DashTest
 
@@ -77,23 +77,23 @@ class InitTest(DashTest):
         self.assertEqual(get_obj_cacheable(self, "_test_value", calculate, recalculate=True), "CALCULATED")
 
     def test_datetime_to_ms(self):
-        d1 = datetime(2014, 1, 2, 3, 4, 5, 678900, tzinfo=pytz.utc)
+        d1 = datetime(2014, 1, 2, 3, 4, 5, 678900, tzinfo=timezone.utc)
         self.assertEqual(datetime_to_ms(d1), 1388631845678)  # from http://unixtimestamp.50x.eu
 
         # conversion to millis loses some accuracy
-        self.assertEqual(ms_to_datetime(1388631845678), datetime(2014, 1, 2, 3, 4, 5, 678000, tzinfo=pytz.utc))
+        self.assertEqual(ms_to_datetime(1388631845678), datetime(2014, 1, 2, 3, 4, 5, 678000, tzinfo=timezone.utc))
 
-        tz = pytz.timezone("Africa/Kigali")
-        d2 = tz.localize(datetime(2014, 1, 2, 3, 4, 5, 600000))
+        tz = zoneinfo.ZoneInfo("Africa/Kigali")
+        d2 = datetime(2014, 1, 2, 3, 4, 5, 600000, tz)
         self.assertEqual(datetime_to_ms(d2), 1388624645600)
-        self.assertEqual(ms_to_datetime(1388624645600), d2.astimezone(pytz.utc))
+        self.assertEqual(ms_to_datetime(1388624645600), d2.astimezone(timezone.utc))
 
     def test_get_month_range(self):
         self.assertEqual(
-            get_month_range(datetime(2014, 2, 10, 12, 30, 0, 0, pytz.timezone("Africa/Kigali"))),
+            get_month_range(datetime(2014, 2, 10, 12, 30, 0, 0, zoneinfo.ZoneInfo("Africa/Kigali"))),
             (
-                datetime(2014, 2, 1, 0, 0, 0, 0, pytz.timezone("Africa/Kigali")),
-                datetime(2014, 3, 1, 0, 0, 0, 0, pytz.timezone("Africa/Kigali")),
+                datetime(2014, 2, 1, 0, 0, 0, 0, zoneinfo.ZoneInfo("Africa/Kigali")),
+                datetime(2014, 3, 1, 0, 0, 0, 0, zoneinfo.ZoneInfo("Africa/Kigali")),
             ),
         )
 
