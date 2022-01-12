@@ -13,7 +13,7 @@ from django.core.exceptions import DisallowedHost
 from django.db.utils import IntegrityError
 from django.http import HttpRequest
 from django.urls import ResolverMatch, reverse
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 
 from dash.categories.fields import CategoryChoiceField
 from dash.categories.models import Category, CategoryImage
@@ -413,7 +413,7 @@ class OrgTest(DashTest):
     def test_org_model(self):
         user = self.create_user("User")
 
-        self.assertEquals(force_text(self.org), "uganda")
+        self.assertEquals(force_str(self.org), "uganda")
 
         self.assertIsNone(Org.get_org(None))
         self.assertEquals(Org.get_org(self.admin), self.org)
@@ -1458,7 +1458,7 @@ class CategoryTest(DashTest):
             modified_by=self.admin,
         )
 
-        self.assertEquals(force_text(category1), "uganda - category 1")
+        self.assertEquals(force_str(category1), "uganda - category 1")
         self.assertEquals(category1.get_label_from_instance(), "uganda - category 1")
 
         category2 = Category.objects.create(
@@ -1488,7 +1488,7 @@ class CategoryTest(DashTest):
             category=category1, name="image 1", image=None, created_by=self.admin, modified_by=self.admin
         )
 
-        self.assertEquals(force_text(category_image1), "category 1 - image 1")
+        self.assertEquals(force_str(category_image1), "category 1 - image 1")
         self.assertIsNone(category1.get_first_image())
 
         category_image1.image = "categories/image.jpg"
@@ -2205,7 +2205,7 @@ class DashBlockTypeTest(DashTest):
         self.assertFalse(dashblocktype.has_tags)
         self.assertFalse(dashblocktype.has_video)
 
-        self.assertEquals(force_text(dashblocktype), "Test Pages")
+        self.assertEquals(force_str(dashblocktype), "Test Pages")
 
     def test_list_dashblocktype(self):
         list_url = reverse("dashblocks.dashblocktype_list")
@@ -2352,7 +2352,7 @@ class DashBlockTest(DashTest):
             modified_by=self.admin,
         )
 
-        self.assertEquals(force_text(dashblock1), "First")
+        self.assertEquals(force_str(dashblock1), "First")
 
         dashblock2 = DashBlock.objects.create(
             dashblock_type=self.type_bar,
@@ -2363,7 +2363,7 @@ class DashBlockTest(DashTest):
             modified_by=self.admin,
         )
 
-        self.assertEquals(force_text(dashblock2), "Bar - %d" % dashblock2.pk)
+        self.assertEquals(force_str(dashblock2), "Bar - %d" % dashblock2.pk)
 
         self.assertEquals(dashblock1.teaser(dashblock1.content, 1), "First ...")
         self.assertEquals(dashblock1.teaser(dashblock1.content, 10), "First content")
@@ -2651,7 +2651,7 @@ class DashBlockTest(DashTest):
         self.assertIn(dashblock2, response.context["object_list"])
         self.assertNotIn(dashblock3, response.context["object_list"])
 
-        self.assertContains(response, force_text(dashblock2))
+        self.assertContains(response, force_str(dashblock2))
 
         self.assertEqual(len(response.context["fields"]), 4)
         self.assertIn("tags", response.context["fields"])
@@ -2861,7 +2861,7 @@ class TagTest(DashTest):
     def test_tag_model(self):
         tag1 = Tag.objects.create(name="tag 1", org=self.uganda, created_by=self.admin, modified_by=self.admin)
 
-        self.assertEquals(force_text(tag1), "tag 1")
+        self.assertEquals(force_str(tag1), "tag 1")
 
         with self.assertRaises(IntegrityError):
             Tag.objects.create(name="tag 1", org=self.uganda, created_by=self.admin, modified_by=self.admin)
