@@ -1,3 +1,7 @@
+v1.9.1
+----------
+ * Add missing migrations
+
 v1.9.0
 ----------
  * Add support for Django 4
