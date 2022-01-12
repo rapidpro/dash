@@ -1,3 +1,7 @@
+v1.9.0
+----------
+ * Add support for Django 4
+
 v1.8.3
 ----------
  * Merge pull request #133 from rapidpro/fix-dashblock_views
