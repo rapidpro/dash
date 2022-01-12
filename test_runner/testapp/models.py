@@ -1,7 +1,7 @@
 from django_redis import get_redis_connection
 
 from django.db import models
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from dash.orgs.models import Org, OrgBackend
 from dash.utils.sync import BaseSyncer

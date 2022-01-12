@@ -2,7 +2,7 @@ import logging
 import os
 import warnings
 
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 """
 Django settings for test_runner project.
