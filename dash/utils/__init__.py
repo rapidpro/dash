@@ -1,5 +1,3 @@
-from __future__ import division, unicode_literals
-
 import calendar
 import datetime
 import json
@@ -9,7 +7,6 @@ from collections import OrderedDict
 from itertools import islice
 from uuid import uuid4
 
-import pytz
 from dateutil.relativedelta import relativedelta
 
 from django.core.cache import cache
@@ -105,7 +102,7 @@ def ms_to_datetime(ms):
     Converts a millisecond accuracy timestamp to a datetime
     """
     dt = datetime.datetime.utcfromtimestamp(ms / 1000)
-    return dt.replace(microsecond=(ms % 1000) * 1000).replace(tzinfo=pytz.utc)
+    return dt.replace(microsecond=(ms % 1000) * 1000).replace(tzinfo=timezone.utc)
 
 
 def get_month_range(d=None):

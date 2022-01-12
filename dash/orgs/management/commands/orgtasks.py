@@ -1,8 +1,5 @@
-from __future__ import absolute_import, unicode_literals
-
-import pytz
-
 from django.core.management.base import BaseCommand, CommandError
+from django.utils import timezone
 
 from dash.orgs.models import Org, TaskState
 
@@ -107,4 +104,4 @@ def cell(val, width):
 
 
 def format_date(dt):
-    return dt.astimezone(pytz.UTC).strftime("%b %d, %Y %H:%M") if dt else ""
+    return dt.astimezone(timezone.utc).strftime("%b %d, %Y %H:%M") if dt else ""

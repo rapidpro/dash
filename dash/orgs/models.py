@@ -11,8 +11,8 @@ from django.conf import settings
 from django.contrib.auth.models import Group, User
 from django.db import models
 from django.utils import timezone
-from django.utils.encoding import force_text
-from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import force_str
+from django.utils.translation import gettext_lazy as _
 
 from dash.utils import generate_file_path
 from dash.utils.email import send_dash_email
@@ -198,7 +198,7 @@ class Org(SmartModel):
 
         if self.subdomain == "":
             return prefix + host_tld
-        return prefix + force_text(self.subdomain) + "." + host_tld
+        return prefix + force_str(self.subdomain) + "." + host_tld
 
     def get_task_state(self, task_key):
         return TaskState.get_or_create(self, task_key)
