@@ -537,7 +537,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 
 [[package]]
 name = "smartmin"
-version = "4.0.1"
+version = "4.1.0"
 description = "Scaffolding system for Django object management."
 category = "main"
 optional = false
@@ -640,7 +640,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "108c22d67701c2f02335f6d6349fe85f685dfd95d076f686b20e8d7e183bafed"
+content-hash = "8d8d4c750f1e5e37d87e19632e5e91164652b6d1034c7f4e44e1d5cfb6760c00"
 
 [metadata.files]
 amqp = [
@@ -1021,8 +1021,8 @@ six = [
     {file = "six-1.16.0.tar.gz", hash = "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"},
 ]
 smartmin = [
-    {file = "smartmin-4.0.1-py3-none-any.whl", hash = "sha256:865ea6681e9ddb7ac138a9f84034807a6db3f8bc3e3100edc4651b5f168e9451"},
-    {file = "smartmin-4.0.1.tar.gz", hash = "sha256:86e8074bac02c611e54ff8427424a6b522c2116a80d484fdb01be19e304be2b2"},
+    {file = "smartmin-4.1.0-py3-none-any.whl", hash = "sha256:3667eaf2b2c9a6d7b4ccccc58efd36a6eef8cd1c17bcf43ab2c76defb25abe92"},
+    {file = "smartmin-4.1.0.tar.gz", hash = "sha256:8a8fae03da769b72f301e5bf28b13b3de0d6e316522fabeae19b6eac2073436b"},
 ]
 sorl-thumbnail = [
     {file = "sorl-thumbnail-12.7.0.tar.gz", hash = "sha256:fbe6dfd66a1aceb7e0203895ff5622775e50266f8d8cfd841fe1500bd3e19018"},
