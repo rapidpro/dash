@@ -1,3 +1,7 @@
+v1.9.2
+----------
+ * Update to latest pillow, smartmin
+
 v1.9.1
 ----------
  * Add missing migrations
