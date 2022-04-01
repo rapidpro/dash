@@ -77,11 +77,9 @@ def load_dashblocks(context, org, slug, tag=None):
         default_invalid = '<b><font color="red">DashBlockType with slug: %s not found</font></b>'
         return getattr(settings, "DASHBLOCK_STRING_IF_INVALID", default_invalid) % slug
 
+    dashblocks = None
     if hasattr(dashblock_type, "prefetch_dashblocks"):
         dashblocks = dashblock_type.prefetch_dashblocks
-    else:
-        dashblocks = DashBlock.objects.filter(dashblock_type=dashblock_type, org=org, is_active=True)
-        dashblocks = dashblocks.order_by("-priority")
 
     context[slug] = dashblocks
 
