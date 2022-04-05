@@ -5,6 +5,7 @@ from smartmin.models import SmartModel
 
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Prefetch, Q
 from django.utils.translation import gettext_lazy as _
 
 from dash.categories.models import Category
@@ -118,7 +119,11 @@ class Story(SmartModel):
             return full_name.strip()
 
     def get_featured_images(self):
-        return self.images.filter(is_active=True).exclude(image="")
+        return (
+            self.prefetched_images
+            if hasattr(self, "prefetched_images")
+            else self.images.filter(is_active=True).exclude(image="")
+        )
 
     def get_category_image(self):
         cat_image = None
@@ -141,6 +146,23 @@ class Story(SmartModel):
                 cat_image = self.category.get_first_image()
 
         return cat_image
+
+    @classmethod
+    def get_main_stories(cls, org, limit=None):
+        stories = (
+            Story.objects.filter(org=org, featured=True, is_active=True)
+            .filter(Q(attachment="") | Q(attachment=None))
+            .prefetch_related(
+                Prefetch(
+                    "images",
+                    queryset=StoryImage.objects.filter(is_active=True).exclude(image=""),
+                    to_attr="prefetched_images",
+                )
+            )
+            .order_by("-created_on")
+        )
+
+        return stories[:limit] if limit else stories
 
     class Meta:
         verbose_name_plural = _("Stories")

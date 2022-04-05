@@ -1,5 +1,6 @@
 from django import template
 from django.conf import settings
+from django.db.models import Prefetch
 
 from dash.dashblocks.models import DashBlock, DashBlockType
 
@@ -55,18 +56,28 @@ def load_dashblocks(context, org, slug, tag=None):
     if not org:
         return ""
 
-    try:
-        dashblock_type = DashBlockType.objects.get(slug=slug)
-    except DashBlockType.DoesNotExist:
+    dashblocks_qs = DashBlock.objects.filter(org=org, is_active=True).order_by("-priority")
+    # filter by our tag if one was specified
+    if tag is not None:
+        dashblocks_qs = dashblocks_qs.filter(tags__icontains=tag)
+
+    dashblock_type = (
+        DashBlockType.objects.filter(slug=slug)
+        .prefetch_related(
+            Prefetch(
+                "dashblock_set",
+                queryset=dashblocks_qs,
+                to_attr="prefetch_dashblocks",
+            )
+        )
+        .first()
+    )
+
+    if not dashblock_type:
         default_invalid = '<b><font color="red">DashBlockType with slug: %s not found</font></b>'
         return getattr(settings, "DASHBLOCK_STRING_IF_INVALID", default_invalid) % slug
 
-    dashblocks = DashBlock.objects.filter(dashblock_type=dashblock_type, org=org, is_active=True)
-    dashblocks = dashblocks.order_by("-priority")
-
-    # filter by our tag if one was specified
-    if tag is not None:
-        dashblocks = dashblocks.filter(tags__icontains=tag)
+    dashblocks = dashblock_type.prefetch_dashblocks
 
     context[slug] = dashblocks
 

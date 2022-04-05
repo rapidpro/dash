@@ -72,11 +72,7 @@ def set_org_processor(request):
     """
     if getattr(request, "org", None):
         org = request.org
-        pattern_bg = org.backgrounds.filter(is_active=True, background_type="P")
-        pattern_bg = pattern_bg.order_by("-pk").first()
-        banner_bg = org.backgrounds.filter(is_active=True, background_type="B")
-        banner_bg = banner_bg.order_by("-pk").first()
 
-        return dict(org=org, pattern_bg=pattern_bg, banner_bg=banner_bg)
+        return dict(org=org)
     else:
         return dict()
