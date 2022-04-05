@@ -1,3 +1,15 @@
+v1.9.3
+----------
+ * Merge pull request #141 from rapidpro/optimize-queries
+ * Remove unnecessary if block
+ * Remove unnecessary codes
+ * Add prefetch dashblocks when loading dashblocks
+ * Reduce DB queries
+ * Merge pull request #140 from rapidpro/dependabot/pip/pillow-9.0.1
+ * Bump pillow from 9.0.0 to 9.0.1
+ * Merge pull request #139 from rapidpro/dependabot/pip/django-4.0.2
+ * Bump django from 4.0.1 to 4.0.2
+
 v1.9.2
 ----------
  * Update to latest pillow, smartmin
