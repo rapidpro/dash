@@ -3,11 +3,12 @@ import json
 import logging
 from functools import wraps
 
-from celery import shared_task, signature
 from django_redis import get_redis_connection
 
 from django.apps import apps
 from django.utils import timezone
+
+from celery import shared_task, signature
 
 from .models import Invitation, TaskState
 

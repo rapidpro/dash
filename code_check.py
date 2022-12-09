@@ -36,10 +36,10 @@ if __name__ == "__main__":
     cmd("python manage.py makemigrations")
     status("Running black")
     cmd("black --line-length=119 dash test_runner")
-    status("Running flake8")
-    cmd("flake8")
+    status("Running ruff")
+    cmd("ruff dash")
     status("Running isort")
-    cmd("isort -rc dash")
+    cmd("isort dash")
 
     # if any code changes were made, exit with error
     if cmd("git diff dash test_runner testfiles"):

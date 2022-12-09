@@ -65,3 +65,7 @@ db.sqlite3
 deploy
 fabric
 fabfile.*
+
+# ruff 
+.ruff_cache
+

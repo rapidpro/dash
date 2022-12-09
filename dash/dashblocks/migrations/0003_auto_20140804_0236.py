@@ -1,4 +1,4 @@
-from django.db import migrations, models
+from django.db import migrations
 
 
 def generate_initial_block_types(apps, schema_editor):

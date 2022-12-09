@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-from django.db import migrations, models
+from django.db import migrations
 
 
 def add_category_to_current_stories(apps, schema_editor):
