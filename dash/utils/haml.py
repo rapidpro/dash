@@ -8,7 +8,6 @@ from django.template import TemplateDoesNotExist
 from django.template.base import Origin
 from django.template.loaders import app_directories, filesystem
 
-
 """
 Our dashboards typically use HamlPy (https://github.com/nyaruka/django-hamlpy) for templates, but we need our own custom
 template loaders because we allow templates to be overridden even when the extension doesn't match, i.e. a template

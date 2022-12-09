@@ -3,7 +3,6 @@ from abc import ABCMeta, abstractmethod
 from enum import Enum
 from typing import Optional, Tuple
 
-
 """
 Sync support
 """
