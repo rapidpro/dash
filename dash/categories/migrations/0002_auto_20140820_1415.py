@@ -1,10 +1,10 @@
-from django.db import migrations, models
+from django.db import migrations
 
 
 def pollcategory_to_category(apps, schema_editor):
-    Category = apps.get_model("categories", "Category")
+    # Category = apps.get_model("categories", "Category")
     User = apps.get_model("auth", "User")
-    Org = apps.get_model("orgs", "Org")
+    # Org = apps.get_model("orgs", "Org")
     # from ureport.polls.models import PollCategory
 
     root = User.objects.filter(username="root").first()

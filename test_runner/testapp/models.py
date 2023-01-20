@@ -28,7 +28,7 @@ class ContactSyncer(BaseSyncer):
     local_backend_attr = "backend"
 
     def local_kwargs(self, org, remote):
-        if remote.blocked:  # we don't store blocked contacts
+        if remote.status == "blocked":  # we don't store blocked contacts
             return None
 
         return {"org": org, "uuid": remote.uuid, "name": remote.name, self.local_backend_attr: self.backend}

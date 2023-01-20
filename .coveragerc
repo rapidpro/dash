@@ -1,9 +1,0 @@
-[run]
-source = dash
-omit =
-    */migrations/*
-    */tests*,
-    *__init__*,
-    *settings*,
-    *management/commands*
-    dash/test.py
