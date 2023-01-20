@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Install Redis
-        uses: zhulik/redis-action@v1.1.0
+        uses: zhulik/redis-action@1.1.0
         with:
           redis version: ${{ env.redis-version }}
 
