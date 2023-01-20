@@ -49,27 +49,27 @@ class SyncTest(DashTest):
         self.assertEqual(self.syncer2.fetch_local(self.unicef, "CF-001"), self.joe2)
 
     def test_local_kwargs(self):
-        remote = TembaContact.create(uuid="C-002", name="Frank", blocked=False)
+        remote = TembaContact.create(uuid="C-002", name="Frank", status="active")
         kwargs = self.syncer.local_kwargs(self.unicef, remote)
         self.assertEqual(
             kwargs, {"org": self.unicef, "uuid": "C-002", "name": "Frank", "backend": self.rapidpro_backend}
         )
 
-        remote = TembaContact.create(uuid="CF-002", name="Frank", blocked=False)
+        remote = TembaContact.create(uuid="CF-002", name="Frank", status="active")
         kwargs = self.syncer2.local_kwargs(self.unicef, remote)
         self.assertEqual(
             kwargs, {"org": self.unicef, "uuid": "CF-002", "name": "Frank", "backend": self.floip_backend}
         )
 
-        remote = TembaContact.create(uuid="C-002", name="Frank", blocked=True)
+        remote = TembaContact.create(uuid="C-002", name="Frank", status="blocked")
         self.assertIsNone(self.syncer.local_kwargs(self.unicef, remote))
 
-        remote = TembaContact.create(uuid="CF-002", name="Frank", blocked=True)
+        remote = TembaContact.create(uuid="CF-002", name="Frank", status="blocked")
         self.assertIsNone(self.syncer2.local_kwargs(self.unicef, remote))
 
     def test_sync_from_remote(self):
         # no existing contact with same identity
-        remote = TembaContact.create(uuid="C-002", name="Frank", blocked=False)
+        remote = TembaContact.create(uuid="C-002", name="Frank", status="active")
         self.assertEqual(sync_from_remote(self.unicef, self.syncer, remote), SyncOutcome.created)
 
         Contact.objects.get(org=self.unicef, uuid="C-002", name="Frank", backend=self.rapidpro_backend, is_active=True)
@@ -79,18 +79,18 @@ class SyncTest(DashTest):
             ).first()
         )
 
-        remote = TembaContact.create(uuid="CF-002", name="Frank", blocked=False)
+        remote = TembaContact.create(uuid="CF-002", name="Frank", status="active")
         self.assertEqual(sync_from_remote(self.unicef, self.syncer2, remote), SyncOutcome.created)
         Contact.objects.get(org=self.unicef, uuid="CF-002", name="Frank", backend=self.floip_backend, is_active=True)
 
         # no significant change
-        remote = TembaContact.create(uuid="C-002", name="Frank", blocked=False)
+        remote = TembaContact.create(uuid="C-002", name="Frank", status="active")
         self.assertEqual(sync_from_remote(self.unicef, self.syncer, remote), SyncOutcome.ignored)
 
         Contact.objects.get(org=self.unicef, uuid="C-002", name="Frank", backend=self.rapidpro_backend, is_active=True)
 
         # significant change (name)
-        remote = TembaContact.create(uuid="C-002", name="Franky", blocked=False)
+        remote = TembaContact.create(uuid="C-002", name="Franky", status="active")
         self.assertEqual(sync_from_remote(self.unicef, self.syncer, remote), SyncOutcome.updated)
 
         Contact.objects.get(
@@ -98,7 +98,7 @@ class SyncTest(DashTest):
         )
 
         # change to something we don't want locally
-        remote = TembaContact.create(uuid="C-002", name="Franky", blocked=True)
+        remote = TembaContact.create(uuid="C-002", name="Franky", status="blocked")
         self.assertEqual(sync_from_remote(self.unicef, self.syncer, remote), SyncOutcome.deleted)
 
         Contact.objects.get(
@@ -109,10 +109,10 @@ class SyncTest(DashTest):
         Contact.objects.all().delete()  # start with no contacts...
 
         remote_set = [
-            TembaContact.create(uuid="C-001", name="Anne", blocked=False),
-            TembaContact.create(uuid="C-002", name="Bob", blocked=False),
-            TembaContact.create(uuid="C-003", name="Colin", blocked=False),
-            TembaContact.create(uuid="C-004", name="Donald", blocked=True),
+            TembaContact.create(uuid="C-001", name="Anne", status="active"),
+            TembaContact.create(uuid="C-002", name="Bob", status="active"),
+            TembaContact.create(uuid="C-003", name="Colin", status="active"),
+            TembaContact.create(uuid="C-004", name="Donald", status="blocked"),
         ]
 
         self.assertEqual(
@@ -123,9 +123,9 @@ class SyncTest(DashTest):
 
         remote_set = [
             # first contact removed
-            TembaContact.create(uuid="C-002", name="Bob", blocked=False),  # no change
-            TembaContact.create(uuid="C-003", name="Colm", blocked=False),  # changed name
-            TembaContact.create(uuid="C-005", name="Edward", blocked=False),  # new contact
+            TembaContact.create(uuid="C-002", name="Bob", status="active"),  # no change
+            TembaContact.create(uuid="C-003", name="Colm", status="active"),  # changed name
+            TembaContact.create(uuid="C-005", name="Edward", status="active"),  # new contact
         ]
 
         self.assertEqual(
@@ -141,9 +141,9 @@ class SyncTest(DashTest):
 
         remote_set = [
             # first contact removed
-            TembaContact.create(uuid="CF-002", name="Bob", blocked=False),  # no change
-            TembaContact.create(uuid="CF-003", name="Colm", blocked=False),  # changed name
-            TembaContact.create(uuid="CF-005", name="Edward", blocked=False),  # new contact
+            TembaContact.create(uuid="CF-002", name="Bob", status="active"),  # no change
+            TembaContact.create(uuid="CF-003", name="Colm", status="active"),  # changed name
+            TembaContact.create(uuid="CF-005", name="Edward", status="active"),  # new contact
         ]
         self.assertEqual(
             {SyncOutcome.created: 3, SyncOutcome.updated: 0, SyncOutcome.deleted: 0, SyncOutcome.ignored: 0},
@@ -159,10 +159,10 @@ class SyncTest(DashTest):
 
         fetches = MockClientQuery(
             [
-                TembaContact.create(uuid="C-001", name="Anne", blocked=False),
-                TembaContact.create(uuid="C-002", name="Bob", blocked=False),
-                TembaContact.create(uuid="C-003", name="Colin", blocked=False),
-                TembaContact.create(uuid="C-004", name="Donald", blocked=True),
+                TembaContact.create(uuid="C-001", name="Anne", status="active"),
+                TembaContact.create(uuid="C-002", name="Bob", status="active"),
+                TembaContact.create(uuid="C-003", name="Colin", status="active"),
+                TembaContact.create(uuid="C-004", name="Donald", status="blocked"),
             ]
         )
         deleted_fetches = MockClientQuery([])  # no deleted contacts this time
@@ -174,13 +174,13 @@ class SyncTest(DashTest):
 
         fetches = MockClientQuery(
             [
-                TembaContact.create(uuid="C-005", name="Edward", blocked=False),  # new contact
-                TembaContact.create(uuid="C-006", name="Frank", blocked=False),  # new contact
+                TembaContact.create(uuid="C-005", name="Edward", status="active"),  # new contact
+                TembaContact.create(uuid="C-006", name="Frank", status="active"),  # new contact
             ]
         )
         deleted_fetches = MockClientQuery(
             [
-                TembaContact.create(uuid="C-001", name=None, blocked=None),  # deleted
+                TembaContact.create(uuid="C-001", name=None, status=None),  # deleted
             ]
         )
 
@@ -191,8 +191,8 @@ class SyncTest(DashTest):
 
         fetches = MockClientQuery(
             [
-                TembaContact.create(uuid="C-002", name="Bob", blocked=True),  # blocked so locally invalid
-                TembaContact.create(uuid="C-003", name="Colm", blocked=False),  # changed name
+                TembaContact.create(uuid="C-002", name="Bob", status="blocked"),  # blocked so locally invalid
+                TembaContact.create(uuid="C-003", name="Colm", status="active"),  # changed name
             ]
         )
         deleted_fetches = MockClientQuery([])
@@ -204,10 +204,10 @@ class SyncTest(DashTest):
 
         fetches = MockClientQuery(
             [
-                TembaContact.create(uuid="CF-001", name="Anne", blocked=False),
-                TembaContact.create(uuid="CF-002", name="Bob", blocked=False),
-                TembaContact.create(uuid="CF-003", name="Colin", blocked=False),
-                TembaContact.create(uuid="CF-004", name="Donald", blocked=True),
+                TembaContact.create(uuid="CF-001", name="Anne", status="active"),
+                TembaContact.create(uuid="CF-002", name="Bob", status="active"),
+                TembaContact.create(uuid="CF-003", name="Colin", status="active"),
+                TembaContact.create(uuid="CF-004", name="Donald", status="blocked"),
             ]
         )
         deleted_fetches = MockClientQuery([])  # no deleted contacts this time
@@ -219,13 +219,13 @@ class SyncTest(DashTest):
 
         fetches = MockClientQuery(
             [
-                TembaContact.create(uuid="CF-005", name="Edward", blocked=False),  # new contact
-                TembaContact.create(uuid="CF-006", name="Frank", blocked=False),  # new contact
+                TembaContact.create(uuid="CF-005", name="Edward", status="active"),  # new contact
+                TembaContact.create(uuid="CF-006", name="Frank", status="active"),  # new contact
             ]
         )
         deleted_fetches = MockClientQuery(
             [
-                TembaContact.create(uuid="CF-001", name=None, blocked=None),  # deleted
+                TembaContact.create(uuid="CF-001", name=None, status=None),  # deleted
             ]
         )
 
@@ -236,8 +236,8 @@ class SyncTest(DashTest):
 
         fetches = MockClientQuery(
             [
-                TembaContact.create(uuid="CF-002", name="Bob", blocked=True),  # blocked so locally invalid
-                TembaContact.create(uuid="CF-003", name="Colm", blocked=False),  # changed name
+                TembaContact.create(uuid="CF-002", name="Bob", status="blocked"),  # blocked so locally invalid
+                TembaContact.create(uuid="CF-003", name="Colm", status="active"),  # changed name
             ]
         )
         deleted_fetches = MockClientQuery([])
