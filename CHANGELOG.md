@@ -1,3 +1,33 @@
+v1.10.0 (2023-01-23)
+-------------------------
+ * Make python version for release 3.10
+ * Merge pull request #149 from rapidpro/updates
+ * Update to latest smartmin
+ * Fix redis install action version
+ * Update CI versions
+ * Merge pull request #148 from rapidpro/updates
+ * Update to match rapipro-python updates
+ * Update black
+ * Update config and deps
+ * update code_checks
+ * Switch from flake8 to ruff
+ * Move isort config into pyproject.toml
+ * Move coverage config into pyproject.toml
+ * Merge pull request #145 from rapidpro/dependabot/pip/pillow-9.3.0
+ * Merge pull request #146 from rapidpro/dependabot/pip/certifi-2022.12.7
+ * Merge pull request #147 from rapidpro/dependabot/pip/django-4.0.8
+ * Merge branch 'main' into dependabot/pip/pillow-9.3.0
+ * Bump django from 4.0.7 to 4.0.8
+ * Merge branch 'main' into dependabot/pip/certifi-2022.12.7
+ * Merge pull request #144 from rapidpro/dependabot/pip/django-4.0.7
+ * Bump certifi from 2021.10.8 to 2022.12.7
+ * Bump pillow from 9.0.1 to 9.3.0
+ * Bump django from 4.0.6 to 4.0.7
+ * Merge pull request #143 from rapidpro/dependabot/pip/django-4.0.6
+ * Bump django from 4.0.4 to 4.0.6
+ * Merge pull request #142 from rapidpro/dependabot/pip/django-4.0.4
+ * Bump django from 4.0.2 to 4.0.4
+
 v1.9.3
 ----------
  * Merge pull request #141 from rapidpro/optimize-queries
