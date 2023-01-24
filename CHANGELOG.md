@@ -1,3 +1,9 @@
+v1.10.2 (2023-01-24)
+-------------------------
+ * Merge pull request #151 from rapidpro/fix-compressor
+ * Update deps
+ * Update django compressor
+
 v1.10.1 (2023-01-24)
 -------------------------
  * Merge pull request #150 from rapidpro/updates-django
