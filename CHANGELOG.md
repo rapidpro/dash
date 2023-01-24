@@ -1,3 +1,8 @@
+v1.10.1 (2023-01-24)
+-------------------------
+ * Merge pull request #150 from rapidpro/updates-django
+ * Update django and celery
+
 v1.10.0 (2023-01-23)
 -------------------------
  * Make python version for release 3.10
