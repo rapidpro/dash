@@ -259,15 +259,18 @@ regex = ">=2020.1.1"
 
 [[package]]
 name = "django-redis"
-version = "4.12.1"
+version = "5.2.0"
 description = "Full featured redis cache backend for Django."
 category = "main"
 optional = false
-python-versions = ">=3.5"
+python-versions = ">=3.6"
 
 [package.dependencies]
 Django = ">=2.2"
-redis = ">=3.0.0"
+redis = ">=3,<4.0.0 || >4.0.0,<4.0.1 || >4.0.1"
+
+[package.extras]
+hiredis = ["redis[hiredis] (>=3,!=4.0.0,!=4.0.1)"]
 
 [[package]]
 name = "django-timezone-field"
@@ -403,11 +406,11 @@ wcwidth = "*"
 
 [[package]]
 name = "psycopg2-binary"
-version = "2.8.6"
+version = "2.9.5"
 description = "psycopg2 - Python-PostgreSQL Database Adapter"
 category = "main"
 optional = false
-python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
+python-versions = ">=3.6"
 
 [[package]]
 name = "python-dateutil"
@@ -611,7 +614,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "232ebe1e58f3926d3805212367f8094a0e70437588c9c2a7483135d4e2f121b8"
+content-hash = "d1c85a4e217ff8ce0c01f50a309a6379da495605d4ac661e242333f5106d0eb0"
 
 [metadata.files]
 amqp = [
@@ -664,10 +667,7 @@ django-hamlpy = [
     {file = "django-hamlpy-1.4.4.tar.gz", hash = "sha256:76252ebb4475c2bffbd2671fc64e9add519dfe53489d48d0727ba7a64c7a9c0b"},
     {file = "django_hamlpy-1.4.4-py3-none-any.whl", hash = "sha256:1cd39ab5bb2af7ee23d1669fa719d5bf4bc0385ebbb827a08471d8a88541b304"},
 ]
-django-redis = [
-    {file = "django-redis-4.12.1.tar.gz", hash = "sha256:306589c7021e6468b2656edc89f62b8ba67e8d5a1c8877e2688042263daa7a63"},
-    {file = "django_redis-4.12.1-py3-none-any.whl", hash = "sha256:1133b26b75baa3664164c3f44b9d5d133d1b8de45d94d79f38d1adc5b1d502e5"},
-]
+django-redis = []
 django-timezone-field = [
     {file = "django-timezone-field-4.2.3.tar.gz", hash = "sha256:5dd5bd9249382bef8847d3e7e4c32b7be182a4b538f354130d1252ed228892f8"},
     {file = "django_timezone_field-4.2.3-py3-none-any.whl", hash = "sha256:7552d2b0f145684b7de3fb5046101c7efd600cc6ba951b15c630fa1e1b83558e"},
