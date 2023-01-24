@@ -48,7 +48,7 @@ class SetOrgMiddleware(MiddlewareMixin):
     """
 
     def __init__(self, get_response=None):
-        self.get_response = get_response
+        super(SetOrgMiddleware, self).__init__(get_response)
 
     def process_request(self, request):
 

@@ -11,7 +11,7 @@ from django.contrib.auth.models import Group, User
 from django.core import mail
 from django.core.exceptions import DisallowedHost
 from django.db.utils import IntegrityError
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponse
 from django.urls import ResolverMatch, reverse
 from django.utils.encoding import force_str
 
@@ -164,7 +164,10 @@ class SetOrgMiddlewareTest(DashTest):
     def setUp(self):
         super(SetOrgMiddlewareTest, self).setUp()
 
-        self.middleware = SetOrgMiddleware()
+        self.middleware = SetOrgMiddleware(self.get_response)
+
+    def get_response(request):
+        return HttpResponse()
 
     def mock_view(self, request):
         return MockResponse(204)
