@@ -1,3 +1,12 @@
+v1.10.3 (2023-02-20)
+-------------------------
+ * Merge pull request #153 from rapidpro/dependabot/pip/django-4.1.7
+ * Merge pull request #154 from rapidpro/fix-ga-deps
+ * Fix github action deps
+ * Bump django from 4.1.6 to 4.1.7
+ * Merge pull request #152 from rapidpro/dependabot/pip/django-4.1.6
+ * Bump django from 4.1.5 to 4.1.6
+
 v1.10.2 (2023-01-24)
 -------------------------
  * Merge pull request #151 from rapidpro/fix-compressor
