@@ -85,7 +85,7 @@ def maybe_run_for_org(org, task_func, task_key, lock_timeout):
             state.ended_on = None
             state.save(update_fields=("started_on", "ended_on"))
 
-            num_task_args = len(inspect.getargspec(task_func).args)
+            num_task_args = len(inspect.getfullargspec(task_func).args)
 
             assert num_task_args >= 1, "task signature must be foo(org) or foo(org, since, until)"
 
