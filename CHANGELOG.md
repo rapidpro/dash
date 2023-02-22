@@ -1,3 +1,7 @@
+v1.10.4 (2023-02-22)
+-------------------------
+ * Replace inspect removed method
+
 v1.10.3 (2023-02-20)
 -------------------------
  * Merge pull request #153 from rapidpro/dependabot/pip/django-4.1.7
