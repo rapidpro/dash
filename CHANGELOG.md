@@ -1,3 +1,8 @@
+v1.10.5 (2023-02-27)
+-------------------------
+ * Merge pull request #156 from rapidpro/fix-stories-links
+ * Fix story audio link formatting
+
 v1.10.4 (2023-02-22)
 -------------------------
  * Replace inspect removed method
