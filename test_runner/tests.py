@@ -1716,6 +1716,7 @@ class StoryTest(DashTest):
         self.assertEqual(Story.format_audio_link("http://"), "")
         self.assertEqual(Story.format_audio_link("example.com/foo.mp3"), "http://example.com/foo.mp3")
         self.assertEqual(Story.format_audio_link("http://example.com/foo.mp3"), "http://example.com/foo.mp3")
+        self.assertEqual(Story.format_audio_link("https://example.com/foo.mp3"), "https://example.com/foo.mp3")
 
     def test_story_model(self):
         self.story = Story.objects.create(
