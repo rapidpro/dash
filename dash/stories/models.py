@@ -77,7 +77,7 @@ class Story(SmartModel):
         if formatted_link == "http://":
             return ""
 
-        if not formatted_link.startswith("http://"):
+        if not formatted_link.startswith("http://") and not formatted_link.startswith("https://"):
             formatted_link = "http://" + formatted_link
         return formatted_link
 
