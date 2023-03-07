@@ -1,3 +1,8 @@
+v1.11.0 (2023-03-07)
+-------------------------
+ * Update to latest rapidpro client
+ * Update hamlpy
+
 v1.10.5 (2023-02-27)
 -------------------------
  * Merge pull request #156 from rapidpro/fix-stories-links
