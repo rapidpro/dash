@@ -41,7 +41,7 @@ isort = {extras = ["pyproject"], version = "^5.10.1"}
 black = "^22.12.0"
 isort = "^5.1.0"
 colorama = "^0.4.3"
-codecov = "^2.1.11"
+coverage = {extras = ["toml"], version = "^7.2.2"}
 ruff = "^0.0.171"
 
 [tool.black]
