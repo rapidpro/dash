@@ -1,3 +1,15 @@
+v1.11.1 (2023-04-19)
+-------------------------
+ * Merge pull request #161 from rapidpro/update-coverage-deps
+ * Replace codecov with coverage
+ * Merge pull request #160 from rapidpro/more-index-optimizations
+ * More stories query optimization
+ * Merge pull request #159 from rapidpro/dependabot/pip/redis-4.5.4
+ * Bump redis from 4.5.3 to 4.5.4
+ * Add indexes to optimize more the page loading
+ * Merge pull request #158 from rapidpro/dependabot/pip/redis-4.5.3
+ * Bump redis from 4.5.1 to 4.5.3
+
 v1.11.0 (2023-03-07)
 -------------------------
  * Update to latest rapidpro client
