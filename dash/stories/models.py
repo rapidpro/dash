@@ -122,7 +122,7 @@ class Story(SmartModel):
         return (
             self.prefetched_images
             if hasattr(self, "prefetched_images")
-            else self.images.filter(is_active=True).exclude(image="")
+            else self.images.filter(is_active=True).exclude(image="").only("is_active", "image")
         )
 
     def get_category_image(self):
@@ -155,10 +155,20 @@ class Story(SmartModel):
             .prefetch_related(
                 Prefetch(
                     "images",
-                    queryset=StoryImage.objects.filter(is_active=True).exclude(image=""),
+                    queryset=StoryImage.objects.filter(is_active=True)
+                    .exclude(image="")
+                    .only("is_active", "story_id", "image"),
                     to_attr="prefetched_images",
-                )
+                ),
+                Prefetch(
+                    "category",
+                    queryset=Category.objects.filter(is_active=True, org=org)
+                    .exclude(image="")
+                    .only("id")
+                    .prefetch_related("images"),
+                ),
             )
+            .only("id", "category_id", "title", "summary")
             .order_by("-created_on")
         )
 
