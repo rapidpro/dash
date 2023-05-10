@@ -1,3 +1,12 @@
+v1.12.0 (2023-05-10)
+-------------------------
+ * Merge pull request #164 from rapidpro/update-client
+ * Update rapidpro-python
+ * Merge pull request #162 from rapidpro/dependabot/pip/sqlparse-0.4.4
+ * Merge pull request #163 from rapidpro/dependabot/pip/django-4.1.9
+ * Bump django from 4.1.7 to 4.1.9
+ * Bump sqlparse from 0.4.3 to 0.4.4
+
 v1.11.1 (2023-04-19)
 -------------------------
  * Merge pull request #161 from rapidpro/update-coverage-deps
