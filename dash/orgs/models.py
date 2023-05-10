@@ -162,7 +162,7 @@ class Org(SmartModel):
             org_user.set_org(self)
             return org_user
 
-    def get_temba_client(self, api_version=2):
+    def get_temba_client(self, api_version=2, transformer=None):
         if api_version not in (2,):
             raise ValueError("Unsupported RapidPro API version: %d" % api_version)
 
@@ -182,7 +182,7 @@ class Org(SmartModel):
             if backend.host:
                 host = backend.host
 
-        return TembaClient(host, api_token, user_agent=agent)
+        return TembaClient(host, api_token, user_agent=agent, transformer=transformer)
 
     def build_host_link(self, user_authenticated=False):
         host_tld = getattr(settings, "HOSTNAME", "locahost")
