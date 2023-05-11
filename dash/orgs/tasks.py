@@ -29,7 +29,7 @@ def trigger_org_task(task_name, queue="celery"):
     :param task_name: the full task name, e.g. 'myproj.myapp.tasks.do_stuff'
     :param queue: the name of the queue to send org sub-tasks to
     """
-    active_orgs = apps.get_model("orgs", "Org").objects.filter(is_active=True)
+    active_orgs = apps.get_model("orgs", "Org").objects.filter(is_active=True, is_paused=False)
     for org in active_orgs:
         sig = signature(task_name, args=[org.pk])
         sig.apply_async(queue=queue)
