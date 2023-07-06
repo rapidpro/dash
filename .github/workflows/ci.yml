@@ -7,9 +7,6 @@ jobs:
       python-version: "3.10.x"
       pg-version: "14"
       redis-version: "6.2"
-    strategy:
-      matrix:
-        django-version: ["4.0.x", "4.1.x", "4.x.x"]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -41,7 +38,6 @@ jobs:
       - name: Initialize environment
         run: |
           poetry install
-          poetry add django==${{ matrix.django-version }}
 
       - name: Run pre-test checks
         run: |
