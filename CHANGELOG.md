@@ -1,3 +1,8 @@
+v1.13.0 (2023-07-06)
+-------------------------
+ * Upgrade to psycopg non-binary
+ * Bump django from 4.2.1 to 4.2.3
+
 v1.12.0 (2023-05-10)
 -------------------------
  * Merge pull request #164 from rapidpro/update-client
