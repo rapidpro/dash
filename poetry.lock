@@ -444,21 +444,6 @@ rcssmin = "1.1.1"
 rjsmin = "1.2.1"
 
 [[package]]
-name = "django-hamlpy"
-version = "1.7.0"
-description = "HAML like syntax for Django templates"
-optional = false
-python-versions = ">=3.9,<4.0"
-files = [
-    {file = "django_hamlpy-1.7.0-py3-none-any.whl", hash = "sha256:e11f611ae9d39bfcfa1d349fb532a7c2a318d9ff99ac1482d6219ffbdcb4b661"},
-    {file = "django_hamlpy-1.7.0.tar.gz", hash = "sha256:cbb003f0888ad8adb2615192916c3f7ff0ed8e5a0c2a15d02a7f273ffca92d5c"},
-]
-
-[package.dependencies]
-django = ">=3.2,<5.0"
-regex = ">=2020.1.1"
-
-[[package]]
 name = "django-redis"
 version = "5.3.0"
 description = "Full featured redis cache backend for Django."
@@ -1305,4 +1290,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "3ee19c701a93eeceb04c9fef4c525f6649fc83b3c7b1c4b7b07acfbd2042e328"
+content-hash = "c7e7a20506391d3976924b643ffa774796767e783b3b54c1cff9dcf701a80f15"
