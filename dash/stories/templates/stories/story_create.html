@@ -1,0 +1,25 @@
+{% extends "smartmin/create.html" %}
+{% block extra-style %}
+    <link rel="stylesheet"
+          type="text/css"
+          href="{{ STATIC_URL }}css/prettify.css">
+    <link rel="stylesheet"
+          type="text/css"
+          href="{{ STATIC_URL }}css/summernote.css">
+    <style type="text/css">
+    #id_content {
+      width: 93%;
+      height: 250px;
+      margin-right: 20px;
+    }
+    </style>
+{% endblock extra-style %}
+{% block extra-script %}
+    <script src="{{ STATIC_URL }}js/prettify.js"></script>
+    <script src="{{ STATIC_URL }}js/summernote.min.js"></script>
+    <script type="text/javascript">
+    $(function(){
+      $("#id_content").summernote()
+    });
+    </script>
+{% endblock extra-script %}
