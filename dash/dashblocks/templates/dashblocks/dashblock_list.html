@@ -9,26 +9,26 @@
                     class="form-control">
                 {% if filtered_type.id == type.id %}
                     <option value="0">-----</option>
+                                    {% else %}
+                                        <option value="0">-----"</option>
+            {% endif %}
+            {% for type in types %}
+                {% if filtered_type.id == type.id %}
+                    <option value="={ type.id }">{{ type.name }}</option>
                 {% else %}
-                    <option value="0">-----"</option>
+                    <option value="={ type.id }">{{ type.name }}</option>
                 {% endif %}
-                {% for type in types %}
-                    {% if filtered_type.id == type.id %}
-                        <option value="={ type.id }">{{ type.name }}</option>
-                    {% else %}
-                        <option value="={ type.id }">{{ type.name }}</option>
-                    {% endif %}
-                {% endfor %}
-            </select>
-        {% else %}
-            <input type="hidden" name="type" value="{{ filtered_type.id }}">
-        {% endif %}
-        <input type="text"
-               name="search"
-               value="={ search }"
-               class="input-medium search-query form-control">
-        <button type="submit" class="btn btn-default">{% trans "Search" %}</button>
-    </form>
+            {% endfor %}
+        </select>
+    {% else %}
+        <input type="hidden" name="type" value="{{ filtered_type.id }}">
+    {% endif %}
+    <input type="text"
+           name="search"
+           value="={ search }"
+           class="input-medium search-query form-control">
+    <button type="submit" class="btn btn-default">{% trans "Search" %}</button>
+</form>
 {% endblock search-form %}
 {% block table-buttons %}
     <div class="pull-right">
