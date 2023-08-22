@@ -357,8 +357,6 @@ TEMPLATES = [
                 "dash.orgs.context_processors.set_org_processor",
             ],
             "loaders": [
-                "dash.utils.haml.HamlFilesystemLoader",
-                "dash.utils.haml.HamlAppDirectoriesLoader",
                 "django.template.loaders.filesystem.Loader",
                 "django.template.loaders.app_directories.Loader",
             ],

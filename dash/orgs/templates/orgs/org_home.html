@@ -1,0 +1,30 @@
+{% extends "smartmin/read.html" %}
+{% load i18n %}
+{% block read-buttons %}
+    {% if request.user.is_superuser or org_perms.orgs.org_edit %}
+        <a href="{% url 'orgs.org_edit' %}"
+           role="button"
+           class="btn btn-primary pull-right">{% trans "Edit" %}</a>
+    {% endif %}
+    {% if request.user.is_superuser or org_perms.orgs.orgbackend_list %}
+        <a href="{% url 'orgs.orgbackend_list' %}"
+           role="button"
+           class="btn btn-primary pull-right backends">{% trans "Manage Backends" %}</a>
+    {% endif %}
+    {% if request.user.is_superuser or org_perms.orgs.org_manage_accounts %}
+        <a href="{% url 'orgs.org_manage_accounts' %}"
+           role="button"
+           class="btn btn-primary pull-right manage">{% trans "Manage Users" %}</a>
+    {% endif %}
+{% endblock read-buttons %}
+{% block extra-style %}
+    <style type="text/css">
+    td.read-label {
+      width: 200px;
+    }
+    
+    a.manage, a.backends {
+      margin-right: 10px;
+    }
+    </style>
+{% endblock extra-style %}
