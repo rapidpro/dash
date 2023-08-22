@@ -1,3 +1,13 @@
+v1.14.0 (2023-08-22)
+-------------------------
+ * Merge pull request #170 from rapidpro/convert_templates
+ * lint templates
+ * Use latest djlint
+ * Convert testapp haml template
+ * Remove django-hamlpy
+ * Convert haml templates
+ * Update deps, add djlint
+
 v1.13.0 (2023-07-06)
 -------------------------
  * Upgrade to psycopg non-binary
