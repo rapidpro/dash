@@ -1,3 +1,10 @@
+v1.14.1 (2023-10-05)
+-------------------------
+ * Merge pull request #172 from rapidpro/dependabot/pip/pillow-10.0.1
+ * Merge pull request #171 from rapidpro/dependabot/pip/urllib3-2.0.6
+ * Bump pillow from 9.5.0 to 10.0.1
+ * Bump urllib3 from 2.0.4 to 2.0.6
+
 v1.14.0 (2023-08-22)
 -------------------------
  * Merge pull request #170 from rapidpro/convert_templates
