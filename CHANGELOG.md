@@ -1,3 +1,8 @@
+v1.14.2 (2023-10-18)
+-------------------------
+ * Merge pull request #173 from rapidpro/dependabot/pip/urllib3-2.0.7
+ * Bump urllib3 from 2.0.6 to 2.0.7
+
 v1.14.1 (2023-10-05)
 -------------------------
  * Merge pull request #172 from rapidpro/dependabot/pip/pillow-10.0.1
