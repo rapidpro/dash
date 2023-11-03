@@ -1,3 +1,10 @@
+v1.14.3 (2023-11-03)
+-------------------------
+ * Merge pull request #175 from rapidpro/update-deps
+ * Update deps
+ * Merge pull request #174 from rapidpro/dependabot/pip/django-4.2.7
+ * Bump django from 4.2.4 to 4.2.7
+
 v1.14.2 (2023-10-18)
 -------------------------
  * Merge pull request #173 from rapidpro/dependabot/pip/urllib3-2.0.7
