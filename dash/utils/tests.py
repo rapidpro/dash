@@ -1,10 +1,9 @@
 import json
 import zoneinfo
-from datetime import datetime
+from datetime import datetime, timezone
 from itertools import chain
 
 from django.core.cache import cache
-from django.utils import timezone
 
 from dash.test import DashTest
 

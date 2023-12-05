@@ -1,9 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 import phonenumbers
 
 from django import template
-from django.utils import timezone
 
 register = template.Library()
 

@@ -416,4 +416,4 @@ class OrgBackend(SmartModel):
 
     class Meta:
         unique_together = ("org", "slug")
-        index_together = ("org", "is_active", "slug")
+        indexes = [models.Index(fields=["org", "is_active", "slug"])]

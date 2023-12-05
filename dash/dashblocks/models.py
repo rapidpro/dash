@@ -49,7 +49,7 @@ class DashBlockType(SmartModel):
 
     class Meta:
         ordering = ["name"]
-        index_together = ("slug", "name")
+        indexes = [models.Index(fields=["slug", "name"])]
 
 
 class DashBlock(SmartModel):
@@ -149,7 +149,7 @@ class DashBlock(SmartModel):
 
     class Meta:
         ordering = ["dashblock_type", "title"]
-        index_together = ("org", "is_active", "dashblock_type", "priority")
+        indexes = [models.Index(fields=["org", "is_active", "dashblock_type", "priority"])]
 
 
 class DashBlockImage(SmartModel):

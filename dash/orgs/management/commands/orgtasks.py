@@ -1,5 +1,6 @@
+from datetime import timezone
+
 from django.core.management.base import BaseCommand, CommandError
-from django.utils import timezone
 
 from dash.orgs.models import Org, TaskState
 
