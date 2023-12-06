@@ -90,7 +90,6 @@ DEFAULT_LANGUAGE = "en"
 TIME_ZONE = "UTC"
 USER_TIME_ZONE = "Africa/Kigali"
 USE_I18N = True
-USE_L10N = True
 USE_TZ = True
 
 # Absolute path to the directory static files should be collected to.
