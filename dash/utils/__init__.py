@@ -1,9 +1,9 @@
 import calendar
-import datetime
 import json
 import os
 import random
 from collections import OrderedDict
+from datetime import datetime, timezone as tzone
 from itertools import islice
 from uuid import uuid4
 
@@ -101,8 +101,8 @@ def ms_to_datetime(ms):
     """
     Converts a millisecond accuracy timestamp to a datetime
     """
-    dt = datetime.datetime.utcfromtimestamp(ms / 1000)
-    return dt.replace(microsecond=(ms % 1000) * 1000).replace(tzinfo=datetime.timezone.utc)
+    dt = datetime.utcfromtimestamp(ms / 1000)
+    return dt.replace(microsecond=(ms % 1000) * 1000).replace(tzinfo=tzone.utc)
 
 
 def get_month_range(d=None):

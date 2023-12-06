@@ -1,4 +1,4 @@
-from datetime import timezone
+from datetime import timezone as tzone
 
 from django.core.management.base import BaseCommand, CommandError
 
@@ -105,4 +105,4 @@ def cell(val, width):
 
 
 def format_date(dt):
-    return dt.astimezone(timezone.utc).strftime("%b %d, %Y %H:%M") if dt else ""
+    return dt.astimezone(tzone.utc).strftime("%b %d, %Y %H:%M") if dt else ""
