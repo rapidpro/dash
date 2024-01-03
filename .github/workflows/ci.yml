@@ -3,10 +3,13 @@ on: [push, pull_request]
 jobs:
   test:
     name: Test
+    strategy:
+      matrix:
+        python-version: ["3.10.x", "3.11.x"]
+        django-version: ["4.2.x", "5.0.x"]
     env:
-      python-version: "3.10.x"
-      pg-version: "14"
       redis-version: "6.2"
+      pg-version: "15"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -28,7 +31,7 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ env.python-version }}
+          python-version: ${{ matrix.python-version }}
 
       - name: Install Poetry
         uses: snok/install-poetry@v1
@@ -38,6 +41,7 @@ jobs:
       - name: Initialize environment
         run: |
           poetry install
+          poetry add django==${{ matrix.django-version }}
 
       - name: Run pre-test checks
         run: |
