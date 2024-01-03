@@ -1,3 +1,13 @@
+v1.15.0 (2024-01-03)
+-------------------------
+ * Merge pull request #177 from rapidpro/django5
+ * Drop support for PG14
+ * Merge pull request #176 from rapidpro/prep-django5
+ * Update smartmin to 5.0.0
+ * Start testing on django 5.0
+ * Use datetime timezone aliased as tzone
+ * Remove use of deprecated pytz, self.assertEquals and index_together
+
 v1.14.3 (2023-11-03)
 -------------------------
  * Merge pull request #175 from rapidpro/update-deps
