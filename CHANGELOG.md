@@ -1,3 +1,16 @@
+v1.15.1 (2024-04-17)
+-------------------------
+ * Merge pull request #185 from rapidpro/update-deps
+ * Update deps
+ * Merge pull request #184 from rapidpro/dependabot/pip/idna-3.7
+ * Merge pull request #183 from rapidpro/dependabot/pip/pillow-10.3.0
+ * Bump idna from 3.6 to 3.7
+ * Bump pillow from 10.2.0 to 10.3.0
+ * Merge pull request #182 from rapidpro/update-deps2
+ * Update to latest black, ruff, isort and djlint
+ * Merge pull request #178 from rapidpro/dependabot/pip/pillow-10.2.0
+ * Bump pillow from 10.1.0 to 10.2.0
+
 v1.15.0 (2024-01-03)
 -------------------------
  * Merge pull request #177 from rapidpro/django5
