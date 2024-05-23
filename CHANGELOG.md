@@ -1,3 +1,12 @@
+v1.15.2 (2024-05-23)
+-------------------------
+ * Merge pull request #188 from rapidpro/dependabot/pip/requests-2.32.0
+ * Merge pull request #186 from rapidpro/dependabot/pip/tqdm-4.66.3
+ * Bump tqdm from 4.66.2 to 4.66.3
+ * --- updated-dependencies: - dependency-name: requests   dependency-type: indirect ...
+ * Merge pull request #187 from rapidpro/update-CI-actions
+ * Update Github actions to latest versions
+
 v1.15.1 (2024-04-17)
 -------------------------
  * Merge pull request #185 from rapidpro/update-deps
