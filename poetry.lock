@@ -1218,13 +1218,13 @@ files = [
 
 [[package]]
 name = "smartmin"
-version = "5.0.7"
+version = "5.0.8"
 description = "Scaffolding system for Django object management."
 optional = false
 python-versions = "<4.0,>=3.10"
 files = [
-    {file = "smartmin-5.0.7-py3-none-any.whl", hash = "sha256:8b78e6257c80b4c528fdf30be3eddc4c94b9a2608ee376b56bd4afba07779529"},
-    {file = "smartmin-5.0.7.tar.gz", hash = "sha256:2a6e9fd45aa32ddfbccdf38977e067a37d06f1223373a3c07de3b0fcbaa14363"},
+    {file = "smartmin-5.0.8-py3-none-any.whl", hash = "sha256:5aa0a3df824f48938ed11a648a1674535b4344c54ec8a6fa527344b96b4a346b"},
+    {file = "smartmin-5.0.8.tar.gz", hash = "sha256:a59b514d87bcf93ea51b01c5851ac5bbc58ac768292af533094c805cf93d3efd"},
 ]
 
 [package.dependencies]
@@ -1378,4 +1378,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "d34b43f2afd30c10fbf832896367ff31aa8a9938daf09e28a757b2dac51b0430"
+content-hash = "3200b7c84c82069f15b63146ba78c49daeb1170f894eff2c7a0a743e640cb583"
