@@ -145,7 +145,6 @@ GROUP_PERMISSIONS = {
         "categories.category.*",
         "categories.categoryimage.*",
         "dashblocks.dashblock.*",
-        "users.user_profile",
         "orgs.org_home",
         "orgs.org_edit",
         "orgs.org_manage_accounts",
@@ -161,7 +160,6 @@ GROUP_PERMISSIONS = {
         "news.newsitem.*",
         "news.video.*",
         "orgs.org_home",
-        "orgs.org_profile",
         "polls.poll.*",
         "polls.pollcategory.*",
         "polls.pollimage.*",
@@ -169,7 +167,6 @@ GROUP_PERMISSIONS = {
         "stories.story.*",
         "stories.storyimage.*",
         "tags.tag.*",
-        "users.user_profile",
     ),
     "Viewers": [],
 }
