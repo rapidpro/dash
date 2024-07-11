@@ -1,3 +1,13 @@
+v1.15.3 (2024-07-11)
+-------------------------
+ * Merge pull request #193 from rapidpro/update-deps
+ * Update smartmin
+ * Update deps
+ * Merge pull request #190 from rapidpro/python3.12
+ * Update ci.yml
+ * Merge pull request #189 from rapidpro/dependabot/pip/urllib3-2.2.2
+ * Bump urllib3 from 2.2.1 to 2.2.2
+
 v1.15.2 (2024-05-23)
 -------------------------
  * Merge pull request #188 from rapidpro/dependabot/pip/requests-2.32.0
