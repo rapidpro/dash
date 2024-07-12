@@ -38,7 +38,7 @@ class OrgForm(forms.ModelForm):
         if "administrators" in self.fields:
             administrators = User.objects.exclude(username__in=["root", "root2"])
             administrators = administrators.exclude(pk__lt=0)
-            self.fields["administrators"].queryset = administrators
+            self.fields["administrators"].queryset = administrators.order_by("username")
 
     def clean_domain(self):
         domain = self.cleaned_data["domain"] or ""
