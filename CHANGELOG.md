@@ -1,3 +1,7 @@
+v1.15.4 (2024-07-12)
+-------------------------
+ * Order org admins on form
+
 v1.15.3 (2024-07-11)
 -------------------------
  * Merge pull request #193 from rapidpro/update-deps
