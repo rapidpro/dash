@@ -397,7 +397,7 @@ class TaskState(models.Model):
         return (until - self.started_on).total_seconds()
 
     class Meta:
-        unique_together = ("org", "task_key")
+        constraints = [models.UniqueConstraint(fields=["org", "task_key"], name="orgs_taskstate_org_task_key_unique")]
 
 
 class OrgBackend(SmartModel):
@@ -415,5 +415,5 @@ class OrgBackend(SmartModel):
         return self.slug
 
     class Meta:
-        unique_together = ("org", "slug")
-        indexes = [models.Index(fields=["org", "is_active", "slug"])]
+        constraints = [models.UniqueConstraint(fields=["org", "slug"], name="orgs_orgbackend_org_slug_unique")]
+        indexes = [models.Index(fields=["org", "is_active", "slug"], name="orgs_orgbac_org_slug_idx")]
