@@ -39,7 +39,7 @@ if __name__ == "__main__":
     cmd("black dash test_runner")
 
     status("Running ruff")
-    cmd("ruff dash")
+    cmd("ruff check dash")
 
     status("Running isort")
     cmd("isort dash")

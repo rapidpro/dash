@@ -15,4 +15,4 @@ class Tag(SmartModel):
         return self.name
 
     class Meta:
-        unique_together = ("name", "org")
+        constraints = [models.UniqueConstraint(fields=["name", "org"], name="tags_tag_name_org_unique")]

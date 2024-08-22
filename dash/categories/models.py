@@ -50,7 +50,7 @@ class Category(SmartModel):
 
     class Meta:
         ordering = ["name"]
-        unique_together = ("name", "org")
+        constraints = [models.UniqueConstraint(fields=["name", "org"], name="categories_category_name_unique")]
         verbose_name_plural = _("Categories")
 
 

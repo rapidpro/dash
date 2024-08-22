@@ -49,10 +49,12 @@ line-length = 119
 
 [tool.ruff]
 line-length = 120
-select = ["E", "F", "W"]
-ignore = ["E501", "F405"]
 fix = true
 exclude = ["./.tox/*", "./.venv/*", "./env/*", "*/migrations/*", "./build/*"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+ignore = ["E501", "F405"]
 
 [tool.isort]
 multi_line_output = 3
