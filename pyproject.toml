@@ -22,7 +22,7 @@ repository = "http://github.com/rapidpro/dash"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-Django = ">= 4.2.14, < 5.1"
+Django = ">= 5.0.8, < 5.2"
 celery = "^5.1"
 django-compressor = "^4.0"
 django-redis = "^5.2.0"
