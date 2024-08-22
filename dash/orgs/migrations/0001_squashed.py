@@ -609,10 +609,6 @@ class Migration(migrations.Migration):
             field=models.CharField(default="", max_length=128),
             preserve_default=False,
         ),
-        migrations.AlterUniqueTogether(
-            name="orgbackend",
-            unique_together={("org", "slug")},
-        ),
         migrations.RunPython(
             code=fix_org_config_rapidpro,
             reverse_code=noop,
@@ -727,22 +723,9 @@ class Migration(migrations.Migration):
                 to=settings.AUTH_USER_MODEL,
             ),
         ),
-        migrations.AlterIndexTogether(
-            name="orgbackend",
-            index_together={("org", "is_active", "slug")},
-        ),
-        migrations.RenameIndex(
+        migrations.AddIndex(
             model_name="orgbackend",
-            new_name="orgs_orgbac_org_slug_idx",
-            old_fields=("org", "is_active", "slug"),
-        ),
-        migrations.AlterUniqueTogether(
-            name="orgbackend",
-            unique_together=set(),
-        ),
-        migrations.AlterUniqueTogether(
-            name="taskstate",
-            unique_together=set(),
+            index=models.Index(fields=["org", "is_active", "slug"], name="orgs_orgbac_org_slug_idx"),
         ),
         migrations.AddConstraint(
             model_name="orgbackend",

@@ -634,32 +634,13 @@ class Migration(migrations.Migration):
                 to=settings.AUTH_USER_MODEL,
             ),
         ),
-        migrations.AlterIndexTogether(
-            name="dashblock",
-            index_together={("org", "is_active", "dashblock_type", "priority")},
-        ),
-        migrations.AlterIndexTogether(
-            name="dashblocktype",
-            index_together={("slug", "name")},
-        ),
-        migrations.RenameIndex(
+        migrations.AddIndex(
             model_name="dashblock",
-            new_name="dashblocks__org_id_024805_idx",
-            old_fields=("org", "is_active", "dashblock_type", "priority"),
+            index=models.Index(
+                fields=["org", "is_active", "dashblock_type", "priority"], name="dashblock_org_typ_prio_idx"
+            ),
         ),
-        migrations.RenameIndex(
-            model_name="dashblocktype",
-            new_name="dashblocks__slug_c0c6c6_idx",
-            old_fields=("slug", "name"),
-        ),
-        migrations.RenameIndex(
-            model_name="dashblock",
-            new_name="dashblock_org_typ_prio_idx",
-            old_name="dashblocks__org_id_024805_idx",
-        ),
-        migrations.RenameIndex(
-            model_name="dashblocktype",
-            new_name="dashblocktype_slug_name_idx",
-            old_name="dashblocks__slug_c0c6c6_idx",
+        migrations.AddIndex(
+            model_name="dashblocktype", index=models.Index(fields=["slug", "name"], name="dashblocktype_slug_name_idx")
         ),
     ]

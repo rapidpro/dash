@@ -72,9 +72,6 @@ class Migration(migrations.Migration):
                 ),
                 ("org", models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to="orgs.org")),
             ],
-            options={
-                "unique_together": set(),
-            },
         ),
         migrations.AddConstraint(
             model_name="tag",
