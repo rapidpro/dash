@@ -1,3 +1,10 @@
+v1.16.0 (2024-08-22)
+-------------------------
+ * Adjust old migrations to not use index_together
+ * Support django 5.1
+ * Change unique_together to use constraints, replace use of index_together
+ * Update deps
+
 v1.15.4 (2024-07-12)
 -------------------------
  * Order org admins on form

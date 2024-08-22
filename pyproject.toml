@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rapidpro-dash"
-version = "1.15.4"
+version = "1.16.0"
 description = "Support library for RapidPro dashboards"
 authors = ["Nyaruka Ltd <code@nyaruka.com>"]
 license = "BSD"
