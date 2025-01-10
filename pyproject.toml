@@ -1,9 +1,11 @@
-[tool.poetry]
+[project]
 name = "rapidpro-dash"
 version = "1.16.0"
 description = "Support library for RapidPro dashboards"
-authors = ["Nyaruka Ltd <code@nyaruka.com>"]
-license = "BSD"
+authors = [
+    {"name" = "Nyaruka", "email" = "code@nyaruka.com"}
+]
+license = { text = "BSD" }
 classifiers=[
     "Development Status :: 5 - Production/Stable",
     "Environment :: Web Environment",
@@ -13,30 +15,33 @@ classifiers=[
     "Programming Language :: Python",
     "Framework :: Django",
 ]
+requires-python = ">=3.10,<4.0"
+
+dependencies = [
+    "Django (>= 5.0.8,< 5.2)",
+    "celery (>=5.1)",
+    "django-compressor (>=4.0)",
+    "django-redis (>=5.2.0)",
+    "django-timezone-field (>=6.1.0)",
+    "Pillow (>=9.4,<11.0)",
+    "phonenumbers (>=8.12.16)",
+    "psycopg (>=3.1.9)",
+    "python-dateutil (>=2.8.2)",
+    "rapidpro-python (>=2.15.0)",
+    "smartmin (>=5.0.8)",
+    "sorl-thumbnail (>=12.9.0)",
+    "isort[pyproject] (>=5.13.2,<6.0.0)",
+]
+
+[tool.poetry]
 packages = [
     { include = "dash" },
 ]
 
 [tool.poetry.urls]
-repository = "http://github.com/rapidpro/dash"
+"Repository" = "http://github.com/rapidpro/dash"
 
-[tool.poetry.dependencies]
-python = "^3.10"
-Django = ">= 5.0.8, < 5.2"
-celery = "^5.1"
-django-compressor = "^4.0"
-django-redis = "^5.2.0"
-django-timezone-field = "^6.1.0"
-Pillow = ">=9.4,<11.0"
-phonenumbers = "^8.12.16"
-psycopg = "^3.1.9"
-python-dateutil = "^2.8.2"
-rapidpro-python = "^2.15.0"
-smartmin = "^5.0.8"
-sorl-thumbnail = "^12.9.0"
-isort = {extras = ["pyproject"], version = "^5.10.1"}
-
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 black = "^24.3.0"
 isort = "^5.13.2"
 colorama = "^0.4.3"
@@ -72,5 +77,5 @@ source = ["dash"]
 omit = ["*/migrations/*", "*/tests*", "*__init__*", "*settings*", "*management/commands*", "dash/test.py"]
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
