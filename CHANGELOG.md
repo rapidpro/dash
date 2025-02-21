@@ -1,3 +1,16 @@
+v1.16.1 (2025-02-21)
+-------------------------
+ * Merge pull request #204 from rapidpro/update-poetry-2
+ * Update GH action to use postgress image on CI
+ * Adjust dependencies config
+ * Merge pull request #203 from rapidpro/update-poetry-2
+ * Update pyproject.toml for poetry 2
+ * Merge pull request #201 from rapidpro/update-deps
+ * Update deps
+ * Update deps
+ * Merge pull request #200 from rapidpro/update-GH-actions
+ * Update django and use GH actions services
+
 v1.16.0 (2024-08-22)
 -------------------------
  * Adjust old migrations to not use index_together
