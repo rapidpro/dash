@@ -5,7 +5,7 @@ import redis
 import requests
 from requests.structures import CaseInsensitiveDict
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from django.test import TestCase
 
@@ -50,7 +50,9 @@ class DashTest(TestCase):
     def setUp(self):
         super(DashTest, self).setUp()
 
-        self.superuser = User.objects.create_superuser(username="testroot", email="super@user.com", password="root")
+        self.superuser = get_user_model().objects.create_superuser(
+            username="testroot", email="super@user.com", password="root"
+        )
 
         self.clear_cache()
 
