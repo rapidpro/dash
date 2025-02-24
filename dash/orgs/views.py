@@ -13,8 +13,7 @@ from smartmin.views import (
 from django import forms
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, get_user_model, login
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.http import HttpResponseRedirect
@@ -464,7 +463,7 @@ class OrgCRUDL(SmartCRUDL):
                     if matcher:
                         user_type = matcher.group(1)
                         user_id = matcher.group(2)
-                        user = User.objects.get(pk=user_id)
+                        user = get_user_model().objects.get(pk=user_id)
                         if user_type == "administrators":
                             self.get_object().administrators.add(user)
                         if user_type == "editors":
