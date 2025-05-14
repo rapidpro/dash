@@ -1,3 +1,8 @@
+v1.18.0 (2025-05-14)
+-------------------------
+ * Merge pull request #207 from rapidpro/update-django
+ * Update to support django 5.2
+
 v1.17.1 (2025-02-24)
 -------------------------
  * Remove user model references
