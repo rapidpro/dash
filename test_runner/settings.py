@@ -179,7 +179,7 @@ LOGOUT_REDIRECT_URL = "/"
 # Async tasks with django-celery
 # ----------------------------------------------------------------------------
 CELERY_RESULT_BACKEND = None
-CELERY_BROKER_URL = "valkey://localhost:6379/4"
+CELERY_BROKER_URL = "redis://localhost:6379/4"
 
 # RapidPRO
 SITE_API_HOST = "http://localhost:8001"
@@ -191,7 +191,7 @@ SITE_ALLOW_NO_ORG = ("orgs.task_list", "testapp.contact_test_tags")
 CACHES = {
     "default": {
         "BACKEND": "django_valkey.cache.ValkeyCache",
-        "LOCATION": "valkey://127.0.0.1:6379/10",
+        "LOCATION": "redis://127.0.0.1:6379/10",
     }
 }
 
