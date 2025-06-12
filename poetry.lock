@@ -963,19 +963,19 @@ files = [
 
 [[package]]
 name = "rapidpro-python"
-version = "2.16.0"
+version = "2.18.2"
 description = "Python client library for the RapidPro API"
 optional = false
-python-versions = "<4.0,>=3.9"
+python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "rapidpro_python-2.16.0-py3-none-any.whl", hash = "sha256:9651949d271a7e83caad0da9ee2f978b0604717a83686fe98a2615351641a247"},
-    {file = "rapidpro_python-2.16.0.tar.gz", hash = "sha256:a2df34589e2da63d736ecf6a302e3346bee126907dd6b575249dda10316de616"},
+    {file = "rapidpro_python-2.18.2-py3-none-any.whl", hash = "sha256:613b705ce5ff9f8650b2040fc1afb65176a4ae24a7bd6a875ce1b7f724843bc4"},
+    {file = "rapidpro_python-2.18.2.tar.gz", hash = "sha256:122d6b38c6b3609693a664cc2e1e4ec31b4327eb4ae7239183fddc3d8ba65d82"},
 ]
 
 [package.dependencies]
-iso8601 = ">=0.1.13,<0.2.0"
-requests = ">=2.25.0,<3.0.0"
+iso8601 = ">=0.1.13"
+requests = ">=2.32.0"
 
 [[package]]
 name = "rcssmin"
@@ -1277,14 +1277,14 @@ files = [
 
 [[package]]
 name = "smartmin"
-version = "5.2.0"
+version = "5.2.1"
 description = "Scaffolding system for Django object management."
 optional = false
 python-versions = "<4.0,>=3.11"
 groups = ["main"]
 files = [
-    {file = "smartmin-5.2.0-py3-none-any.whl", hash = "sha256:50e76b24728f38a26c2b82caba2f5b10d69b6e253307eadc2063625fe51dc5e2"},
-    {file = "smartmin-5.2.0.tar.gz", hash = "sha256:9e64d19045ef682954e2e0677683838ce1b15497763b615997d926407182b90d"},
+    {file = "smartmin-5.2.1-py3-none-any.whl", hash = "sha256:2edcd0b54e149fe609a10a22704d15ceeee114ac41f30cabb8d5c439eed573a6"},
+    {file = "smartmin-5.2.1.tar.gz", hash = "sha256:0a837b58454af0b7b4ff6c39ed7595f765497a06e1da5d4b42c639791100cf84"},
 ]
 
 [package.dependencies]
@@ -1444,4 +1444,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<4.0"
-content-hash = "52bf397fdde3d18de68c9df9e6c1d00998f58f7c5aaf512419aae97ab5a01e43"
+content-hash = "1f7f16a6272555ca58c8d3bad760f8e5df83f8c13e35402c37a3ce963795ce66"
