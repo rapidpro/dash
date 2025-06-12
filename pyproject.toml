@@ -1,6 +1,6 @@
 [project]
 name = "rapidpro-dash"
-version = "1.18.0"
+version = "1.18.1"
 description = "Support library for RapidPro dashboards"
 authors = [
     {"name" = "Nyaruka", "email" = "code@nyaruka.com"}

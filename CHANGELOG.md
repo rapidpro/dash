@@ -1,3 +1,13 @@
+v1.18.1 (2025-06-12)
+-------------------------
+ * Merge pull request #210 from rapidpro/update-depsss
+ * Update deps
+ * Update deps
+ * Merge pull request #209 from rapidpro/dependabot/pip/requests-2.32.4
+ * Merge pull request #208 from rapidpro/dependabot/pip/django-5.2.2
+ * Bump requests from 2.32.3 to 2.32.4
+ * Bump django from 5.2.1 to 5.2.2
+
 v1.18.0 (2025-05-14)
 -------------------------
  * Merge pull request #207 from rapidpro/update-django
