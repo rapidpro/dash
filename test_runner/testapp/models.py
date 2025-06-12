@@ -1,4 +1,4 @@
-from django_redis import get_redis_connection
+from django_valkey import get_valkey_connection
 
 from django.db import models
 from django.utils.translation import gettext as _
@@ -20,7 +20,7 @@ class Contact(models.Model):
 
     @classmethod
     def lock(cls, org, uuid):
-        return get_redis_connection().lock("contact-lock:%d:%s" % (org.pk, uuid), timeout=60)
+        return get_valkey_connection().lock("contact-lock:%d:%s" % (org.pk, uuid), timeout=60)
 
 
 class ContactSyncer(BaseSyncer):

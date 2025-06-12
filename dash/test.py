@@ -1,8 +1,8 @@
 import itertools
 import json
 
-import redis
 import requests
+import valkey
 from requests.structures import CaseInsensitiveDict
 
 from django.contrib.auth import get_user_model
@@ -58,9 +58,9 @@ class DashTest(TestCase):
 
     @classmethod
     def clear_cache(cls):
-        # we are extra paranoid here and actually hardcode redis to 'localhost' and '10'
-        # Redis 10 is our testing redis db
-        r = redis.StrictRedis(host="localhost", db=10)
+        # we are extra paranoid here and actually hardcode valkey to 'localhost' and '10'
+        # Valkey 10 is our testing valkey db
+        r = valkey.StrictValkey(host="localhost", db=10)
         r.flushdb()
 
     def create_org(self, name, timezone, subdomain):
