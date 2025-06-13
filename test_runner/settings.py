@@ -190,11 +190,8 @@ SITE_ALLOW_NO_ORG = ("orgs.task_list", "testapp.contact_test_tags")
 
 CACHES = {
     "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
+        "BACKEND": "django_valkey.cache.ValkeyCache",
         "LOCATION": "redis://127.0.0.1:6379/10",
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        },
     }
 }
 

@@ -4,7 +4,7 @@ import logging
 from functools import wraps
 
 from celery import shared_task, signature
-from django_redis import get_redis_connection
+from django_valkey import get_valkey_connection
 
 from django.apps import apps
 from django.utils import timezone
@@ -62,7 +62,7 @@ def maybe_run_for_org(org, task_func, task_key, lock_timeout):
     :param task_key: the task key
     :param lock_timeout: the lock timeout in seconds
     """
-    r = get_redis_connection()
+    r = get_valkey_connection()
 
     key = TaskState.get_lock_key(org, task_key)
 
