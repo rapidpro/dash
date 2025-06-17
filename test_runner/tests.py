@@ -2,7 +2,7 @@ import zoneinfo
 from dash.tags.models import Tag
 from unittest.mock import Mock, patch, call
 
-import redis
+import valkey
 from smartmin.tests import SmartminTest
 from temba_client.v2 import TembaClient
 
@@ -111,7 +111,7 @@ class DashTest(SmartminTest):
 
     def clear_cache(self):
         # hardcoded to localhost
-        r = redis.StrictRedis(host="localhost", db=1)
+        r = valkey.StrictValkey(host="localhost", db=1)
         r.flushdb()
 
     def clear_uploads(self):
