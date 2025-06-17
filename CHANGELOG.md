@@ -1,3 +1,10 @@
+v1.19.0 (2025-06-17)
+-------------------------
+ * Merge pull request #211 from rapidpro/django_valkey
+ * Update to smartmin 5.2.2
+ * Use redis transport key
+ * Replace django-redis with django-valkey
+
 v1.18.1 (2025-06-12)
 -------------------------
  * Merge pull request #210 from rapidpro/update-depsss
