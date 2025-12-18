@@ -27,7 +27,7 @@ dependencies = [
     "psycopg>=3.1.9",
     "python-dateutil>=2.8.2",
     "rapidpro-python>=2.21.0,<3.0.0",
-    "smartmi@git+https://github.com/nyaruka/smartmin.git@ci-containers",
+    "smartmin@git+https://github.com/nyaruka/smartmin.git@ci-containers",
     "sorl-thumbnail>= 12.9.0",
     "isort[pyproject]>= 5.13.2",
     "django-valkey>=0.2.1,<0.3.0",
