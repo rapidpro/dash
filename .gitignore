@@ -69,3 +69,5 @@ fabfile.*
 # ruff 
 .ruff_cache
 
+# uv
+.venv/
