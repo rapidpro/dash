@@ -39,7 +39,7 @@ jobs:
       - name: Initialize environment
         run: |
           uv sync --extra dev
-          uv add django@~${{ matrix.django-version }}
+          uv add django@~=${{ matrix.django-version }}
 
       - name: Run pre-test checks
         run: |
