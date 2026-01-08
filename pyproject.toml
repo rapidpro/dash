@@ -29,7 +29,6 @@ dependencies = [
     "rapidpro-python (>=2.21.0,<3.0.0)",
     "smartmin (>=5.2.2,<6.0.0)",
     "sorl-thumbnail >= 12.9.0",
-    "isort >= 5.13.2",
     "django-valkey (>=0.2.1,<0.3.0)",
 ]
 

@@ -79,4 +79,4 @@ jobs:
       - name: Publish release
         run: |
           uv build
-          uv publish --token ${{ secrets.PYPI_TOKEN }}
+          uv publish
