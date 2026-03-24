@@ -35,7 +35,7 @@ if __name__ == "__main__":
     status("Make any missing migrations")
     cmd("python manage.py makemigrations")
 
-    status("Running ruff format")
+    status("Checking formatting with ruff")
     cmd("ruff format --check dash test_runner")
 
     status("Running ruff")

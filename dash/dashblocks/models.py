@@ -20,12 +20,12 @@ class DashBlockType(SmartModel):
     slug = models.SlugField(
         max_length=50,
         unique=True,
-        help_text=_("The slug to idenfity this content type, used with the template tags"),
+        help_text=_("The slug to identify this content type, used with the template tags"),
     )
     description = models.TextField(
         blank=True,
         null=True,
-        help_text=_("A description of where this content type is used on the site and how it will be dsiplayed"),
+        help_text=_("A description of where this content type is used on the site and how it will be displayed"),
     )
 
     has_title = models.BooleanField(default=True, help_text=_("Whether this content should include a title"))

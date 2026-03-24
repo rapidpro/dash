@@ -189,7 +189,7 @@ class OrgCRUDL(SmartCRUDL):
                 elif not user_orgs:
                     messages.info(
                         request,
-                        _("Your account is not associated to an organization. Please Contact the adminstrator."),
+                        _("Your account is not associated to an organization. Please contact the administrator."),
                     )
                     return HttpResponseRedirect(reverse("users.user_login"))
 

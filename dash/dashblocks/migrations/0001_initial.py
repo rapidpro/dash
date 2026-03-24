@@ -188,13 +188,13 @@ class Migration(migrations.Migration):
                 (
                     "slug",
                     models.SlugField(
-                        help_text="The slug to idenfity this content type, used with the template tags", unique=True
+                        help_text="The slug to identify this content type, used with the template tags", unique=True
                     ),
                 ),
                 (
                     "description",
                     models.TextField(
-                        help_text="A description of where this content type is used on the site and how it will be dsiplayed",
+                        help_text="A description of where this content type is used on the site and how it will be displayed",
                         null=True,
                         blank=True,
                     ),
