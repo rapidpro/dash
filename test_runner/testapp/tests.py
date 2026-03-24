@@ -57,9 +57,7 @@ class SyncTest(DashTest):
 
         remote = TembaContact.create(uuid="CF-002", name="Frank", status="active")
         kwargs = self.syncer2.local_kwargs(self.unicef, remote)
-        self.assertEqual(
-            kwargs, {"org": self.unicef, "uuid": "CF-002", "name": "Frank", "backend": self.floip_backend}
-        )
+        self.assertEqual(kwargs, {"org": self.unicef, "uuid": "CF-002", "name": "Frank", "backend": self.floip_backend})
 
         remote = TembaContact.create(uuid="C-002", name="Frank", status="blocked")
         self.assertIsNone(self.syncer.local_kwargs(self.unicef, remote))
@@ -93,9 +91,7 @@ class SyncTest(DashTest):
         remote = TembaContact.create(uuid="C-002", name="Franky", status="active")
         self.assertEqual(sync_from_remote(self.unicef, self.syncer, remote), SyncOutcome.updated)
 
-        Contact.objects.get(
-            org=self.unicef, uuid="C-002", name="Franky", backend=self.rapidpro_backend, is_active=True
-        )
+        Contact.objects.get(org=self.unicef, uuid="C-002", name="Franky", backend=self.rapidpro_backend, is_active=True)
 
         # change to something we don't want locally
         remote = TembaContact.create(uuid="C-002", name="Franky", status="blocked")
