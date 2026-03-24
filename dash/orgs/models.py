@@ -87,7 +87,7 @@ class Org(SmartModel):
 
     config = models.JSONField(
         default=dict,
-        help_text=_("JSON blob used to store configuration information " "associated with this organization"),
+        help_text=_("JSON blob used to store configuration information associated with this organization"),
     )
 
     def get_backend(self, backend_slug="rapidpro"):
@@ -171,8 +171,7 @@ class Org(SmartModel):
 
         if host.endswith("api/v2") or host.endswith("api/v2/"):
             raise ValueError(
-                "API host should not include API version, "
-                "e.g. http://example.com instead of http://example.com/api/v2"
+                "API host should not include API version, e.g. http://example.com instead of http://example.com/api/v2"
             )
 
         api_token = ""
@@ -333,9 +332,7 @@ class OrgBackground(SmartModel):
         help_text=_("The organization in which the image will be used"),
     )
 
-    name = models.CharField(
-        verbose_name=_("Name"), max_length=128, help_text=_("The name to describe this background")
-    )
+    name = models.CharField(verbose_name=_("Name"), max_length=128, help_text=_("The name to describe this background"))
 
     background_type = models.CharField(
         max_length=1, choices=BACKGROUND_TYPES, default="P", verbose_name=_("Background type")

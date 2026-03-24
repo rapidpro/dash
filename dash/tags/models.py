@@ -7,7 +7,6 @@ from dash.orgs.models import Org
 
 
 class Tag(SmartModel):
-
     name = models.CharField(max_length=64, help_text=_("The name of this tag"))
     org = models.ForeignKey(Org, on_delete=models.PROTECT)
 

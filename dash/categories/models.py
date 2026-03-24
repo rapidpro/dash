@@ -61,9 +61,7 @@ class CategoryImage(SmartModel):
         Category, on_delete=models.PROTECT, related_name="images", help_text=_("The category this image represents")
     )
 
-    image = models.ImageField(
-        upload_to=partial(generate_file_path, "categories"), help_text=_("The image file to use")
-    )
+    image = models.ImageField(upload_to=partial(generate_file_path, "categories"), help_text=_("The image file to use"))
 
     def __str__(self):
         return "%s - %s" % (self.category.name, self.name)
