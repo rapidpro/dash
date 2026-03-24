@@ -188,7 +188,7 @@ class Migration(migrations.Migration):
                 (
                     "slug",
                     models.SlugField(
-                        help_text="The slug to idenfity this content type, used with the template tags", unique=True
+                        help_text="The slug to identify this content type, used with the template tags", unique=True
                     ),
                 ),
                 (
