@@ -1,3 +1,25 @@
+v1.19.1 (2026-03-25)
+-------------------------
+ * Fix typos
+ * Support django 5.2.12 and later only
+ * Update deps
+ * Replace black with ruff for code formatting
+ * Add UV_PUBLISH_TOKEN environment variable
+ * Fix syntax for adding Django version in CI
+ * Fix syntax for adding Django version in CI workflow
+ * Update setup-uv action to v7
+ * Address code review feedback: remove isort from main deps, use trusted publishing
+ * Remove poetry.lock file
+ * Switch to uv Python package manager
+ * Initial plan
+ * Bump urllib3 from 2.6.2 to 2.6.3
+ * Regenerate lock file
+ * Update django
+ * Update rapidpro-client
+ * Bump urllib3 from 2.3.0 to 2.5.0
+ * Bump django from 5.2.2 to 5.2.6
+ * Update django
+
 v1.19.0 (2025-06-17)
 -------------------------
  * Merge pull request #211 from rapidpro/django_valkey
