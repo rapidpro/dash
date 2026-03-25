@@ -189,7 +189,7 @@ class OrgCRUDL(SmartCRUDL):
                 elif not user_orgs:
                     messages.info(
                         request,
-                        _("Your account is not associated to an " "organization. Please Contact the adminstrator."),
+                        _("Your account is not associated to an organization. Please contact the administrator."),
                     )
                     return HttpResponseRedirect(reverse("users.user_login"))
 
@@ -427,13 +427,11 @@ class OrgCRUDL(SmartCRUDL):
 
             if emails:
                 for email in email_list:
-
                     # if they already have an invite, update it
                     invites = Invitation.objects.filter(email=email, org=org).order_by("-pk")
                     invitation = invites.first()
 
                     if invitation:
-
                         # remove any old invites
                         invites.exclude(pk=invitation.pk).delete()
 
@@ -496,7 +494,7 @@ class OrgCRUDL(SmartCRUDL):
             org = self.get_object()
             if not org:
                 messages.info(
-                    request, _("Your invitation link is invalid. Please " "contact your organization administrator.")
+                    request, _("Your invitation link is invalid. Please contact your organization administrator.")
                 )
                 return HttpResponseRedirect("/")
 
@@ -580,11 +578,10 @@ class OrgCRUDL(SmartCRUDL):
             org = self.get_object()
             if not org:
                 messages.info(
-                    request, _("Your invitation link has expired. Please " "contact your organization administrator.")
+                    request, _("Your invitation link has expired. Please contact your organization administrator.")
                 )
                 return HttpResponseRedirect("/")
             elif request.org != org:
-
                 redirect_path = org.build_host_link() + reverse("orgs.org_join", args=[secret])
                 return HttpResponseRedirect(redirect_path)
 

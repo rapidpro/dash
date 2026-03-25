@@ -58,7 +58,7 @@ class Story(SmartModel):
         null=True,
         max_length=255,
         help_text=_(
-            "Any tags for this story, separated by spaces, can be " "used to do more advanced filtering, optional"
+            "Any tags for this story, separated by spaces, can be used to do more advanced filtering, optional"
         ),
     )
 

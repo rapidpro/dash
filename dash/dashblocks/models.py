@@ -20,23 +20,21 @@ class DashBlockType(SmartModel):
     slug = models.SlugField(
         max_length=50,
         unique=True,
-        help_text=_("The slug to idenfity this content type, used with the " "template tags"),
+        help_text=_("The slug to identify this content type, used with the template tags"),
     )
     description = models.TextField(
         blank=True,
         null=True,
-        help_text=_("A description of where this content type is used on the " "site and how it will be dsiplayed"),
+        help_text=_("A description of where this content type is used on the site and how it will be displayed"),
     )
 
     has_title = models.BooleanField(default=True, help_text=_("Whether this content should include a title"))
     has_image = models.BooleanField(default=True, help_text=_("Whether this content should include an image"))
-    has_rich_text = models.BooleanField(
-        default=True, help_text=_("Whether this content should use a rich HTML editor")
-    )
+    has_rich_text = models.BooleanField(default=True, help_text=_("Whether this content should use a rich HTML editor"))
     has_summary = models.BooleanField(default=True, help_text=_("Whether this content should include a summary field"))
     has_link = models.BooleanField(default=True, help_text=_("Whether this content should include a link"))
     has_gallery = models.BooleanField(
-        default=False, help_text=_("Whether this content should allow upload of additional " "images, ie a gallery")
+        default=False, help_text=_("Whether this content should allow upload of additional images, ie a gallery")
     )
     has_color = models.BooleanField(default=False, help_text=_("Whether this content has a color field"))
     has_video = models.BooleanField(
@@ -74,37 +72,36 @@ class DashBlock(SmartModel):
         blank=True,
         null=True,
         upload_to=partial(generate_file_path, "dashblocks"),
-        help_text=_("Any image that should be displayed with this content " "block, optional"),
+        help_text=_("Any image that should be displayed with this content block, optional"),
     )
     color = models.CharField(
         blank=True,
         null=True,
         max_length=16,
-        help_text=_("A background color to use for the image, in the " "format: #rrggbb"),
+        help_text=_("A background color to use for the image, in the format: #rrggbb"),
     )
     link = models.CharField(
         blank=True,
         null=True,
         max_length=255,
-        help_text=_("Any link that should be associated with this content " "block, optional"),
+        help_text=_("Any link that should be associated with this content block, optional"),
     )
     video_id = models.CharField(
         blank=True,
         null=True,
         max_length=255,
-        help_text=_("The id of the YouTube video that should be linked to " "this item"),
+        help_text=_("The id of the YouTube video that should be linked to this item"),
     )
     tags = models.CharField(
         blank=True,
         null=True,
         max_length=255,
         help_text=_(
-            "Any tags for this content block, separated by spaces, "
-            "can be used to do more advanced filtering, optional"
+            "Any tags for this content block, separated by spaces, can be used to do more advanced filtering, optional"
         ),
     )
     priority = models.IntegerField(
-        default=0, help_text=_("The priority for this block, higher priority blocks " "come first")
+        default=0, help_text=_("The priority for this block, higher priority blocks come first")
     )
 
     org = models.ForeignKey(
