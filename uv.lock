@@ -662,7 +662,7 @@ requires-dist = [
     { name = "pillow", specifier = ">=12.1.1" },
     { name = "psycopg", specifier = ">=3.1.9" },
     { name = "python-dateutil", specifier = ">=2.8.2" },
-    { name = "rapidpro-python", specifier = ">=2.21.1,<3.0.0" },
+    { name = "rapidpro-python", specifier = ">=2.22.2,<3.0.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.15.7" },
     { name = "smartmin", specifier = ">=5.2.5,<6.0.0" },
     { name = "sorl-thumbnail", specifier = ">=12.9.0" },
@@ -671,15 +671,15 @@ provides-extras = ["dev"]
 
 [[package]]
 name = "rapidpro-python"
-version = "2.22.1"
+version = "2.22.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "iso8601" },
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/29/31/d7e1420abbde8d38eb841d6bfca16ee38c68769c93dcab41dfa20504d5a2/rapidpro_python-2.22.1.tar.gz", hash = "sha256:cae47203c598f05c5698308f3d685fefb878af28c00711a76d07ca1d224037ee", size = 21627, upload-time = "2026-03-24T11:15:54.255Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e5/2c/a4687cde52d0a4974def780bc98e3203ce8b77182ba4fc29f191ca9a4690/rapidpro_python-2.22.2.tar.gz", hash = "sha256:3cbd6ff6fbd609f1084019b916769044b7b71d43537c191ce5420f22aa09fc9f", size = 21624, upload-time = "2026-03-26T15:50:35.597Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/98/d5/09f8d180715380218e0194b96a1b36b0044b3513ede7df12fc9d0d1645ea/rapidpro_python-2.22.1-py3-none-any.whl", hash = "sha256:bd1d11be5081bb9d1115ae09f4c4f3aab152747879b4a7b4865b93e8484c5cd6", size = 24306, upload-time = "2026-03-24T11:15:53.404Z" },
+    { url = "https://files.pythonhosted.org/packages/37/29/8cbf47178dfa0e89f3edde6cfdae0f983862ed932b300645d0861f046c4a/rapidpro_python-2.22.2-py3-none-any.whl", hash = "sha256:b41da5e5151b189a2c2ee193317c12f91fd7c87d45d5cad1dfc452a2fafb8232", size = 24303, upload-time = "2026-03-26T15:50:34.505Z" },
 ]
 
 [[package]]
