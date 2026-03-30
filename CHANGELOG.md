@@ -1,3 +1,9 @@
+v1.19.2 (2026-03-30)
+-------------------------
+ * Update rapidpro-python to v2.22.2
+ * Update GH actions
+ * Bump requests from 2.32.5 to 2.33.0
+
 v1.19.1 (2026-03-25)
 -------------------------
  * Fix typos
