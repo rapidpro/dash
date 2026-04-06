@@ -652,7 +652,7 @@ requires-dist = [
     { name = "celery", extras = ["redis"], specifier = "~=5.5.3" },
     { name = "colorama", marker = "extra == 'dev'", specifier = ">=0.4.3" },
     { name = "coverage", extras = ["toml"], marker = "extra == 'dev'", specifier = ">=7.2.2" },
-    { name = "django", specifier = ">=5.2.12,<5.3" },
+    { name = "django", specifier = ">=5.2.12,<6.1" },
     { name = "django-compressor", specifier = ">=4.0" },
     { name = "django-timezone-field", specifier = ">=6.1.0" },
     { name = "django-valkey", specifier = ">=0.2.1,<0.3.0" },
