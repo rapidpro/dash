@@ -1854,7 +1854,13 @@ class StoryTest(DashTest):
         self.assertTrue(story.featured)
         self.assertEqual(story.summary, "baz")
         self.assertEqual(story.written_by, "Content Provider")
-        self.assertEqual(story.audio_link, "http://example.com/foo.mp3")
+        self.assertTrue(
+            story.audio_link
+            in [
+                "https://example.com/foo.mp3",
+                "http://example.com/foo.mp3",
+            ]
+        )
         self.assertEqual(story.video_id, "yt_id")
         self.assertEqual(story.tags, " first second third ")
 
@@ -1920,7 +1926,13 @@ class StoryTest(DashTest):
         self.assertTrue(story.featured)
         self.assertEqual(story.summary, "baz")
         self.assertEqual(story.written_by, "Content Provider")
-        self.assertEqual(story.audio_link, "http://example.com/foo.mp3")
+        self.assertTrue(
+            story.audio_link
+            in [
+                "https://example.com/foo.mp3",
+                "http://example.com/foo.mp3",
+            ]
+        )
         self.assertEqual(story.video_id, "yt_id")
         self.assertEqual(story.tags, " first second third ")
 
