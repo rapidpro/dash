@@ -1,3 +1,11 @@
+v1.20.0 (2026-04-06)
+-------------------------
+ * Update tests for Django 6.0 URLField behavior
+ * Update smartmin to v6.0.0
+ * Test against Django 6.0
+ * Replace isort with ruff for import sorting
+ * Update GH actions
+
 v1.19.2 (2026-03-30)
 -------------------------
  * Update rapidpro-python to v2.22.2
