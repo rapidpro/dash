@@ -41,9 +41,6 @@ if __name__ == "__main__":
     status("Running ruff")
     cmd("ruff check dash")
 
-    status("Running isort")
-    cmd("isort dash")
-
     # if any code changes were made, exit with error
     if cmd("git diff dash test_runner testfiles"):
         print("👎 " + colorama.Fore.RED + "Changes to be committed")
