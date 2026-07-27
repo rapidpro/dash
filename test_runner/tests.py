@@ -348,25 +348,86 @@ class SetOrgMiddlewareTest(DashTest):
         self.assertEqual(self.request.org, empty_subdomain_org)
         self.assertEqual(self.request.user.get_org(), empty_subdomain_org)
 
-    def test_language_and_timezone_reset(self):
+    def simulate_call(self, host, url_name, path="/"):
+        """
+        Simulates a full middleware call, capturing the language and timezone active while the view runs
+        """
+        self.request = Mock(spec=HttpRequest)
+        self.request.get_host.return_value = host
+        self.request.user = self.admin
+        self.request.path = path
+        self.request.META = dict(HTTP_HOST=None)
+
+        def get_response(request):
+            request.resolver_match = ResolverMatch(self.mock_view, [], {}, url_name)
+            response = self.middleware.process_view(request, self.mock_view, [], {})
+            if response:
+                return response
+
+            self.view_language = translation.get_language()
+            self.view_timezone = timezone.get_current_timezone_name()
+            return HttpResponse()
+
+        return SetOrgMiddleware(get_response)(self.request)
+
+    def test_language_and_timezone_restored(self):
+        self.addCleanup(translation.deactivate)
+        self.addCleanup(timezone.deactivate)
+
+        # start from the default language and timezone
+        translation.deactivate()
+        timezone.deactivate()
+
         ug_org = self.create_org("uganda", self.admin)
         ug_org.language = "fr"
         ug_org.timezone = zoneinfo.ZoneInfo("Africa/Kigali")
         ug_org.save()
 
-        # a request with an org activates its language and timezone
-        response = self.simulate_process("uganda.ureport.io", "dash.test_test")
-        self.assertIsNone(response)
+        # a request with an org activates its language and timezone for the duration of the view
+        response = self.simulate_call("uganda.ureport.io", "dash.test_test")
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(self.request.org, ug_org)
-        self.assertEqual(translation.get_language(), "fr")
-        self.assertEqual(timezone.get_current_timezone_name(), "Africa/Kigali")
+        self.assertEqual(self.view_language, "fr")
+        self.assertEqual(self.view_timezone, "Africa/Kigali")
 
-        # a subsequent org-less request on the same thread gets the defaults back
-        response = self.simulate_process("ureport.io", "orgs.org_create")
-        self.assertIsNone(response)
-        self.assertIsNone(self.request.org)
+        # but restores the previous state once the response is returned
         self.assertEqual(translation.get_language(), settings.LANGUAGE_CODE)
         self.assertEqual(timezone.get_current_timezone_name(), settings.TIME_ZONE)
+
+        # so a subsequent org-less request on the same thread sees the defaults
+        response = self.simulate_call("ureport.io", "orgs.org_create")
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(self.request.org)
+        self.assertEqual(self.view_language, settings.LANGUAGE_CODE)
+        self.assertEqual(self.view_timezone, settings.TIME_ZONE)
+
+    def test_org_less_request_keeps_negotiated_language(self):
+        self.addCleanup(translation.deactivate)
+        self.addCleanup(timezone.deactivate)
+
+        # simulate LocaleMiddleware having negotiated a language before this middleware runs
+        translation.activate("es")
+
+        response = self.simulate_call("ureport.io", "orgs.org_create")
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(self.request.org)
+
+        # an org-less request doesn't touch the active language
+        self.assertEqual(self.view_language, "es")
+        self.assertEqual(translation.get_language(), "es")
+
+    def test_org_without_language_gets_default(self):
+        self.addCleanup(translation.deactivate)
+        self.addCleanup(timezone.deactivate)
+
+        ug_org = self.create_org("uganda", self.admin)
+        ug_org.language = None
+        ug_org.save()
+
+        response = self.simulate_call("uganda.ureport.io", "dash.test_test")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.request.org, ug_org)
+        self.assertEqual(self.view_language, settings.DEFAULT_LANGUAGE)
 
 
 class OrgContextProcessorTestcase(DashTest):
