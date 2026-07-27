@@ -523,7 +523,6 @@ class OrgTest(DashTest):
                 self.assertEqual(self.org.build_host_link(True), "https://uganda.localhost:8000")
 
             self.org.subdomain = ""
-            self.org.save()
 
             self.assertEqual(self.org.build_host_link(), "http://localhost:8000")
             self.assertEqual(self.org.build_host_link(True), "http://localhost:8000")
@@ -533,7 +532,6 @@ class OrgTest(DashTest):
                 self.assertEqual(self.org.build_host_link(True), "https://localhost:8000")
 
             self.org.subdomain = None
-            self.org.save()
 
             self.assertEqual(self.org.build_host_link(), "http://localhost:8000")
             self.assertEqual(self.org.build_host_link(True), "http://localhost:8000")
@@ -543,8 +541,15 @@ class OrgTest(DashTest):
                 self.assertEqual(self.org.build_host_link(True), "https://localhost:8000")
 
             self.org.domain = "ureport.ug"
+
+            self.assertEqual(self.org.build_host_link(), "http://localhost:8000")
+            self.assertEqual(self.org.build_host_link(True), "http://localhost:8000")
+
+            with self.settings(SESSION_COOKIE_SECURE=True):
+                self.assertEqual(self.org.build_host_link(), "https://ureport.ug")
+                self.assertEqual(self.org.build_host_link(True), "https://localhost:8000")
+
             self.org.subdomain = "uganda"
-            self.org.save()
 
             self.assertEqual(self.org.build_host_link(), "http://uganda.localhost:8000")
             self.assertEqual(self.org.build_host_link(True), "http://uganda.localhost:8000")
@@ -552,6 +557,17 @@ class OrgTest(DashTest):
             with self.settings(SESSION_COOKIE_SECURE=True):
                 self.assertEqual(self.org.build_host_link(), "https://ureport.ug")
                 self.assertEqual(self.org.build_host_link(True), "https://uganda.localhost:8000")
+
+        # HOSTNAME empty falls back to localhost
+        self.org.domain = None
+        self.org.subdomain = "uganda"
+
+        with self.settings(HOSTNAME=""):
+            self.assertEqual(self.org.build_host_link(), "http://uganda.localhost")
+            self.assertEqual(self.org.build_host_link(True), "http://uganda.localhost")
+
+            self.org.subdomain = ""
+            self.assertEqual(self.org.build_host_link(), "http://localhost")
 
     def test_org_create(self):
         create_url = reverse("orgs.org_create")

@@ -11,7 +11,6 @@ from django.conf import settings
 from django.contrib.auth.models import Group, User
 from django.db import models
 from django.utils import timezone
-from django.utils.encoding import force_str
 from django.utils.translation import gettext_lazy as _
 
 from dash.utils import generate_file_path
@@ -184,17 +183,15 @@ class Org(SmartModel):
         return TembaClient(host, api_token, user_agent=agent, transformer=transformer)
 
     def build_host_link(self, user_authenticated=False):
-        host_tld = getattr(settings, "HOSTNAME", "localhost")
+        host_tld = getattr(settings, "HOSTNAME", "") or "localhost"
         is_secure = getattr(settings, "SESSION_COOKIE_SECURE", False)
 
         prefix = "https://" if is_secure else "http://"
 
         if self.domain and is_secure and not user_authenticated:
-            return prefix + str(self.domain)
+            return prefix + self.domain
 
-        if not self.subdomain:
-            return prefix + host_tld
-        return prefix + force_str(self.subdomain) + "." + host_tld
+        return prefix + (f"{self.subdomain}.{host_tld}" if self.subdomain else host_tld)
 
     def get_task_state(self, task_key):
         return TaskState.get_or_create(self, task_key)
