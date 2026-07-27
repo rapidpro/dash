@@ -98,6 +98,10 @@ class InitTest(DashTest):
         self.assertEqual(ms_to_datetime(datetime_to_ms(d3)), d3)
         self.assertEqual(ms_to_datetime(datetime_to_ms(d3)).tzinfo, tzone.utc)
 
+        # epoch and pre-epoch values
+        self.assertEqual(ms_to_datetime(0), datetime(1970, 1, 1, tzinfo=tzone.utc))
+        self.assertEqual(ms_to_datetime(-1500), datetime(1969, 12, 31, 23, 59, 58, 500000, tzinfo=tzone.utc))
+
     def test_get_month_range(self):
         self.assertEqual(
             get_month_range(datetime(2014, 2, 10, 12, 30, 0, 0, zoneinfo.ZoneInfo("Africa/Kigali"))),

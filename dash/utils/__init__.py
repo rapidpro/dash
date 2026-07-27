@@ -32,7 +32,8 @@ def intersection(*args):
 
 def union(*args):
     """
-    Return the union of lists, ordering by first seen in any list
+    Return the union of the given iterables as a new list, ordering items by first seen and leaving the arguments
+    unmodified
     """
     if not args:
         return []
