@@ -728,17 +728,16 @@ class OrgBackendCRUDL(SmartCRUDL):
         form_class = OrgBackendForm
 
         def derive_fields(self):
-            if self.request.user.is_superuser:
+            if self.get_user().is_superuser:
                 return ("org", "slug", "backend_type", "host", "api_token")
             return ("slug", "backend_type", "host", "api_token")
 
         def pre_save(self, obj):
             obj = super(OrgBackendCRUDL.Create, self).pre_save(obj)
 
+            # non-superusers can't pick the org so it always comes from the request
             if not self.get_user().is_superuser:
-                org = self.derive_org()
-                if org:
-                    obj.org = org
+                obj.org = self.derive_org()
 
             return obj
 
@@ -747,16 +746,15 @@ class OrgBackendCRUDL(SmartCRUDL):
         ordering = ("org__name", "slug")
 
         def derive_fields(self):
-            if self.request.user.is_superuser:
+            if self.get_user().is_superuser:
                 return ("org", "slug", "backend_type", "modified_on", "created_on")
             return ("slug", "backend_type", "modified_on", "created_on")
 
         def get_queryset(self, **kwargs):
             queryset = super(OrgBackendCRUDL.List, self).get_queryset(**kwargs)
 
-            if not self.get_user().is_superuser:
-                queryset = queryset.filter(org=self.derive_org())
-            elif self.derive_org():
-                queryset = queryset.filter(org=self.derive_org())
+            org = self.derive_org()
+            if org or not self.get_user().is_superuser:
+                queryset = queryset.filter(org=org)
 
             return queryset
