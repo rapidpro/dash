@@ -12,6 +12,7 @@ from django.core.exceptions import DisallowedHost
 from django.db import connection
 from django.db.utils import IntegrityError
 from django.http import HttpRequest, HttpResponse
+from django.test import override_settings
 from django.test.utils import CaptureQueriesContext
 from django.urls import ResolverMatch, reverse
 from django.utils.encoding import force_str
@@ -1300,10 +1301,23 @@ class OrgTest(DashTest):
 
     def test_dashorgs_templatetags(self):
         self.assertEqual(display_time("2014-11-04T15:11:34Z", self.org), "Nov 04, 2014 15:11")
+        self.assertEqual(display_time("2014-11-04T15:11:34.123456Z", self.org), "Nov 04, 2014 15:11")
+        self.assertEqual(display_time("2014-11-04T15:11:34.123456+00:00", self.org), "Nov 04, 2014 15:11")
+        self.assertEqual(display_time("2014-11-04T17:11:34+02:00", self.org), "Nov 04, 2014 15:11")
+
+        # naive timestamps are assumed to be UTC regardless of the local timezone
+        with override_settings(TIME_ZONE="America/New_York"):
+            self.assertEqual(display_time("2014-11-04T15:11:34", self.org), "Nov 04, 2014 15:11")
+
+        # falsy input renders as empty, unparseable input is returned raw
+        self.assertEqual(display_time(None, self.org), "")
+        self.assertEqual(display_time("", self.org), "")
+        self.assertEqual(display_time("not a timestamp", self.org), "not a timestamp")
 
         self.org.timezone = zoneinfo.ZoneInfo("Africa/Kigali")
         self.org.save()
         self.assertEqual(display_time("2014-11-04T15:11:34Z", self.org), "Nov 04, 2014 17:11")
+        self.assertEqual(display_time("2014-11-04T15:11:34.123456Z", self.org), "Nov 04, 2014 17:11")
 
         self.assertEqual(display_time("2014-11-04T15:11:34Z", self.org, "%A, %B %d, %Y"), "Tuesday, November 04, 2014")
 
