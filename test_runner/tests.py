@@ -403,12 +403,32 @@ class OrgBackendTest(DashTest):
         response = self.client.get(create_url, SERVER_NAME="uganda.ureport.io")
         self.assertLoginRedirect(response)
 
+        # org admins can't create backends even with orgbackend model permissions
         self.login(self.admin)
         response = self.client.get(create_url, SERVER_NAME="uganda.ureport.io")
-        self.assertEqual(response.status_code, 200)
-        self.assertNotIn("org", response.context["form"].fields)
+        self.assertLoginRedirect(response)
 
-        # posting another org's id should still create the backend on the request org
+        post_data = dict(
+            org=self.uganda.pk,
+            slug="denied",
+            backend_type="rapidpro",
+            host="http://localhost:8004",
+            api_token="token789",
+        )
+        response = self.client.post(create_url, post_data, SERVER_NAME="uganda.ureport.io")
+        self.assertLoginRedirect(response)
+        self.assertFalse(OrgBackend.objects.filter(slug="denied").exists())
+
+        # staff users can create backends and pick the org
+        staff_user = self.create_user("staffuser")
+        staff_user.is_staff = True
+        staff_user.save()
+
+        self.login(staff_user)
+        response = self.client.get(create_url, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("org", response.context["form"].fields)
+
         post_data = dict(
             org=self.nigeria.pk,
             slug="floip",
@@ -419,22 +439,7 @@ class OrgBackendTest(DashTest):
         response = self.client.post(create_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
         self.assertEqual(response.status_code, 200)
         backend = OrgBackend.objects.get(slug="floip")
-        self.assertEqual(backend.org, self.uganda)
-
-        # a non-superuser can't create backends on an org they don't administer
-        uganda_admin = self.create_user("uganda_admin")
-        self.uganda.administrators.add(uganda_admin)
-
-        self.login(uganda_admin)
-        post_data = dict(
-            slug="denied",
-            backend_type="rapidpro",
-            host="http://localhost:8004",
-            api_token="token789",
-        )
-        response = self.client.post(create_url, post_data, SERVER_NAME="nigeria.ureport.io")
-        self.assertLoginRedirect(response)
-        self.assertFalse(OrgBackend.objects.filter(slug="denied").exists())
+        self.assertEqual(backend.org, self.nigeria)
 
         # superusers can pick the org
         self.login(self.superuser)

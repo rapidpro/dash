@@ -744,22 +744,13 @@ class OrgBackendCRUDL(SmartCRUDL):
         form_class = OrgBackendForm
         fields = ("is_active", "slug", "backend_type", "host", "api_token")
 
-    class Create(OrgPermsMixin, SmartCreateView):
+    class Create(SmartCreateView):
         form_class = OrgBackendForm
+        fields = ("org", "slug", "backend_type", "host", "api_token")
 
-        def derive_fields(self):
-            if self.get_user().is_superuser:
-                return ("org", "slug", "backend_type", "host", "api_token")
-            return ("slug", "backend_type", "host", "api_token")
-
-        def pre_save(self, obj):
-            obj = super(OrgBackendCRUDL.Create, self).pre_save(obj)
-
-            # non-superusers can't pick the org so it always comes from the request
-            if not self.get_user().is_superuser:
-                obj.org = self.derive_org()
-
-            return obj
+        def has_permission(self, request, *args, **kwargs):
+            # only superusers and staff can create org backends
+            return request.user.is_authenticated and (request.user.is_superuser or request.user.is_staff)
 
     class List(OrgPermsMixin, SmartListView):
         fields = ("org", "slug", "backend_type", "modified_on", "created_on")
