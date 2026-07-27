@@ -109,9 +109,12 @@ class DashBlock(SmartModel):
     )
 
     def teaser(self, field, length):
+        if not field:
+            return ""
+
         words = field.split(" ")
 
-        if len(words) < length:
+        if len(words) <= length:
             return field
         else:
             return " ".join(words[:length]) + " ..."
@@ -140,7 +143,7 @@ class DashBlock(SmartModel):
         return self.images.filter(is_active=True).order_by("-priority")
 
     def __str__(self):
-        if self.dashblock_type.has_title:
+        if self.dashblock_type.has_title and self.title:
             return self.title
         return "%s - %d" % (self.dashblock_type, self.pk)
 
@@ -154,7 +157,7 @@ class DashBlock(SmartModel):
 class DashBlockImage(SmartModel):
     dashblock = models.ForeignKey(DashBlock, on_delete=models.PROTECT, related_name="images")
     image = models.ImageField(
-        upload_to=partial(generate_file_path, "dashblock_images/"), width_field="width", height_field="height"
+        upload_to=partial(generate_file_path, "dashblock_images"), width_field="width", height_field="height"
     )
     caption = models.CharField(max_length=64)
     priority = models.IntegerField(default=0, blank=True, null=True)
