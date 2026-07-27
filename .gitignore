@@ -58,6 +58,12 @@ docs/_build/
 # PyBuilder
 target/
 
+# AI
+.claude/
+CLAUDE.md
+CODEX.md
+AGENTS.md
+
 .idea/
 db.sqlite3
 
