@@ -1,3 +1,44 @@
+v1.21.0 (2026-07-27)
+-------------------------
+ * Update .gitignore to cover AI agent files
+ * Restrict org backend creation to superusers and staff
+ * Fix invitation email test to execute on-commit callbacks for posts added in a parallel change
+ * Update smartmin to 6.1.0
+ * Bump django from 5.2.14 to 5.2.15
+ * Bump pillow from 12.2.0 to 12.3.0
+ * Claim invitations atomically when joining an org so concurrent submissions can't reuse them
+ * Update story images in place so unchanged images keep their metadata
+ * Address review feedback: harden dashblock id parsing, cache lookup, expand org scoping tests
+ * Simplify org backend view scoping and expand test coverage
+ * Cache org group lookups on the user and pin query shape in tests
+ * De-duplicate invitation emails and normalize once in form validation
+ * Log warning when invitation for queued email no longer exists, use crypto-safe random for secrets and check uniqueness with exists()
+ * Pin hatchling>=1.27 so SPDX license expression is emitted as License-Expression metadata
+ * Clarify union() docstring and add edge-case tests for ms_to_datetime
+ * Simplify build_host_link, unify HOSTNAME fallback and expand test coverage
+ * Make display_time tag tolerant of empty and unparseable input
+ * Simplify deletion re-check to a cheap existence probe and count skips as ignored
+ * Scope org backend create and list views to the user's org for non-superusers
+ * Guard org join and create login views against already-used invitations
+ * Send invitation emails via async task and use crypto-safe secrets
+ * Add org scoping and permission checks to dashblock image views
+ * Strip whitespace and skip empty entries when parsing invitation email lists
+ * Use existence queries for org group membership checks
+ * Preserve all story images when saving the images form
+ * Re-check object state under lock before deletion in sync_local_to_set
+ * Fix Org.build_host_link: treat null subdomain as blank, use https for custom domains on secure deployments, fix hostname fallback typo
+ * Remove unused gettext install from CI, use SPDX license expression, and clean up stale test settings
+ * Fix deprecated datetime.utcfromtimestamp usage and stop union() mutating its arguments
+ * Fix display_time tag to parse ISO 8601 timestamps with microseconds and offsets
+ * Bump idna from 3.11 to 3.15
+ * Bump urllib3 from 2.6.3 to 2.7.0
+ * Bump django from 5.2.13 to 5.2.14
+ * Remove codecov
+ * Do not fail CI with codecov error
+ * Update pillow to 12.2.0
+ * Bump pillow from 12.1.1 to 12.2.0
+ * Bump django from 5.2.12 to 5.2.13
+
 v1.20.0 (2026-04-06)
 -------------------------
  * Update tests for Django 6.0 URLField behavior
