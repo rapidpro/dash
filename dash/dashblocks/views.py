@@ -1,6 +1,7 @@
 from smartmin.views import SmartCreateView, SmartCRUDL, SmartListView, SmartUpdateView
 
 from django import forms
+from django.http import Http404
 from django.urls import reverse
 from django.utils.encoding import force_str
 from django.utils.translation import gettext_lazy as _
@@ -214,18 +215,27 @@ class DashBlockImageCRUDL(SmartCRUDL):
     model = DashBlockImage
     actions = ("create", "update", "list")
 
-    class List(SmartListView):
+    class List(OrgPermsMixin, SmartListView):
         ordering = ("dashblock__title",)
 
-    class Update(SmartUpdateView):
+        def get_queryset(self, **kwargs):
+            queryset = super(DashBlockImageCRUDL.List, self).get_queryset(**kwargs)
+            queryset = queryset.filter(dashblock__org=self.derive_org())
+
+            return queryset
+
+    class Update(OrgObjPermsMixin, SmartUpdateView):
         exclude = ("dashblock", "modified_by", "modified_on", "created_on", "created_by", "width", "height")
         title = "Edit Image"
         success_message = "Image edited successfully."
 
+        def get_object_org(self):
+            return self.get_object().dashblock.org
+
         def get_success_url(self):
             return reverse("dashblocks.dashblock_update", args=[self.object.dashblock.id])
 
-    class Create(SmartCreateView):
+    class Create(OrgPermsMixin, SmartCreateView):
         exclude = (
             "dashblock",
             "is_active",
@@ -239,11 +249,21 @@ class DashBlockImageCRUDL(SmartCRUDL):
         title = "Add Image"
         success_message = "Image added successfully."
 
+        def get_dashblock(self):
+            block_id = self.request.POST.get("dashblock", self.request.GET.get("dashblock", None))
+
+            dashblock = None
+            if block_id and str(block_id).isdigit():
+                dashblock = DashBlock.objects.filter(pk=block_id, org=self.derive_org()).first()
+
+            if dashblock is None:
+                raise Http404("No DashBlock matches the given query.")
+
+            return dashblock
+
         def derive_initial(self, *args, **kwargs):
             initial = super(DashBlockImageCRUDL.Create, self).derive_initial(*args, **kwargs)
-            block_id = self.request.POST.get("dashblock", self.request.GET.get("dashblock", None))
-            dashblock = DashBlock.objects.get(pk=block_id)
-            images = dashblock.sorted_images()
+            images = self.get_dashblock().sorted_images()
             if not images:
                 initial["priority"] = 0
             else:
@@ -255,6 +275,5 @@ class DashBlockImageCRUDL(SmartCRUDL):
 
         def pre_save(self, obj):
             obj = super(DashBlockImageCRUDL.Create, self).pre_save(obj)
-            block_id = self.request.POST.get("dashblock", self.request.GET.get("dashblock", None))
-            obj.dashblock = DashBlock.objects.filter(pk=block_id).first()
+            obj.dashblock = self.get_dashblock()
             return obj

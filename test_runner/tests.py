@@ -1,13 +1,12 @@
 import zoneinfo
-from dash.tags.models import Tag
-from unittest.mock import Mock, patch, call
+from unittest.mock import Mock, call, patch
 
 import valkey
 from smartmin.tests import SmartminTest
 from temba_client.v2 import TembaClient
 
 from django.conf import settings
-from django.contrib.auth.models import Group, User
+from django.contrib.auth.models import Group, Permission, User
 from django.core import mail
 from django.core.exceptions import DisallowedHost
 from django.db.utils import IntegrityError
@@ -25,8 +24,9 @@ from dash.orgs.models import Invitation, Org, OrgBackend, OrgBackground, TaskSta
 from dash.orgs.tasks import org_task
 from dash.orgs.templatetags.dashorgs import display_time, national_phone
 from dash.stories.models import Story, StoryImage
-from dash.utils import random_string
+from dash.tags.models import Tag
 from dash.test import MockResponse
+from dash.utils import random_string
 
 
 class UserTest(SmartminTest):
@@ -2757,6 +2757,113 @@ class DashBlockTest(DashTest):
         response = self.client.get(list_url, SERVER_NAME="uganda.ureport.io")
         self.assertEqual(len(response.context["object_list"]), 1)
         self.assertTrue(updated_block_image in response.context["object_list"])
+
+        self.clear_uploads()
+
+    def test_dashblock_image_org(self):
+        # grant the dashblock image permissions to org administrators
+        administrators = Group.objects.get(name="Administrators")
+        administrators.permissions.add(
+            *Permission.objects.filter(content_type__app_label="dashblocks", codename__startswith="dashblockimage_")
+        )
+
+        uganda_block = DashBlock.objects.create(
+            dashblock_type=self.type_foo,
+            org=self.uganda,
+            title="Uganda",
+            content="Uganda content",
+            summary="uganda summary",
+            created_by=self.admin,
+            modified_by=self.admin,
+        )
+
+        nigeria_block = DashBlock.objects.create(
+            dashblock_type=self.type_foo,
+            org=self.nigeria,
+            title="Nigeria",
+            content="Nigeria content",
+            summary="nigeria summary",
+            created_by=self.admin,
+            modified_by=self.admin,
+        )
+
+        create_url = reverse("dashblocks.dashblockimage_create")
+
+        self.login(self.admin)
+
+        # cannot fetch the create form for a dashblock in another org
+        response = self.client.get(create_url + "?dashblock=%d" % nigeria_block.pk, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(response.status_code, 404)
+
+        # nor for a missing or invalid dashblock id
+        response = self.client.get(create_url, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(response.status_code, 404)
+
+        response = self.client.get(create_url + "?dashblock=invalid", SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(response.status_code, 404)
+
+        # cannot attach an image to a dashblock in another org
+        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "rb")
+        post_data = dict(dashblock=nigeria_block.pk, image=upload, caption="sneaky caption")
+        response = self.client.post(
+            create_url + "?dashblock=%d" % nigeria_block.pk, post_data, SERVER_NAME="uganda.ureport.io"
+        )
+        self.assertEqual(response.status_code, 404)
+        self.assertFalse(DashBlockImage.objects.exists())
+
+        # can attach an image to a dashblock in the request org
+        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "rb")
+        post_data = dict(dashblock=uganda_block.pk, image=upload, caption="uganda caption")
+        response = self.client.post(
+            create_url + "?dashblock=%d" % uganda_block.pk, post_data, follow=True, SERVER_NAME="uganda.ureport.io"
+        )
+        uganda_image = DashBlockImage.objects.get()
+        self.assertEqual(uganda_image.dashblock, uganda_block)
+        self.assertEqual(uganda_image.caption, "uganda caption")
+
+        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "rb")
+        post_data = dict(dashblock=nigeria_block.pk, image=upload, caption="nigeria caption")
+        response = self.client.post(
+            create_url + "?dashblock=%d" % nigeria_block.pk, post_data, follow=True, SERVER_NAME="nigeria.ureport.io"
+        )
+        nigeria_image = DashBlockImage.objects.get(dashblock=nigeria_block)
+        self.assertEqual(nigeria_image.caption, "nigeria caption")
+
+        # list only shows the images for dashblocks in the request org
+        list_url = reverse("dashblocks.dashblockimage_list")
+
+        response = self.client.get(list_url, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(len(response.context["object_list"]), 1)
+        self.assertIn(uganda_image, response.context["object_list"])
+        self.assertNotIn(nigeria_image, response.context["object_list"])
+
+        response = self.client.get(list_url, SERVER_NAME="nigeria.ureport.io")
+        self.assertEqual(len(response.context["object_list"]), 1)
+        self.assertIn(nigeria_image, response.context["object_list"])
+        self.assertNotIn(uganda_image, response.context["object_list"])
+
+        # cannot update an image for a dashblock in another org
+        update_url = reverse("dashblocks.dashblockimage_update", args=[nigeria_image.pk])
+
+        response = self.client.get(update_url, SERVER_NAME="uganda.ureport.io")
+        self.assertLoginRedirect(response)
+
+        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "rb")
+        post_data = dict(image=upload, caption="sneaky update", is_active=True, priority=0)
+        response = self.client.post(update_url, post_data, SERVER_NAME="uganda.ureport.io")
+        self.assertLoginRedirect(response)
+        nigeria_image.refresh_from_db()
+        self.assertEqual(nigeria_image.caption, "nigeria caption")
+
+        # can update an image for a dashblock in the request org
+        response = self.client.get(update_url, SERVER_NAME="nigeria.ureport.io")
+        self.assertEqual(response.status_code, 200)
+
+        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "rb")
+        post_data = dict(image=upload, caption="nigeria updated caption", is_active=True, priority=0)
+        response = self.client.post(update_url, post_data, follow=True, SERVER_NAME="nigeria.ureport.io")
+        nigeria_image.refresh_from_db()
+        self.assertEqual(nigeria_image.caption, "nigeria updated caption")
 
         self.clear_uploads()
 
