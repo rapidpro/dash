@@ -16,6 +16,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model, login
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
+from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -506,36 +507,36 @@ class OrgCRUDL(SmartCRUDL):
             return None
 
         def form_valid(self, form):
-            # make sure the invitation is still valid before creating anything, e.g. it may have
-            # been used already by a duplicate submission
-            invitation = self.get_invitation()
-            if not invitation:
-                messages.info(
-                    self.request,
-                    _("Your invitation link is invalid. Please contact your organization administrator."),
+            with transaction.atomic():
+                # claim the invitation atomically so that a concurrent duplicate submission can't also use it
+                claimed = Invitation.objects.filter(secret=self.kwargs["secret"], is_active=True).update(
+                    is_active=False
                 )
-                return HttpResponseRedirect("/")
+                if not claimed:
+                    messages.info(
+                        self.request,
+                        _("Your invitation link is invalid. Please contact your organization administrator."),
+                    )
+                    return HttpResponseRedirect("/")
 
-            user = Org.create_user(self.form.cleaned_data["email"], self.form.cleaned_data["password"])
-            user.first_name = self.form.cleaned_data["first_name"]
-            user.last_name = self.form.cleaned_data["last_name"]
-            user.save()
+                invitation = Invitation.objects.filter(secret=self.kwargs["secret"]).first()
 
-            # log the user in
-            user = authenticate(username=user.username, password=self.form.cleaned_data["password"])
-            login(self.request, user)
+                user = Org.create_user(self.form.cleaned_data["email"], self.form.cleaned_data["password"])
+                user.first_name = self.form.cleaned_data["first_name"]
+                user.last_name = self.form.cleaned_data["last_name"]
+                user.save()
 
-            obj = invitation.org
-            if invitation.user_group == "A":
-                obj.administrators.add(user)
-            elif invitation.user_group == "E":
-                obj.editors.add(user)
+                # log the user in
+                user = authenticate(username=user.username, password=self.form.cleaned_data["password"])
+                login(self.request, user)
 
-            # make the invitation inactive
-            invitation.is_active = False
-            invitation.save()
+                obj = invitation.org
+                if invitation.user_group == "A":
+                    obj.administrators.add(user)
+                elif invitation.user_group == "E":
+                    obj.editors.add(user)
 
-            return super(OrgCRUDL.CreateLogin, self).form_valid(form)
+                return super(OrgCRUDL.CreateLogin, self).form_valid(form)
 
         @classmethod
         def derive_url_pattern(cls, path, action):
@@ -556,7 +557,7 @@ class OrgCRUDL(SmartCRUDL):
 
         def derive_title(self):
             org = self.get_object()
-            return _("Join %(name)s") % {"name": org.name}
+            return _("Join %(name)s") % {"name": org.name} if org else _("Join")
 
         def get_context_data(self, **kwargs):
             context = super(OrgCRUDL.CreateLogin, self).get_context_data(**kwargs)
@@ -599,36 +600,36 @@ class OrgCRUDL(SmartCRUDL):
 
         def derive_title(self):
             org = self.get_object()
-            return _("Join %(name)s") % {"name": org.name}
+            return _("Join %(name)s") % {"name": org.name} if org else _("Join")
 
         def form_valid(self, form):
-            # make sure the invitation is still valid before updating anything, e.g. it may have
-            # been used already by a duplicate submission
-            if not self.get_invitation():
-                messages.info(
-                    self.request,
-                    _("Your invitation link has expired. Please contact your organization administrator."),
+            with transaction.atomic():
+                # claim the invitation atomically so that a concurrent duplicate submission can't also use it
+                claimed = Invitation.objects.filter(secret=self.kwargs["secret"], is_active=True).update(
+                    is_active=False
                 )
-                return HttpResponseRedirect("/")
+                if not claimed:
+                    messages.info(
+                        self.request,
+                        _("Your invitation link has expired. Please contact your organization administrator."),
+                    )
+                    return HttpResponseRedirect("/")
 
-            return super(OrgCRUDL.Join, self).form_valid(form)
+                self.invitation = Invitation.objects.filter(secret=self.kwargs["secret"]).first()
+
+                return super(OrgCRUDL.Join, self).form_valid(form)
 
         def save(self, org):
-            invitation = self.get_invitation()
-            if invitation:
-                org = invitation.org
-                if invitation.user_group == "A":
-                    org.administrators.add(self.request.user)
-                elif invitation.user_group == "E":
-                    org.editors.add(self.request.user)
+            invitation = self.invitation
+            org = invitation.org
+            if invitation.user_group == "A":
+                org.administrators.add(self.request.user)
+            elif invitation.user_group == "E":
+                org.editors.add(self.request.user)
 
-                # make the invitation inactive
-                invitation.is_active = False
-                invitation.save()
-
-                # set the active org on this user
-                self.request.user.set_org(org)
-                self.request.session["org_id"] = org.pk
+            # set the active org on this user
+            self.request.user.set_org(org)
+            self.request.session["org_id"] = org.pk
 
         @classmethod
         def derive_url_pattern(cls, path, action):
