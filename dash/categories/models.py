@@ -32,9 +32,13 @@ class Category(SmartModel):
     )
 
     def get_first_image(self):
-        cat_images = self.images.filter(is_active=True).exclude(image="")
-        if cat_images and cat_images.first().image:
-            return cat_images.first().image
+        cat_images = (
+            self.prefetched_images
+            if hasattr(self, "prefetched_images")
+            else list(self.images.filter(is_active=True).exclude(image="").order_by("id"))
+        )
+        if cat_images and cat_images[0].image:
+            return cat_images[0].image
 
     def get_label_from_instance(self):
         label = str(self)

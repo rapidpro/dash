@@ -1,6 +1,5 @@
 import zoneinfo
-from dash.tags.models import Tag
-from unittest.mock import Mock, patch, call
+from unittest.mock import Mock, call, patch
 
 import valkey
 from smartmin.tests import SmartminTest
@@ -25,8 +24,9 @@ from dash.orgs.models import Invitation, Org, OrgBackend, OrgBackground, TaskSta
 from dash.orgs.tasks import org_task
 from dash.orgs.templatetags.dashorgs import display_time, national_phone
 from dash.stories.models import Story, StoryImage
-from dash.utils import random_string
+from dash.tags.models import Tag
 from dash.test import MockResponse
+from dash.utils import random_string
 
 
 class UserTest(SmartminTest):
@@ -1804,6 +1804,87 @@ class StoryTest(DashTest):
 
         self.assertFalse(self.story.get_category_image())
         self.assertFalse(self.story.get_image(), "categories/some_image.jpg")
+
+    def test_get_main_stories(self):
+        # health_uganda has a blank direct image field but does have a category image
+        CategoryImage.objects.create(
+            category=self.health_uganda,
+            name="image 1",
+            image="categories/some_image.jpg",
+            created_by=self.admin,
+            modified_by=self.admin,
+        )
+
+        story1 = Story.objects.create(
+            title="Story 1",
+            content="content",
+            featured=True,
+            org=self.uganda,
+            category=self.health_uganda,
+            created_by=self.admin,
+            modified_by=self.admin,
+        )
+
+        story2 = Story.objects.create(
+            title="Story 2",
+            content="content",
+            featured=True,
+            org=self.uganda,
+            category=self.health_uganda,
+            created_by=self.admin,
+            modified_by=self.admin,
+        )
+        StoryImage.objects.create(
+            name="image 1", story=story2, image="stories/someimage.jpg", created_by=self.admin, modified_by=self.admin
+        )
+
+        # not featured so not included
+        Story.objects.create(
+            title="Story 3",
+            content="content",
+            org=self.uganda,
+            category=self.health_uganda,
+            created_by=self.admin,
+            modified_by=self.admin,
+        )
+
+        # has an attachment so not included
+        Story.objects.create(
+            title="Story 4",
+            content="content",
+            featured=True,
+            attachment="story_attachments/file.pdf",
+            org=self.uganda,
+            category=self.health_uganda,
+            created_by=self.admin,
+            modified_by=self.admin,
+        )
+
+        # 1 query for the stories, 3 for the prefetches, none per story
+        with self.assertNumQueries(4):
+            main_stories = list(Story.get_main_stories(self.uganda))
+            self.assertEqual(main_stories, [story2, story1])
+
+            # category with a blank direct image field is still set and its images are prefetched
+            self.assertEqual(main_stories[1].category, self.health_uganda)
+            self.assertTrue(main_stories[1].category.is_active)
+            self.assertEqual(main_stories[1].get_category_image(), "categories/some_image.jpg")
+            self.assertEqual(main_stories[1].get_image(), "categories/some_image.jpg")
+            self.assertEqual(main_stories[0].get_category_image(), "categories/some_image.jpg")
+            self.assertEqual(main_stories[0].get_image(), "stories/someimage.jpg")
+
+        self.assertEqual(list(Story.get_main_stories(self.uganda, 1)), [story2])
+
+        # an inactive category is still set on the story but its images are ignored
+        self.health_uganda.is_active = False
+        self.health_uganda.save()
+
+        main_stories = list(Story.get_main_stories(self.uganda))
+        self.assertEqual(main_stories, [story2, story1])
+        self.assertEqual(main_stories[1].category, self.health_uganda)
+        self.assertIsNone(main_stories[1].get_category_image())
+        self.assertEqual(main_stories[0].get_category_image(), "stories/someimage.jpg")
+        self.assertEqual(main_stories[0].get_image(), "stories/someimage.jpg")
 
     def test_upload_attachment(self):
         create_url = reverse("stories.story_create")

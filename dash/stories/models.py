@@ -8,7 +8,7 @@ from django.db import models
 from django.db.models import Prefetch, Q
 from django.utils.translation import gettext_lazy as _
 
-from dash.categories.models import Category
+from dash.categories.models import Category, CategoryImage
 from dash.orgs.models import Org
 from dash.utils import generate_file_path
 
@@ -162,10 +162,13 @@ class Story(SmartModel):
                 ),
                 Prefetch(
                     "category",
-                    queryset=Category.objects.filter(is_active=True, org=org)
-                    .exclude(image="")
-                    .only("id")
-                    .prefetch_related("images"),
+                    queryset=Category.objects.prefetch_related(
+                        Prefetch(
+                            "images",
+                            queryset=CategoryImage.objects.filter(is_active=True).exclude(image="").order_by("id"),
+                            to_attr="prefetched_images",
+                        )
+                    ),
                 ),
             )
             .only("id", "category_id", "title", "summary")
