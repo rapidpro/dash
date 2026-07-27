@@ -113,18 +113,22 @@ class StoryCRUDL(SmartCRUDL):
 
             idx = 1
 
+            # the existing image behind each rendered field, so saving can update rows in place
+            self.existing_images = {}
+
             # add existing images
-            for image in self.object.images.all().order_by("pk"):
+            for story_image in self.object.images.filter(is_active=True).order_by("pk"):
                 image_field_name = "image_%d" % idx
                 image_field = forms.ImageField(
                     required=False,
-                    initial=image.image,
+                    initial=story_image.image,
                     label=_("Image %d") % idx,
                     help_text=_("Image to display on story page and in previews. (optional)"),
                     validators=[validate_image_file_extension],
                 )
 
                 self.form.fields[image_field_name] = image_field
+                self.existing_images[image_field_name] = story_image
                 idx += 1
 
             while idx <= 3:
@@ -141,15 +145,20 @@ class StoryCRUDL(SmartCRUDL):
         def post_save(self, obj):
             obj = super(StoryCRUDL.Images, self).post_save(obj)
 
-            # remove our existing images
-            self.object.images.all().delete()
-
-            # overwrite our new ones, iterating over all rendered image fields
+            # for each rendered image field, keep the existing image if it is unchanged, remove it if it was
+            # cleared or replaced, and create a new image for each new upload
             for field_name in self.form.fields:
                 if not field_name.startswith("image_"):
                     continue
 
                 image = self.form.cleaned_data.get(field_name, None)
+                existing = self.existing_images.get(field_name)
+
+                if existing:
+                    if image == existing.image:  # unchanged, keep as is
+                        continue
+
+                    existing.delete()
 
                 if image:
                     StoryImage.objects.create(
