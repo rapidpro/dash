@@ -144,10 +144,12 @@ class StoryCRUDL(SmartCRUDL):
             # remove our existing images
             self.object.images.all().delete()
 
-            # overwrite our new ones
-            # TODO: this could probably be done more elegantly
-            for idx in range(1, 4):
-                image = self.form.cleaned_data.get("image_%d" % idx, None)
+            # overwrite our new ones, iterating over all rendered image fields
+            for field_name in self.form.fields:
+                if not field_name.startswith("image_"):
+                    continue
+
+                image = self.form.cleaned_data.get(field_name, None)
 
                 if image:
                     StoryImage.objects.create(

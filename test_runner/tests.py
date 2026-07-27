@@ -1,6 +1,5 @@
 import zoneinfo
-from dash.tags.models import Tag
-from unittest.mock import Mock, patch, call
+from unittest.mock import Mock, call, patch
 
 import valkey
 from smartmin.tests import SmartminTest
@@ -25,8 +24,9 @@ from dash.orgs.models import Invitation, Org, OrgBackend, OrgBackground, TaskSta
 from dash.orgs.tasks import org_task
 from dash.orgs.templatetags.dashorgs import display_time, national_phone
 from dash.stories.models import Story, StoryImage
-from dash.utils import random_string
+from dash.tags.models import Tag
 from dash.test import MockResponse
+from dash.utils import random_string
 
 
 class UserTest(SmartminTest):
@@ -2169,6 +2169,54 @@ class StoryTest(DashTest):
         self.assertEqual(response.request["PATH_INFO"], reverse("stories.story_list"))
 
         self.clear_uploads()
+
+    def test_images_story_preserves_extra_images(self):
+        import os
+
+        story1 = Story.objects.create(
+            title="foo",
+            content="bar",
+            category=self.health_uganda,
+            org=self.uganda,
+            created_by=self.admin,
+            modified_by=self.admin,
+        )
+
+        # a story can have more than 3 images when they are created outside the images form
+        for i in range(1, 5):
+            StoryImage.objects.create(
+                name="image %d" % i,
+                story=story1,
+                image="stories/someimage%d.jpg" % i,
+                created_by=self.admin,
+                modified_by=self.admin,
+            )
+
+        images_url = reverse("stories.story_images", args=[story1.pk])
+
+        self.login(self.admin)
+        response = self.client.get(images_url, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context["form"].fields), 4)
+        for field in response.context["form"].fields:
+            self.assertTrue(response.context["form"].fields[field].initial)
+
+        # posting without changes should preserve all 4 images
+        response = self.client.post(images_url, dict(), follow=True, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(response.request["PATH_INFO"], reverse("stories.story_list"))
+        self.assertEqual(StoryImage.objects.filter(story=story1).count(), 4)
+
+        # submitting a new image for one of the fields should still preserve all 4 images
+        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "rb")
+        post_data = dict(image_2=upload)
+        response = self.client.post(images_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(response.request["PATH_INFO"], reverse("stories.story_list"))
+        self.assertEqual(StoryImage.objects.filter(story=story1).count(), 4)
+
+        # remove the file we uploaded, other images do not have files on disk
+        for story_image in StoryImage.objects.filter(story=story1):
+            if os.path.exists(story_image.image.path):
+                os.remove(story_image.image.path)
 
 
 class DashBlockTypeTest(DashTest):
