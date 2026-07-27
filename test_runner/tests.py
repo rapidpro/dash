@@ -1444,7 +1444,7 @@ class OrgTaskTest(DashTest):
         mock_over_time_window.return_value = {"foo": "bar"}
 
         r = get_valkey_connection()
-        lock = r.lock(TaskState.get_lock_key(self.org, "test-task-2"), timeout=10)
+        lock = r.lock(TaskState.get_lock_key(self.org, "test-task-2"), timeout=60)
         self.assertTrue(lock.acquire(blocking=False))
 
         try:
@@ -1453,6 +1453,9 @@ class OrgTaskTest(DashTest):
 
             mock_over_time_window.assert_not_called()
             self.assertFalse(TaskState.objects.filter(org=self.org, task_key="test-task-2").exists())
+
+            # and the skipped invocation didn't steal or release the other worker's lock
+            self.assertTrue(lock.owned())
         finally:
             lock.release()
 
@@ -1461,6 +1464,50 @@ class OrgTaskTest(DashTest):
 
         mock_over_time_window.assert_called_once()
         self.assertFalse(TaskState.objects.get(org=self.org, task_key="test-task-2").is_failing)
+
+    @patch("test_runner.tests.test_over_time_window")
+    def test_org_task_locks_with_expiry(self, mock_over_time_window):
+        r = get_valkey_connection()
+        key = TaskState.get_lock_key(self.org, "test-task-2")
+
+        def check_lock(org, prev_started_on, started_on):
+            ttl = r.ttl(key)
+            self.assertTrue(0 < ttl <= 60 * 60)  # lock is held with the default expiry whilst the task runs
+            return {}
+
+        mock_over_time_window.side_effect = check_lock
+
+        test_org_task_2(self.org.id)
+
+        mock_over_time_window.assert_called_once()
+        self.assertEqual(r.ttl(key), -2)  # lock released when the task finished
+
+    @patch("test_runner.tests.test_over_time_window")
+    def test_org_task_lock_expires_mid_run(self, mock_over_time_window):
+        r = get_valkey_connection()
+        key = TaskState.get_lock_key(self.org, "test-task-2")
+
+        def delete_lock_and_succeed(org, prev_started_on, started_on):
+            r.delete(key)  # simulate the lock expiring before the task finishes
+            return {"foo": "bar"}
+
+        mock_over_time_window.side_effect = delete_lock_and_succeed
+
+        # a run that outlives its lock still completes successfully
+        test_org_task_2(self.org.id)
+
+        self.assertFalse(TaskState.objects.get(org=self.org, task_key="test-task-2").is_failing)
+
+        def delete_lock_and_fail(org, prev_started_on, started_on):
+            r.delete(key)  # simulate the lock expiring before the task fails
+            raise ValueError("DOH!")
+
+        mock_over_time_window.side_effect = delete_lock_and_fail
+
+        # and a failing run's own exception isn't masked by the failure to release the expired lock
+        self.assertRaises(ValueError, test_org_task_2, self.org.id)
+
+        self.assertTrue(TaskState.objects.get(org=self.org, task_key="test-task-2").is_failing)
 
 
 class TaskCRUDLTest(DashTest):

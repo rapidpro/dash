@@ -5,13 +5,12 @@ from functools import wraps
 
 from celery import shared_task, signature
 from django_valkey import get_valkey_connection
+from valkey.exceptions import LockError
 
 from django.apps import apps
 from django.utils import timezone
 
 from .models import Invitation, TaskState
-
-ORG_TASK_LOCK_KEY = "org-task-lock:%s:%s"
 
 DEFAULT_LOCK_TIMEOUT = 60 * 60  # 1 hour
 
@@ -39,9 +38,15 @@ def trigger_org_task(task_name, queue="celery"):
     logger.info("Requested task '%s' for %d active orgs" % (task_name, len(active_orgs)))
 
 
-def org_task(task_key, lock_timeout=None):
+def org_task(task_key, lock_timeout=DEFAULT_LOCK_TIMEOUT):
     """
     Decorator to create an org task.
+
+    The task holds a lock while it runs so that it can't run concurrently for the same org. The lock expires after
+    lock_timeout seconds (1 hour by default) so that a dead worker can't hold it forever - which means a task that
+    runs longer than its lock timeout may be started concurrently. Set lock_timeout to comfortably exceed the task's
+    worst-case runtime.
+
     :param task_key: the task key used for state storage and locking, e.g. 'do-stuff'
     :param lock_timeout: the lock timeout in seconds
     """
@@ -56,7 +61,7 @@ def org_task(task_key, lock_timeout=None):
     return _org_task
 
 
-def maybe_run_for_org(org, task_func, task_key, lock_timeout):
+def maybe_run_for_org(org, task_func, task_key, lock_timeout=DEFAULT_LOCK_TIMEOUT):
     """
     Runs the given task function for the specified org provided it's not already running
     :param org: the org
@@ -68,7 +73,7 @@ def maybe_run_for_org(org, task_func, task_key, lock_timeout):
 
     key = TaskState.get_lock_key(org, task_key)
 
-    lock = r.lock(key, timeout=lock_timeout if lock_timeout is not None else DEFAULT_LOCK_TIMEOUT)
+    lock = r.lock(key, timeout=lock_timeout)
 
     if not lock.acquire(blocking=False):
         logger.warning("Skipping task %s for org #%d as it is still running" % (task_key, org.id))
@@ -122,4 +127,11 @@ def maybe_run_for_org(org, task_func, task_key, lock_timeout):
             logger.exception("Task %s for org #%d failed" % (task_key, org.id))
             raise e  # re-raise with original stack trace
     finally:
-        lock.release()
+        try:
+            lock.release()
+        except LockError:
+            # the lock expired before we finished (i.e. the task ran longer than its lock timeout) - don't let that
+            # fail an otherwise successful run or mask an in-flight exception
+            logger.warning(
+                "Unable to release lock for task %s for org #%d as it is no longer owned" % (task_key, org.id)
+            )
