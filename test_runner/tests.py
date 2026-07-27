@@ -6,7 +6,7 @@ from smartmin.tests import SmartminTest
 from temba_client.v2 import TembaClient
 
 from django.conf import settings
-from django.contrib.auth.models import AnonymousUser, Group, User
+from django.contrib.auth.models import AnonymousUser, Group, Permission, User
 from django.core import mail
 from django.core.exceptions import DisallowedHost
 from django.db import connection
@@ -26,7 +26,7 @@ from dash.orgs.middleware import SetOrgMiddleware
 from dash.orgs.models import Invitation, Org, OrgBackend, OrgBackground, TaskState
 from dash.orgs.tasks import org_task
 from dash.orgs.templatetags.dashorgs import display_time, national_phone
-from dash.orgs.views import OrgCRUDL
+from dash.orgs.views import OrgBackendForm, OrgCRUDL
 from dash.stories.models import Story, StoryImage
 from dash.tags.models import Tag
 from dash.test import MockResponse
@@ -382,6 +382,129 @@ class OrgBackendTest(DashTest):
 
         self.nigeria_backend = self.nigeria.backends.get(slug="rapidpro")
 
+    def grant_backend_perms(self):
+        # in the test settings org administrators aren't given orgbackend permissions, add them here
+        administrators = Group.objects.get(name="Administrators")
+        administrators.permissions.add(
+            *Permission.objects.filter(content_type__app_label="orgs", codename__startswith="orgbackend_")
+        )
+
+    def setup_backend_type_choices(self):
+        # the test settings have no configured backend type choices, add one for the form to validate
+        backend_type_field = OrgBackendForm.base_fields["backend_type"]
+        self.addCleanup(setattr, backend_type_field, "choices", backend_type_field.choices)
+        backend_type_field.choices = [("rapidpro", "RapidPro")]
+
+    def test_create(self):
+        create_url = reverse("orgs.orgbackend_create")
+
+        self.grant_backend_perms()
+        self.setup_backend_type_choices()
+
+        response = self.client.get(create_url, SERVER_NAME="uganda.ureport.io")
+        self.assertLoginRedirect(response)
+
+        # org admins can't create backends even with orgbackend model permissions
+        self.login(self.admin)
+        response = self.client.get(create_url, SERVER_NAME="uganda.ureport.io")
+        self.assertLoginRedirect(response)
+
+        post_data = dict(
+            org=self.uganda.pk,
+            slug="denied",
+            backend_type="rapidpro",
+            host="http://localhost:8004",
+            api_token="token789",
+        )
+        response = self.client.post(create_url, post_data, SERVER_NAME="uganda.ureport.io")
+        self.assertLoginRedirect(response)
+        self.assertFalse(OrgBackend.objects.filter(slug="denied").exists())
+
+        # staff users can create backends and pick the org
+        staff_user = self.create_user("staffuser")
+        staff_user.is_staff = True
+        staff_user.save()
+
+        self.login(staff_user)
+        response = self.client.get(create_url, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("org", response.context["form"].fields)
+
+        post_data = dict(
+            org=self.nigeria.pk,
+            slug="floip",
+            backend_type="rapidpro",
+            host="http://localhost:8002",
+            api_token="token123",
+        )
+        response = self.client.post(create_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(response.status_code, 200)
+        backend = OrgBackend.objects.get(slug="floip")
+        self.assertEqual(backend.org, self.nigeria)
+
+        # superusers can pick the org
+        self.login(self.superuser)
+        response = self.client.get(create_url, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("org", response.context["form"].fields)
+
+        post_data = dict(
+            org=self.nigeria.pk,
+            slug="other",
+            backend_type="rapidpro",
+            host="http://localhost:8003",
+            api_token="token456",
+        )
+        response = self.client.post(create_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(response.status_code, 200)
+        backend = OrgBackend.objects.get(slug="other")
+        self.assertEqual(backend.org, self.nigeria)
+
+    def test_update(self):
+        update_url = reverse("orgs.orgbackend_update", args=[self.nigeria_backend.pk])
+
+        self.grant_backend_perms()
+        self.setup_backend_type_choices()
+
+        uganda_admin = self.create_user("uganda_admin")
+        self.uganda.administrators.add(uganda_admin)
+
+        # an administrator of another org can't update this backend
+        self.login(uganda_admin)
+        response = self.client.get(update_url, SERVER_NAME="uganda.ureport.io")
+        self.assertLoginRedirect(response)
+
+        post_data = dict(
+            is_active=True,
+            slug="hijacked",
+            backend_type="rapidpro",
+            host="http://localhost:8004",
+            api_token="token789",
+        )
+        response = self.client.post(update_url, post_data, SERVER_NAME="uganda.ureport.io")
+        self.assertLoginRedirect(response)
+
+        self.nigeria_backend.refresh_from_db()
+        self.assertEqual(self.nigeria_backend.slug, "rapidpro")
+        self.assertEqual(self.nigeria_backend.org, self.nigeria)
+
+        # updating a backend on their own org works, but posting another org's id can't move it
+        update_url = reverse("orgs.orgbackend_update", args=[self.uganda_backend.pk])
+        post_data = dict(
+            org=self.nigeria.pk,
+            is_active=True,
+            slug="updated",
+            backend_type="rapidpro",
+            host="http://localhost:8005",
+            api_token="token987",
+        )
+        response = self.client.post(update_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(response.status_code, 200)
+
+        self.uganda_backend.refresh_from_db()
+        self.assertEqual(self.uganda_backend.slug, "updated")
+        self.assertEqual(self.uganda_backend.org, self.uganda)
+
     def test_list(self):
         list_url = reverse("orgs.orgbackend_list")
 
@@ -406,6 +529,17 @@ class OrgBackendTest(DashTest):
         self.assertFalse(self.nigeria_backend in response.context["object_list"])
         self.assertTrue(self.uganda_backend in response.context["object_list"])
         self.assertEqual(len(response.context["object_list"]), 1)
+
+        # org administrators only see the backends of the request org
+        self.grant_backend_perms()
+
+        self.login(self.admin)
+        response = self.client.get(list_url, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.uganda_backend, response.context["object_list"])
+        self.assertNotIn(self.nigeria_backend, response.context["object_list"])
+        self.assertEqual(len(response.context["object_list"]), 1)
+        self.assertNotIn("org", response.context["fields"])
 
         self.assertEqual(str(self.nigeria_backend), "rapidpro")
 
