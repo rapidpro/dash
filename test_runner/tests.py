@@ -1,6 +1,5 @@
 import zoneinfo
-from dash.tags.models import Tag
-from unittest.mock import Mock, patch, call
+from unittest.mock import Mock, call, patch
 
 import valkey
 from smartmin.tests import SmartminTest
@@ -25,8 +24,9 @@ from dash.orgs.models import Invitation, Org, OrgBackend, OrgBackground, TaskSta
 from dash.orgs.tasks import org_task
 from dash.orgs.templatetags.dashorgs import display_time, national_phone
 from dash.stories.models import Story, StoryImage
-from dash.utils import random_string
+from dash.tags.models import Tag
 from dash.test import MockResponse
+from dash.utils import random_string
 
 
 class UserTest(SmartminTest):
@@ -975,7 +975,8 @@ class OrgTest(DashTest):
         # now post with right email
         post_data["emails"] = "norkans7@gmail.com"
         post_data["user_group"] = "A"
-        response = self.client.post(manage_accounts_url, post_data, SERVER_NAME="uganda.ureport.io")
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.post(manage_accounts_url, post_data, SERVER_NAME="uganda.ureport.io")
 
         # an invitation is created and sent by email
         self.assertEqual(1, Invitation.objects.all().count())
@@ -993,7 +994,8 @@ class OrgTest(DashTest):
         # send another invitation, different group
         post_data["emails"] = "norkans7@gmail.com"
         post_data["user_group"] = "E"
-        self.client.post(manage_accounts_url, post_data, SERVER_NAME="uganda.ureport.io")
+        with self.captureOnCommitCallbacks(execute=True):
+            self.client.post(manage_accounts_url, post_data, SERVER_NAME="uganda.ureport.io")
 
         # old invite should be updated
         new_invite = Invitation.objects.all().first()
@@ -1006,7 +1008,8 @@ class OrgTest(DashTest):
         # post many emails to the form
         post_data["emails"] = "norbert@nyaruka.com,code@nyaruka.com"
         post_data["user_group"] = "A"
-        self.client.post(manage_accounts_url, post_data, SERVER_NAME="uganda.ureport.io")
+        with self.captureOnCommitCallbacks(execute=True):
+            self.client.post(manage_accounts_url, post_data, SERVER_NAME="uganda.ureport.io")
 
         # now 2 new invitations are created and sent
         self.assertEqual(3, Invitation.objects.all().count())

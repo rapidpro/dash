@@ -1,5 +1,5 @@
 import json
-import random
+import secrets
 from functools import partial
 from pydoc import locate
 
@@ -9,7 +9,7 @@ from timezone_field import TimeZoneField
 
 from django.conf import settings
 from django.contrib.auth.models import Group, User
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 from django.utils.encoding import force_str
 from django.utils.translation import gettext_lazy as _
@@ -298,12 +298,12 @@ class Invitation(SmartModel):
         """
         # avoid things that could be mistaken ex: 'I' and '1'
         letters = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"
-        return "".join([random.choice(letters) for _ in range(length)])
+        return "".join([secrets.choice(letters) for _ in range(length)])
 
     def send_invitation(self):
         from .tasks import send_invitation_email_task
 
-        send_invitation_email_task(self.id)
+        transaction.on_commit(partial(send_invitation_email_task.delay, self.id))
 
     def send_email(self):
         # no=op if we do not know the email
