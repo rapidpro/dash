@@ -726,16 +726,37 @@ class OrgBackendCRUDL(SmartCRUDL):
 
     class Create(OrgPermsMixin, SmartCreateView):
         form_class = OrgBackendForm
-        fields = ("org", "slug", "backend_type", "host", "api_token")
+
+        def derive_fields(self):
+            if self.request.user.is_superuser:
+                return ("org", "slug", "backend_type", "host", "api_token")
+            return ("slug", "backend_type", "host", "api_token")
+
+        def pre_save(self, obj):
+            obj = super(OrgBackendCRUDL.Create, self).pre_save(obj)
+
+            if not self.get_user().is_superuser:
+                org = self.derive_org()
+                if org:
+                    obj.org = org
+
+            return obj
 
     class List(OrgPermsMixin, SmartListView):
         fields = ("org", "slug", "backend_type", "modified_on", "created_on")
         ordering = ("org__name", "slug")
 
+        def derive_fields(self):
+            if self.request.user.is_superuser:
+                return ("org", "slug", "backend_type", "modified_on", "created_on")
+            return ("slug", "backend_type", "modified_on", "created_on")
+
         def get_queryset(self, **kwargs):
             queryset = super(OrgBackendCRUDL.List, self).get_queryset(**kwargs)
 
-            if self.derive_org():
+            if not self.get_user().is_superuser:
+                queryset = queryset.filter(org=self.derive_org())
+            elif self.derive_org():
                 queryset = queryset.filter(org=self.derive_org())
 
             return queryset
