@@ -5,12 +5,11 @@ description = "Support library for RapidPro dashboards"
 authors = [
     {"name" = "Nyaruka", "email" = "code@nyaruka.com"}
 ]
-license = { text = "BSD" }
+license = "BSD-3-Clause"
 classifiers=[
     "Development Status :: 5 - Production/Stable",
     "Environment :: Web Environment",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: BSD License",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Framework :: Django",
@@ -66,7 +65,7 @@ source = ["dash"]
 omit = ["*/migrations/*", "*/tests*", "*__init__*", "*settings*", "*management/commands*", "dash/test.py"]
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
