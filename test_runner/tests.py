@@ -2882,6 +2882,37 @@ class DashBlockTest(DashTest):
         self.assertTrue(dashblock1 in context["foo"])
         self.assertTrue(dashblock4 in context["foo"])
 
+        # blocks created programmatically with raw tags are normalized on save
+        dashblock5 = DashBlock.objects.create(
+            dashblock_type=self.type_foo,
+            org=self.uganda,
+            title="Fifth",
+            content="Fifth content",
+            tags="Kigali\tNyarugenge\n Remera",
+            created_by=self.admin,
+            modified_by=self.admin,
+        )
+        self.assertEqual(dashblock5.tags, " kigali nyarugenge remera ")
+
+        self.assertEqual(load_qbs(context, self.uganda, "foo", "nyarugenge"), "")
+        self.assertTrue(dashblock5 in context["foo"])
+        self.assertFalse(dashblock1 in context["foo"])
+        self.assertFalse(dashblock4 in context["foo"])
+
+        self.assertEqual(load_qbs(context, self.uganda, "foo", "kigali"), "")
+        self.assertTrue(dashblock1 in context["foo"])
+        self.assertTrue(dashblock4 in context["foo"])
+        self.assertTrue(dashblock5 in context["foo"])
+
+        # an empty or None tag skips tag filtering entirely, returning all blocks of the type
+        for empty_tag in ("", "   ", None):
+            self.assertEqual(load_qbs(context, self.uganda, "foo", empty_tag), "")
+            self.assertTrue(dashblock1 in context["foo"])
+            self.assertFalse(dashblock2 in context["foo"])
+            self.assertFalse(dashblock3 in context["foo"])
+            self.assertTrue(dashblock4 in context["foo"])
+            self.assertTrue(dashblock5 in context["foo"])
+
 
 class TemplateTagsTest(DashTest):
     def test_if_url(self):

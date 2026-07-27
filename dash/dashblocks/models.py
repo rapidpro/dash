@@ -133,11 +133,15 @@ class DashBlock(SmartModel):
 
     def space_tags(self):
         """
-        If we have tags set, then adds spaces before and after to allow for SQL
-        querying for them.
+        If we have tags set, then lowercases them, collapses whitespace between them
+        and adds spaces before and after to allow for SQL querying for them.
         """
         if self.tags and self.tags.strip():
-            self.tags = " " + self.tags.strip().lower() + " "
+            self.tags = " " + " ".join(self.tags.lower().split()) + " "
+
+    def save(self, *args, **kwargs):
+        self.space_tags()
+        return super().save(*args, **kwargs)
 
     def sorted_images(self):
         return self.images.filter(is_active=True).order_by("-priority")

@@ -58,8 +58,9 @@ def load_dashblocks(context, org, slug, tag=None):
 
     dashblocks_qs = DashBlock.objects.filter(org=org, is_active=True).order_by("-priority")
     # filter by our tag if one was specified, tags are stored space padded and lowercased, e.g. " tag1 tag2 "
-    if tag is not None:
-        dashblocks_qs = dashblocks_qs.filter(tags__contains=" %s " % tag.strip().lower())
+    tag = str(tag).strip().lower() if tag is not None else None
+    if tag:
+        dashblocks_qs = dashblocks_qs.filter(tags__contains=" %s " % tag)
 
     dashblock_type = (
         DashBlockType.objects.filter(slug=slug)
