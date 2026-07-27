@@ -5,12 +5,11 @@ description = "Support library for RapidPro dashboards"
 authors = [
     {"name" = "Nyaruka", "email" = "code@nyaruka.com"}
 ]
-license = { text = "BSD" }
+license = "BSD-3-Clause"
 classifiers=[
     "Development Status :: 5 - Production/Stable",
     "Environment :: Web Environment",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: BSD License",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Framework :: Django",
@@ -27,7 +26,7 @@ dependencies = [
     "psycopg >= 3.1.9",
     "python-dateutil >=2.8.2",
     "rapidpro-python (>=2.22.2,<3.0.0)",
-    "smartmin (>=6.0.0,<6.1.0)",
+    "smartmin (>=6.1.0,<6.2.0)",
     "sorl-thumbnail >= 12.9.0",
     "django-valkey (>=0.2.1,<0.3.0)",
 ]
@@ -66,7 +65,7 @@ source = ["dash"]
 omit = ["*/migrations/*", "*/tests*", "*__init__*", "*settings*", "*management/commands*", "dash/test.py"]
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
