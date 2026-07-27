@@ -1,6 +1,5 @@
 import zoneinfo
-from dash.tags.models import Tag
-from unittest.mock import Mock, patch, call
+from unittest.mock import Mock, call, patch
 
 import valkey
 from smartmin.tests import SmartminTest
@@ -25,8 +24,9 @@ from dash.orgs.models import Invitation, Org, OrgBackend, OrgBackground, TaskSta
 from dash.orgs.tasks import org_task
 from dash.orgs.templatetags.dashorgs import display_time, national_phone
 from dash.stories.models import Story, StoryImage
-from dash.utils import random_string
+from dash.tags.models import Tag
 from dash.test import MockResponse
+from dash.utils import random_string
 
 
 class UserTest(SmartminTest):
@@ -1154,10 +1154,15 @@ class OrgTest(DashTest):
 
     def test_dashorgs_templatetags(self):
         self.assertEqual(display_time("2014-11-04T15:11:34Z", self.org), "Nov 04, 2014 15:11")
+        self.assertEqual(display_time("2014-11-04T15:11:34.123456Z", self.org), "Nov 04, 2014 15:11")
+        self.assertEqual(display_time("2014-11-04T15:11:34.123456+00:00", self.org), "Nov 04, 2014 15:11")
+        self.assertEqual(display_time("2014-11-04T17:11:34+02:00", self.org), "Nov 04, 2014 15:11")
+        self.assertEqual(display_time("2014-11-04T15:11:34", self.org), "Nov 04, 2014 15:11")
 
         self.org.timezone = zoneinfo.ZoneInfo("Africa/Kigali")
         self.org.save()
         self.assertEqual(display_time("2014-11-04T15:11:34Z", self.org), "Nov 04, 2014 17:11")
+        self.assertEqual(display_time("2014-11-04T15:11:34.123456Z", self.org), "Nov 04, 2014 17:11")
 
         self.assertEqual(display_time("2014-11-04T15:11:34Z", self.org, "%A, %B %d, %Y"), "Tuesday, November 04, 2014")
 
