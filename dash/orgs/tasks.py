@@ -21,6 +21,8 @@ def send_invitation_email_task(invitation_id):
     invitation = Invitation.objects.filter(pk=invitation_id).first()
     if invitation:
         invitation.send_email()
+    else:
+        logger.warning("invitation %s no longer exists", invitation_id)
 
 
 @shared_task

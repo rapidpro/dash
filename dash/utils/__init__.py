@@ -1,7 +1,7 @@
 import calendar
 import json
 import os
-import random
+import secrets
 from collections import OrderedDict
 from datetime import datetime, timezone as tzone
 from itertools import islice
@@ -50,7 +50,7 @@ def random_string(length):
     """
     # avoid things that could be mistaken ex: 'I' and '1'
     letters = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"
-    return "".join([random.choice(letters) for _ in range(length)])
+    return "".join([secrets.choice(letters) for _ in range(length)])
 
 
 def filter_dict(d, keys):
