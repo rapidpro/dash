@@ -1,5 +1,4 @@
 import json
-import random
 from functools import partial
 from pydoc import locate
 
@@ -9,12 +8,11 @@ from timezone_field import TimeZoneField
 
 from django.conf import settings
 from django.contrib.auth.models import Group, User
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
-from django.utils.encoding import force_str
 from django.utils.translation import gettext_lazy as _
 
-from dash.utils import generate_file_path
+from dash.utils import generate_file_path, random_string
 from dash.utils.email import send_dash_email
 
 STATE = 1
@@ -144,16 +142,19 @@ class Org(SmartModel):
         return org_users.distinct()
 
     def get_user_org_group(self, user):
-        if user in self.get_org_admins():
+        if hasattr(user, "_org_group"):
+            return user._org_group
+
+        if self.administrators.filter(id=user.id).exists():
             user._org_group = Group.objects.get(name="Administrators")
-        elif user in self.get_org_editors():
+        elif self.editors.filter(id=user.id).exists():
             user._org_group = Group.objects.get(name="Editors")
-        elif user in self.get_org_viewers():
+        elif self.viewers.filter(id=user.id).exists():
             user._org_group = Group.objects.get(name="Viewers")
         else:
             user._org_group = None
 
-        return getattr(user, "_org_group", None)
+        return user._org_group
 
     def get_user(self):
         user = self.administrators.filter(is_active=True).first()
@@ -184,20 +185,15 @@ class Org(SmartModel):
         return TembaClient(host, api_token, user_agent=agent, transformer=transformer)
 
     def build_host_link(self, user_authenticated=False):
-        host_tld = getattr(settings, "HOSTNAME", "locahost")
+        host_tld = getattr(settings, "HOSTNAME", "") or "localhost"
         is_secure = getattr(settings, "SESSION_COOKIE_SECURE", False)
 
-        prefix = "http://"
+        prefix = "https://" if is_secure else "http://"
 
         if self.domain and is_secure and not user_authenticated:
-            return prefix + str(self.domain)
+            return prefix + self.domain
 
-        if is_secure:
-            prefix = "https://"
-
-        if self.subdomain == "":
-            return prefix + host_tld
-        return prefix + force_str(self.subdomain) + "." + host_tld
+        return prefix + (f"{self.subdomain}.{host_tld}" if self.subdomain else host_tld)
 
     def get_task_state(self, task_key):
         return TaskState.get_or_create(self, task_key)
@@ -284,7 +280,7 @@ class Invitation(SmartModel):
         if not self.secret:
             secret = Invitation.generate_random_string(64)
 
-            while Invitation.objects.filter(secret=secret):
+            while Invitation.objects.filter(secret=secret).exists():
                 secret = Invitation.generate_random_string(64)
 
             self.secret = secret
@@ -294,16 +290,14 @@ class Invitation(SmartModel):
     @classmethod
     def generate_random_string(cls, length):
         """
-        Generatesa a [length] characters alpha numeric secret
+        Generates a [length] characters alpha numeric secret
         """
-        # avoid things that could be mistaken ex: 'I' and '1'
-        letters = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"
-        return "".join([random.choice(letters) for _ in range(length)])
+        return random_string(length)
 
     def send_invitation(self):
         from .tasks import send_invitation_email_task
 
-        send_invitation_email_task(self.id)
+        transaction.on_commit(partial(send_invitation_email_task.delay, self.id))
 
     def send_email(self):
         # no=op if we do not know the email

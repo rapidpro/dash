@@ -10,10 +10,20 @@ register = template.Library()
 @register.simple_tag()
 def display_time(text_timestamp, org, time_format=None):
 
+    if not text_timestamp:
+        return ""
+
     if not time_format:
         time_format = "%b %d, %Y %H:%M"
 
-    parsed_time = datetime.strptime(text_timestamp, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=tzone.utc)
+    try:
+        parsed_time = datetime.fromisoformat(text_timestamp)
+    except ValueError:
+        # timestamp didn't parse, return it raw
+        return text_timestamp
+
+    if parsed_time.tzinfo is None:
+        parsed_time = parsed_time.replace(tzinfo=tzone.utc)
     output_time = parsed_time.astimezone(org.timezone)
 
     return output_time.strftime(time_format)
