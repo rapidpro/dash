@@ -36,6 +36,12 @@ class InitTest(DashTest):
         self.assertEqual(union([2, 1, 1], [1, 2, 3]), [2, 1, 3])  # order is first seen
         self.assertEqual(union([2, 1], [2, 3, 3], [4, 5]), [2, 1, 3, 4, 5])
 
+        # arguments should be left unmodified
+        arg1, arg2 = [2, 1, 1], [1, 2, 3]
+        union(arg1, arg2)
+        self.assertEqual(arg1, [2, 1, 1])
+        self.assertEqual(arg2, [1, 2, 3])
+
     def test_random_string(self):
         rs = random_string(1000)
         self.assertEqual(1000, len(rs))
@@ -86,6 +92,15 @@ class InitTest(DashTest):
         d2 = datetime(2014, 1, 2, 3, 4, 5, 600000, tz)
         self.assertEqual(datetime_to_ms(d2), 1388624645600)
         self.assertEqual(ms_to_datetime(1388624645600), d2.astimezone(tzone.utc))
+
+        # round-trip: datetime -> ms -> datetime returns an aware UTC datetime
+        d3 = datetime(2021, 6, 7, 8, 9, 10, 111000, tzinfo=tzone.utc)
+        self.assertEqual(ms_to_datetime(datetime_to_ms(d3)), d3)
+        self.assertEqual(ms_to_datetime(datetime_to_ms(d3)).tzinfo, tzone.utc)
+
+        # epoch and pre-epoch values
+        self.assertEqual(ms_to_datetime(0), datetime(1970, 1, 1, tzinfo=tzone.utc))
+        self.assertEqual(ms_to_datetime(-1500), datetime(1969, 12, 31, 23, 59, 58, 500000, tzinfo=tzone.utc))
 
     def test_get_month_range(self):
         self.assertEqual(
