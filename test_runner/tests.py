@@ -1632,7 +1632,7 @@ class OrgTaskTest(DashTest):
 
         def check_lock(org, prev_started_on, started_on):
             ttl = r.ttl(key)
-            self.assertTrue(0 < ttl <= 60 * 60)  # lock is held with the default expiry whilst the task runs
+            self.assertTrue(0 < ttl <= 60 * 60 * 2)  # lock is held with the default expiry whilst the task runs
             return {}
 
         mock_over_time_window.side_effect = check_lock

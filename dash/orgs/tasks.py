@@ -12,7 +12,7 @@ from django.utils import timezone
 
 from .models import Invitation, TaskState
 
-DEFAULT_LOCK_TIMEOUT = 60 * 60  # 1 hour
+DEFAULT_LOCK_TIMEOUT = 60 * 60 * 2  # 2 hours
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ def org_task(task_key, lock_timeout=DEFAULT_LOCK_TIMEOUT):
     Decorator to create an org task.
 
     The task holds a lock while it runs so that it can't run concurrently for the same org. The lock expires after
-    lock_timeout seconds (1 hour by default) so that a dead worker can't hold it forever - which means a task that
+    lock_timeout seconds (2 hours by default) so that a dead worker can't hold it forever - which means a task that
     runs longer than its lock timeout may be started concurrently. Set lock_timeout to comfortably exceed the task's
     worst-case runtime.
 
