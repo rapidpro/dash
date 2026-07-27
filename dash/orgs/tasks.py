@@ -18,8 +18,11 @@ logger = logging.getLogger(__name__)
 
 @shared_task(track_started=True, name="send_invitation_email_task")
 def send_invitation_email_task(invitation_id):
-    invitation = Invitation.objects.get(pk=invitation_id)
-    invitation.send_email()
+    invitation = Invitation.objects.filter(pk=invitation_id).first()
+    if invitation:
+        invitation.send_email()
+    else:
+        logger.warning("invitation %s no longer exists", invitation_id)
 
 
 @shared_task
