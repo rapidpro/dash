@@ -1806,11 +1806,30 @@ class StoryTest(DashTest):
         self.assertFalse(self.story.get_image(), "categories/some_image.jpg")
 
     def test_get_main_stories(self):
+        # an inactive category image should never be used, even though it has the lowest id
+        CategoryImage.objects.create(
+            category=self.health_uganda,
+            name="inactive image",
+            image="categories/inactive_image.jpg",
+            is_active=False,
+            created_by=self.admin,
+            modified_by=self.admin,
+        )
+
         # health_uganda has a blank direct image field but does have a category image
         CategoryImage.objects.create(
             category=self.health_uganda,
             name="image 1",
             image="categories/some_image.jpg",
+            created_by=self.admin,
+            modified_by=self.admin,
+        )
+
+        # a second active image with a higher id, the lowest-id active image should win
+        CategoryImage.objects.create(
+            category=self.health_uganda,
+            name="image 2",
+            image="categories/other_image.jpg",
             created_by=self.admin,
             modified_by=self.admin,
         )
@@ -1860,7 +1879,7 @@ class StoryTest(DashTest):
             modified_by=self.admin,
         )
 
-        # 1 query for the stories, 3 for the prefetches, none per story
+        # 1 query for the stories, 3 for the prefetches (when at least one story has a category), none per story
         with self.assertNumQueries(4):
             main_stories = list(Story.get_main_stories(self.uganda))
             self.assertEqual(main_stories, [story2, story1])
@@ -1868,6 +1887,8 @@ class StoryTest(DashTest):
             # category with a blank direct image field is still set and its images are prefetched
             self.assertEqual(main_stories[1].category, self.health_uganda)
             self.assertTrue(main_stories[1].category.is_active)
+
+            # the lowest-id active category image is used, ignoring the inactive one
             self.assertEqual(main_stories[1].get_category_image(), "categories/some_image.jpg")
             self.assertEqual(main_stories[1].get_image(), "categories/some_image.jpg")
             self.assertEqual(main_stories[0].get_category_image(), "categories/some_image.jpg")

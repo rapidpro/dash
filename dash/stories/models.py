@@ -162,7 +162,7 @@ class Story(SmartModel):
                 ),
                 Prefetch(
                     "category",
-                    queryset=Category.objects.prefetch_related(
+                    queryset=Category.objects.select_related("org").prefetch_related(
                         Prefetch(
                             "images",
                             queryset=CategoryImage.objects.filter(is_active=True).exclude(image="").order_by("id"),

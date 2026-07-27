@@ -32,13 +32,13 @@ class Category(SmartModel):
     )
 
     def get_first_image(self):
+        # prefetched_images, when populated by a Prefetch, must contain only active, non-blank images ordered by id
         cat_images = (
             self.prefetched_images
             if hasattr(self, "prefetched_images")
             else list(self.images.filter(is_active=True).exclude(image="").order_by("id"))
         )
-        if cat_images and cat_images[0].image:
-            return cat_images[0].image
+        return cat_images[0].image if cat_images else None
 
     def get_label_from_instance(self):
         label = str(self)
