@@ -655,7 +655,7 @@ requires-dist = [
     { name = "python-dateutil", specifier = ">=2.8.2" },
     { name = "rapidpro-python", specifier = ">=2.22.2,<3.0.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.15.7" },
-    { name = "smartmin", specifier = ">=6.0.0,<6.1.0" },
+    { name = "smartmin", specifier = ">=6.1.0,<6.2.0" },
     { name = "sorl-thumbnail", specifier = ">=12.9.0" },
 ]
 provides-extras = ["dev"]
@@ -887,7 +887,7 @@ wheels = [
 
 [[package]]
 name = "smartmin"
-version = "6.0.0"
+version = "6.1.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
@@ -895,9 +895,9 @@ dependencies = [
     { name = "xlrd" },
     { name = "xlwt" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/61/3b/e26f56c7fca369c1cf7e758a625393c1623a61afc203200616f43c4ca124/smartmin-6.0.0.tar.gz", hash = "sha256:3433d241ee9fffcbaa71101d82034cdf1c8e4699ff4f88bab291ff756049e13a", size = 503649, upload-time = "2026-04-06T16:09:23.55Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/87/64/1b50519259470b9a5dcfb7f9cbdab7d9d8b40638343ec74eae59b3c6349d/smartmin-6.1.0.tar.gz", hash = "sha256:38e2cf29567cb578f7f589f083351c93c8a87985e0e3e07572640d0461e43bd9", size = 485925, upload-time = "2026-07-27T19:29:02.605Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/db/3a/934f18557a5a4dd8d9a8fcfc5901d501d0c681ffd453a909076b50e919fa/smartmin-6.0.0-py3-none-any.whl", hash = "sha256:10d215f2449de6136a1b97ed1286c002e75872f7cf4f126877bf0b80e56d4e9a", size = 351600, upload-time = "2026-04-06T16:09:22.278Z" },
+    { url = "https://files.pythonhosted.org/packages/3c/b3/6a47e64f4d6b415f73a8aae9186fb9f435fa133a516911dc7fb2e55d3b7c/smartmin-6.1.0-py3-none-any.whl", hash = "sha256:525e989c40185d8a9ef2ef3db26a74b0c133fcd826784cda0f3bf388fce94d23", size = 351035, upload-time = "2026-07-27T19:29:01.304Z" },
 ]
 
 [[package]]
