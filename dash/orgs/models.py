@@ -1,5 +1,4 @@
 import json
-import random
 from functools import partial
 from pydoc import locate
 
@@ -9,11 +8,11 @@ from timezone_field import TimeZoneField
 
 from django.conf import settings
 from django.contrib.auth.models import Group, User
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from dash.utils import generate_file_path
+from dash.utils import generate_file_path, random_string
 from dash.utils.email import send_dash_email
 
 STATE = 1
@@ -281,7 +280,7 @@ class Invitation(SmartModel):
         if not self.secret:
             secret = Invitation.generate_random_string(64)
 
-            while Invitation.objects.filter(secret=secret):
+            while Invitation.objects.filter(secret=secret).exists():
                 secret = Invitation.generate_random_string(64)
 
             self.secret = secret
@@ -291,16 +290,14 @@ class Invitation(SmartModel):
     @classmethod
     def generate_random_string(cls, length):
         """
-        Generatesa a [length] characters alpha numeric secret
+        Generates a [length] characters alpha numeric secret
         """
-        # avoid things that could be mistaken ex: 'I' and '1'
-        letters = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"
-        return "".join([random.choice(letters) for _ in range(length)])
+        return random_string(length)
 
     def send_invitation(self):
         from .tasks import send_invitation_email_task
 
-        send_invitation_email_task(self.id)
+        transaction.on_commit(partial(send_invitation_email_task.delay, self.id))
 
     def send_email(self):
         # no=op if we do not know the email

@@ -169,6 +169,8 @@ LOGOUT_REDIRECT_URL = "/"
 # ----------------------------------------------------------------------------
 CELERY_RESULT_BACKEND = None
 CELERY_BROKER_URL = "redis://localhost:6379/4"
+CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_EAGER_PROPAGATES = True
 
 # RapidPRO
 SITE_API_HOST = "http://localhost:8001"
