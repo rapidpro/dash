@@ -200,13 +200,15 @@ def sync_local_to_set(org, syncer, remote_set) -> dict:
         identity = syncer.identify_local(local)
 
         with syncer.lock(org, identity):
-            # re-fetch inside the lock and re-check that this object still qualifies for deletion, as a concurrent
-            # sync may have changed it since the queryset was evaluated
-            local = syncer.fetch_local(org, identity)
-
-            if local and local.is_active and identity not in remote_identities:
+            # re-check inside the lock that this object still exists and is active, as a concurrent sync may have
+            # deactivated or hard-deleted it since the queryset was evaluated. Note this only sees committed state
+            # under READ COMMITTED/autocommit - callers must not wrap syncs in an outer transaction that outlives
+            # the lock.
+            if syncer.fetch_all(org).filter(pk=local.pk, is_active=True).exists():
                 syncer.delete_local(local)
                 outcome_counts[SyncOutcome.deleted] += 1
+            else:
+                outcome_counts[SyncOutcome.ignored] += 1
 
     return outcome_counts
 

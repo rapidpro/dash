@@ -177,11 +177,12 @@ class SyncTest(DashTest):
         try:
             outcome_counts = sync_local_to_set(self.unicef, self.syncer, remote_set)
         finally:
-            self.syncer.lock = real_lock
+            del self.syncer.lock
 
-        # neither C-002 nor C-003 should have been deleted by this sync as they were re-checked under the lock
+        # neither C-002 nor C-003 should have been deleted by this sync as they were re-checked under the lock, and
+        # both count as ignored so the outcome buckets still sum to the number of candidates
         self.assertEqual(
-            {SyncOutcome.created: 0, SyncOutcome.updated: 0, SyncOutcome.deleted: 0, SyncOutcome.ignored: 1},
+            {SyncOutcome.created: 0, SyncOutcome.updated: 0, SyncOutcome.deleted: 0, SyncOutcome.ignored: 3},
             outcome_counts,
         )
         Contact.objects.get(org=self.unicef, uuid="C-001", is_active=True)
