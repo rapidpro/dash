@@ -506,18 +506,26 @@ class OrgCRUDL(SmartCRUDL):
             return None
 
         def form_valid(self, form):
+            # make sure the invitation is still valid before creating anything, e.g. it may have
+            # been used already by a duplicate submission
+            invitation = self.get_invitation()
+            if not invitation:
+                messages.info(
+                    self.request,
+                    _("Your invitation link is invalid. Please contact your organization administrator."),
+                )
+                return HttpResponseRedirect("/")
+
             user = Org.create_user(self.form.cleaned_data["email"], self.form.cleaned_data["password"])
             user.first_name = self.form.cleaned_data["first_name"]
             user.last_name = self.form.cleaned_data["last_name"]
             user.save()
 
-            invitation = self.get_invitation()
-
             # log the user in
             user = authenticate(username=user.username, password=self.form.cleaned_data["password"])
             login(self.request, user)
 
-            obj = self.get_object()
+            obj = invitation.org
             if invitation.user_group == "A":
                 obj.administrators.add(user)
             elif invitation.user_group == "E":
@@ -593,10 +601,22 @@ class OrgCRUDL(SmartCRUDL):
             org = self.get_object()
             return _("Join %(name)s") % {"name": org.name}
 
+        def form_valid(self, form):
+            # make sure the invitation is still valid before updating anything, e.g. it may have
+            # been used already by a duplicate submission
+            if not self.get_invitation():
+                messages.info(
+                    self.request,
+                    _("Your invitation link has expired. Please contact your organization administrator."),
+                )
+                return HttpResponseRedirect("/")
+
+            return super(OrgCRUDL.Join, self).form_valid(form)
+
         def save(self, org):
-            org = self.get_object()
             invitation = self.get_invitation()
-            if org:
+            if invitation:
+                org = invitation.org
                 if invitation.user_group == "A":
                     org.administrators.add(self.request.user)
                 elif invitation.user_group == "E":

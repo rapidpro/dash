@@ -1,6 +1,5 @@
 import zoneinfo
-from dash.tags.models import Tag
-from unittest.mock import Mock, patch, call
+from unittest.mock import Mock, call, patch
 
 import valkey
 from smartmin.tests import SmartminTest
@@ -25,8 +24,9 @@ from dash.orgs.models import Invitation, Org, OrgBackend, OrgBackground, TaskSta
 from dash.orgs.tasks import org_task
 from dash.orgs.templatetags.dashorgs import display_time, national_phone
 from dash.stories.models import Story, StoryImage
-from dash.utils import random_string
+from dash.tags.models import Tag
 from dash.test import MockResponse
+from dash.utils import random_string
 
 
 class UserTest(SmartminTest):
@@ -1071,6 +1071,21 @@ class OrgTest(DashTest):
             response = self.client.post(join_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
             self.assertEqual(response.request["PATH_INFO"], "/example/home")
 
+        # posting again with an invitation that has already been used should not error, just redirect away
+        self.org.editors.remove(self.invited_editor)
+
+        response = self.client.post(editor_join_url, dict(), follow=True, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(response.request["PATH_INFO"], "/")
+        self.assertFalse(self.invited_editor in self.org.editors.all())
+
+        # even if the invitation is consumed after the request passes pre_process
+        with patch("dash.orgs.views.OrgCRUDL.Join.pre_process") as mock_pre_process:
+            mock_pre_process.return_value = None
+
+            response = self.client.post(editor_join_url, dict(), follow=True, SERVER_NAME="uganda.ureport.io")
+            self.assertEqual(response.request["PATH_INFO"], "/")
+            self.assertFalse(self.invited_editor in self.org.editors.all())
+
     def test_create_login(self):
         admin_invitation = Invitation.objects.create(
             org=self.org, user_group="A", email="norkans7@gmail.com", created_by=self.admin, modified_by=self.admin
@@ -1151,6 +1166,27 @@ class OrgTest(DashTest):
         self.assertTrue(User.objects.filter(email="norkans7@gmail.com"))
         self.assertFalse(Invitation.objects.get(pk=admin_invitation.pk).is_active)
         self.assertTrue(Invitation.objects.get(pk=viewer_invitation.pk).is_active)
+
+        # posting again with an invitation that has already been used should not create a user, just redirect away
+        self.client.logout()
+
+        post_data = dict()
+        post_data["first_name"] = "Bob"
+        post_data["last_name"] = "User"
+        post_data["email"] = "bob@nyaruka.com"
+        post_data["password"] = "bobuserpassword"
+
+        response = self.client.post(admin_create_login_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(response.request["PATH_INFO"], "/")
+        self.assertFalse(User.objects.filter(email="bob@nyaruka.com"))
+
+        # even if the invitation is consumed after the request passes pre_process
+        with patch("dash.orgs.views.OrgCRUDL.CreateLogin.pre_process") as mock_pre_process:
+            mock_pre_process.return_value = None
+
+            response = self.client.post(admin_create_login_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
+            self.assertEqual(response.request["PATH_INFO"], "/")
+            self.assertFalse(User.objects.filter(email="bob@nyaruka.com"))
 
     def test_dashorgs_templatetags(self):
         self.assertEqual(display_time("2014-11-04T15:11:34Z", self.org), "Nov 04, 2014 15:11")
