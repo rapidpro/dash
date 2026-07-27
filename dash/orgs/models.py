@@ -144,11 +144,11 @@ class Org(SmartModel):
         return org_users.distinct()
 
     def get_user_org_group(self, user):
-        if user in self.get_org_admins():
+        if self.administrators.filter(id=user.id).exists():
             user._org_group = Group.objects.get(name="Administrators")
-        elif user in self.get_org_editors():
+        elif self.editors.filter(id=user.id).exists():
             user._org_group = Group.objects.get(name="Editors")
-        elif user in self.get_org_viewers():
+        elif self.viewers.filter(id=user.id).exists():
             user._org_group = Group.objects.get(name="Viewers")
         else:
             user._org_group = None

@@ -1,6 +1,5 @@
 import zoneinfo
-from dash.tags.models import Tag
-from unittest.mock import Mock, patch, call
+from unittest.mock import Mock, call, patch
 
 import valkey
 from smartmin.tests import SmartminTest
@@ -25,8 +24,9 @@ from dash.orgs.models import Invitation, Org, OrgBackend, OrgBackground, TaskSta
 from dash.orgs.tasks import org_task
 from dash.orgs.templatetags.dashorgs import display_time, national_phone
 from dash.stories.models import Story, StoryImage
-from dash.utils import random_string
+from dash.tags.models import Tag
 from dash.test import MockResponse
+from dash.utils import random_string
 
 
 class UserTest(SmartminTest):
@@ -411,6 +411,23 @@ class OrgTest(DashTest):
         super(OrgTest, self).setUp()
 
         self.org = self.create_org("uganda", self.admin)
+
+    def test_get_user_org_group_num_queries(self):
+        viewer = self.create_user("Viewer")
+        editor = self.create_user("Editor")
+        non_member = self.create_user("NonMember")
+        self.org.viewers.add(viewer)
+        self.org.editors.add(editor)
+
+        # membership is checked with existence queries rather than fetching entire member lists
+        with self.assertNumQueries(2):
+            self.assertEqual(self.org.get_user_org_group(self.admin).name, "Administrators")
+        with self.assertNumQueries(3):
+            self.assertEqual(self.org.get_user_org_group(editor).name, "Editors")
+        with self.assertNumQueries(4):
+            self.assertEqual(self.org.get_user_org_group(viewer).name, "Viewers")
+        with self.assertNumQueries(3):
+            self.assertIsNone(self.org.get_user_org_group(non_member))
 
     def test_org_model(self):
         user = self.create_user("User")
