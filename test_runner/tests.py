@@ -1,6 +1,5 @@
 import zoneinfo
-from dash.tags.models import Tag
-from unittest.mock import Mock, patch, call
+from unittest.mock import Mock, call, patch
 
 import valkey
 from smartmin.tests import SmartminTest
@@ -25,8 +24,9 @@ from dash.orgs.models import Invitation, Org, OrgBackend, OrgBackground, TaskSta
 from dash.orgs.tasks import org_task
 from dash.orgs.templatetags.dashorgs import display_time, national_phone
 from dash.stories.models import Story, StoryImage
-from dash.utils import random_string
+from dash.tags.models import Tag
 from dash.test import MockResponse
+from dash.utils import random_string
 
 
 class UserTest(SmartminTest):
@@ -1011,6 +1011,18 @@ class OrgTest(DashTest):
         # now 2 new invitations are created and sent
         self.assertEqual(3, Invitation.objects.all().count())
         self.assertEqual(4, len(mail.outbox))
+
+        # emails with surrounding whitespace and a trailing comma are tolerated
+        post_data["emails"] = "spaced1@nyaruka.com, spaced2@nyaruka.com ,"
+        post_data["user_group"] = "E"
+        response = self.client.post(manage_accounts_url, post_data, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(302, response.status_code)
+
+        # 2 new invitations are created with clean addresses
+        self.assertEqual(5, Invitation.objects.all().count())
+        self.assertEqual(6, len(mail.outbox))
+        self.assertTrue(Invitation.objects.filter(email="spaced1@nyaruka.com", user_group="E").exists())
+        self.assertTrue(Invitation.objects.filter(email="spaced2@nyaruka.com", user_group="E").exists())
 
     def test_join(self):
         editor_invitation = Invitation.objects.create(

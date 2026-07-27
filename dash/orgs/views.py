@@ -358,12 +358,14 @@ class OrgCRUDL(SmartCRUDL):
             def clean_emails(self):
                 emails = self.cleaned_data["emails"].lower().strip()
                 if emails:
-                    email_list = emails.split(",")
+                    email_list = [email.strip() for email in emails.split(",")]
+                    email_list = [email for email in email_list if email]
                     for email in email_list:
                         try:
                             validate_email(email)
                         except ValidationError:
                             raise forms.ValidationError(_("One of the emails you entered is invalid."))
+                    emails = ",".join(email_list)
                 return emails
 
             class Meta:
@@ -423,7 +425,8 @@ class OrgCRUDL(SmartCRUDL):
             user_group = cleaned_data["user_group"]
 
             emails = cleaned_data["emails"].lower().strip()
-            email_list = emails.split(",")
+            email_list = [email.strip() for email in emails.split(",")]
+            email_list = [email for email in email_list if email]
 
             if emails:
                 for email in email_list:
