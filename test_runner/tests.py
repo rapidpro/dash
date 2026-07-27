@@ -23,6 +23,7 @@ from dash.orgs.middleware import SetOrgMiddleware
 from dash.orgs.models import Invitation, Org, OrgBackend, OrgBackground, TaskState
 from dash.orgs.tasks import org_task
 from dash.orgs.templatetags.dashorgs import display_time, national_phone
+from dash.orgs.views import OrgCRUDL
 from dash.stories.models import Story, StoryImage
 from dash.tags.models import Tag
 from dash.test import MockResponse
@@ -1023,6 +1024,27 @@ class OrgTest(DashTest):
         self.assertEqual(6, len(mail.outbox))
         self.assertTrue(Invitation.objects.filter(email="spaced1@nyaruka.com", user_group="E").exists())
         self.assertTrue(Invitation.objects.filter(email="spaced2@nyaruka.com", user_group="E").exists())
+
+        # duplicate addresses are collapsed to a single invitation and email
+        post_data["emails"] = "dup@nyaruka.com, dup@nyaruka.com"
+        post_data["user_group"] = "E"
+        response = self.client.post(manage_accounts_url, post_data, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(302, response.status_code)
+        self.assertEqual(6, Invitation.objects.all().count())
+        self.assertEqual(7, len(mail.outbox))
+        self.assertEqual(1, Invitation.objects.filter(email="dup@nyaruka.com").count())
+
+        # separator-only input is treated as no emails
+        post_data["emails"] = " , , "
+        response = self.client.post(manage_accounts_url, post_data, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(302, response.status_code)
+        self.assertEqual(6, Invitation.objects.all().count())
+        self.assertEqual(7, len(mail.outbox))
+
+    def test_invite_form_clean_emails(self):
+        form = OrgCRUDL.ManageAccounts.InviteForm(data={"emails": " A@x.com , b@y.com ,", "user_group": "E"})
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual("a@x.com,b@y.com", form.cleaned_data["emails"])
 
     def test_join(self):
         editor_invitation = Invitation.objects.create(

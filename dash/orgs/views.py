@@ -356,17 +356,14 @@ class OrgCRUDL(SmartCRUDL):
             )
 
             def clean_emails(self):
-                emails = self.cleaned_data["emails"].lower().strip()
-                if emails:
-                    email_list = [email.strip() for email in emails.split(",")]
-                    email_list = [email for email in email_list if email]
-                    for email in email_list:
-                        try:
-                            validate_email(email)
-                        except ValidationError:
-                            raise forms.ValidationError(_("One of the emails you entered is invalid."))
-                    emails = ",".join(email_list)
-                return emails
+                emails = self.cleaned_data["emails"]
+                email_list = list(dict.fromkeys(email.strip().lower() for email in emails.split(",") if email.strip()))
+                for email in email_list:
+                    try:
+                        validate_email(email)
+                    except ValidationError:
+                        raise forms.ValidationError(_("One of the emails you entered is invalid."))
+                return ",".join(email_list)
 
             class Meta:
                 model = Invitation
@@ -424,29 +421,28 @@ class OrgCRUDL(SmartCRUDL):
 
             user_group = cleaned_data["user_group"]
 
-            emails = cleaned_data["emails"].lower().strip()
-            email_list = [email.strip() for email in emails.split(",")]
-            email_list = [email for email in email_list if email]
+            # emails is already normalized by clean_emails: comma-joined, stripped, lowercased and de-duplicated
+            emails = cleaned_data["emails"]
+            email_list = emails.split(",") if emails else []
 
-            if emails:
-                for email in email_list:
-                    # if they already have an invite, update it
-                    invites = Invitation.objects.filter(email=email, org=org).order_by("-pk")
-                    invitation = invites.first()
+            for email in email_list:
+                # if they already have an invite, update it
+                invites = Invitation.objects.filter(email=email, org=org).order_by("-pk")
+                invitation = invites.first()
 
-                    if invitation:
-                        # remove any old invites
-                        invites.exclude(pk=invitation.pk).delete()
+                if invitation:
+                    # remove any old invites
+                    invites.exclude(pk=invitation.pk).delete()
 
-                        invitation.user_group = user_group
-                        invitation.is_active = True
-                        invitation.save()
-                    else:
-                        invitation = Invitation.objects.create(
-                            email=email, org=org, user_group=user_group, created_by=user, modified_by=user
-                        )
+                    invitation.user_group = user_group
+                    invitation.is_active = True
+                    invitation.save()
+                else:
+                    invitation = Invitation.objects.create(
+                        email=email, org=org, user_group=user_group, created_by=user, modified_by=user
+                    )
 
-                    invitation.send_invitation()
+                invitation.send_invitation()
 
             # remove all the org users
             for user in self.get_object().get_org_admins():
