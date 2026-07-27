@@ -1171,6 +1171,24 @@ class OrgTest(DashTest):
             response = self.client.post(join_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
             self.assertEqual(response.request["PATH_INFO"], "/example/home")
 
+        # posting again with an invitation that has already been used should not error, just redirect away
+        self.org.editors.remove(self.invited_editor)
+
+        response = self.client.post(editor_join_url, dict(), SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(302, response.status_code)
+        self.assertEqual("/", response.url)
+        self.assertFalse(self.invited_editor in self.org.editors.all())
+
+        # simulate a concurrent second submission: the invitation still looks active when the request
+        # is checked but has been consumed by the time it is claimed
+        with patch("dash.orgs.views.OrgCRUDL.Join.get_invitation") as mock_get_invitation:
+            mock_get_invitation.return_value = editor_invitation
+
+            response = self.client.post(editor_join_url, dict(), SERVER_NAME="uganda.ureport.io")
+            self.assertEqual(302, response.status_code)
+            self.assertEqual("/", response.url)
+            self.assertFalse(self.invited_editor in self.org.editors.all())
+
     def test_create_login(self):
         admin_invitation = Invitation.objects.create(
             org=self.org, user_group="A", email="norkans7@gmail.com", created_by=self.admin, modified_by=self.admin
@@ -1251,6 +1269,31 @@ class OrgTest(DashTest):
         self.assertTrue(User.objects.filter(email="norkans7@gmail.com"))
         self.assertFalse(Invitation.objects.get(pk=admin_invitation.pk).is_active)
         self.assertTrue(Invitation.objects.get(pk=viewer_invitation.pk).is_active)
+
+        # posting again with an invitation that has already been used should not create a user, just redirect away
+        self.client.logout()
+
+        post_data = dict()
+        post_data["first_name"] = "Bob"
+        post_data["last_name"] = "User"
+        post_data["email"] = "bob@nyaruka.com"
+        post_data["password"] = "bobuserpassword"
+
+        response = self.client.post(admin_create_login_url, post_data, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(302, response.status_code)
+        self.assertEqual("/", response.url)
+        self.assertFalse(User.objects.filter(email="bob@nyaruka.com"))
+
+        # simulate a concurrent second submission: the invitation still looks active when the request
+        # is checked but has been consumed by the time it is claimed
+        with patch("dash.orgs.views.OrgCRUDL.CreateLogin.get_invitation") as mock_get_invitation:
+            mock_get_invitation.return_value = admin_invitation
+
+            response = self.client.post(admin_create_login_url, post_data, SERVER_NAME="uganda.ureport.io")
+            self.assertEqual(302, response.status_code)
+            self.assertEqual("/", response.url)
+            self.assertFalse(User.objects.filter(email="bob@nyaruka.com"))
+            self.assertEqual(1, self.org.administrators.filter(email="norkans7@gmail.com").count())
 
     def test_dashorgs_templatetags(self):
         self.assertEqual(display_time("2014-11-04T15:11:34Z", self.org), "Nov 04, 2014 15:11")
