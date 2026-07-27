@@ -91,11 +91,17 @@ class SetOrgMiddleware(MiddlewareMixin):
         if org:
             lang = org.language or settings.DEFAULT_LANGUAGE
             translation.activate(lang)
+        else:
+            # reset any language activated by a previous request on this thread
+            translation.activate(settings.LANGUAGE_CODE)
 
     def set_timezone(self, request, org):
         """Set the current timezone from the org configuration."""
         if org and org.timezone:
             timezone.activate(org.timezone)
+        else:
+            # reset any timezone activated by a previous request on this thread
+            timezone.deactivate()
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         if not request.org:

@@ -1,6 +1,5 @@
 import zoneinfo
-from dash.tags.models import Tag
-from unittest.mock import Mock, patch, call
+from unittest.mock import Mock, call, patch
 
 import valkey
 from smartmin.tests import SmartminTest
@@ -13,6 +12,7 @@ from django.core.exceptions import DisallowedHost
 from django.db.utils import IntegrityError
 from django.http import HttpRequest, HttpResponse
 from django.urls import ResolverMatch, reverse
+from django.utils import timezone, translation
 from django.utils.encoding import force_str
 
 from dash.categories.fields import CategoryChoiceField
@@ -25,8 +25,9 @@ from dash.orgs.models import Invitation, Org, OrgBackend, OrgBackground, TaskSta
 from dash.orgs.tasks import org_task
 from dash.orgs.templatetags.dashorgs import display_time, national_phone
 from dash.stories.models import Story, StoryImage
-from dash.utils import random_string
+from dash.tags.models import Tag
 from dash.test import MockResponse
+from dash.utils import random_string
 
 
 class UserTest(SmartminTest):
@@ -346,6 +347,26 @@ class SetOrgMiddlewareTest(DashTest):
         self.assertIsNone(response)
         self.assertEqual(self.request.org, empty_subdomain_org)
         self.assertEqual(self.request.user.get_org(), empty_subdomain_org)
+
+    def test_language_and_timezone_reset(self):
+        ug_org = self.create_org("uganda", self.admin)
+        ug_org.language = "fr"
+        ug_org.timezone = zoneinfo.ZoneInfo("Africa/Kigali")
+        ug_org.save()
+
+        # a request with an org activates its language and timezone
+        response = self.simulate_process("uganda.ureport.io", "dash.test_test")
+        self.assertIsNone(response)
+        self.assertEqual(self.request.org, ug_org)
+        self.assertEqual(translation.get_language(), "fr")
+        self.assertEqual(timezone.get_current_timezone_name(), "Africa/Kigali")
+
+        # a subsequent org-less request on the same thread gets the defaults back
+        response = self.simulate_process("ureport.io", "orgs.org_create")
+        self.assertIsNone(response)
+        self.assertIsNone(self.request.org)
+        self.assertEqual(translation.get_language(), settings.LANGUAGE_CODE)
+        self.assertEqual(timezone.get_current_timezone_name(), settings.TIME_ZONE)
 
 
 class OrgContextProcessorTestcase(DashTest):
