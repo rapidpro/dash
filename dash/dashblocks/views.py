@@ -250,16 +250,21 @@ class DashBlockImageCRUDL(SmartCRUDL):
         success_message = "Image added successfully."
 
         def get_dashblock(self):
-            block_id = self.request.POST.get("dashblock", self.request.GET.get("dashblock", None))
+            if not hasattr(self, "_dashblock"):
+                block_id = self.request.POST.get("dashblock", self.request.GET.get("dashblock", None))
 
-            dashblock = None
-            if block_id and str(block_id).isdigit():
+                try:
+                    block_id = int(block_id)
+                except (TypeError, ValueError):
+                    raise Http404("No DashBlock matches the given query.")
+
                 dashblock = DashBlock.objects.filter(pk=block_id, org=self.derive_org()).first()
+                if dashblock is None:
+                    raise Http404("No DashBlock matches the given query.")
 
-            if dashblock is None:
-                raise Http404("No DashBlock matches the given query.")
+                self._dashblock = dashblock
 
-            return dashblock
+            return self._dashblock
 
         def derive_initial(self, *args, **kwargs):
             initial = super(DashBlockImageCRUDL.Create, self).derive_initial(*args, **kwargs)

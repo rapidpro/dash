@@ -6,7 +6,7 @@ from smartmin.tests import SmartminTest
 from temba_client.v2 import TembaClient
 
 from django.conf import settings
-from django.contrib.auth.models import Group, Permission, User
+from django.contrib.auth.models import Group, User
 from django.core import mail
 from django.core.exceptions import DisallowedHost
 from django.db.utils import IntegrityError
@@ -2761,12 +2761,6 @@ class DashBlockTest(DashTest):
         self.clear_uploads()
 
     def test_dashblock_image_org(self):
-        # grant the dashblock image permissions to org administrators
-        administrators = Group.objects.get(name="Administrators")
-        administrators.permissions.add(
-            *Permission.objects.filter(content_type__app_label="dashblocks", codename__startswith="dashblockimage_")
-        )
-
         uganda_block = DashBlock.objects.create(
             dashblock_type=self.type_foo,
             org=self.uganda,
@@ -2800,6 +2794,9 @@ class DashBlockTest(DashTest):
         self.assertEqual(response.status_code, 404)
 
         response = self.client.get(create_url + "?dashblock=invalid", SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(response.status_code, 404)
+
+        response = self.client.get(create_url + "?dashblock=²", SERVER_NAME="uganda.ureport.io")
         self.assertEqual(response.status_code, 404)
 
         # cannot attach an image to a dashblock in another org
@@ -2864,6 +2861,21 @@ class DashBlockTest(DashTest):
         response = self.client.post(update_url, post_data, follow=True, SERVER_NAME="nigeria.ureport.io")
         nigeria_image.refresh_from_db()
         self.assertEqual(nigeria_image.caption, "nigeria updated caption")
+
+        # a user administering only uganda has no access on the nigeria org
+        uganda_admin = self.create_user("UgandaAdmin")
+        self.uganda.administrators.add(uganda_admin)
+
+        self.login(uganda_admin)
+
+        response = self.client.get(update_url, SERVER_NAME="nigeria.ureport.io")
+        self.assertLoginRedirect(response)
+
+        response = self.client.get(list_url, SERVER_NAME="nigeria.ureport.io")
+        self.assertLoginRedirect(response)
+
+        response = self.client.get(create_url + "?dashblock=%d" % nigeria_block.pk, SERVER_NAME="nigeria.ureport.io")
+        self.assertLoginRedirect(response)
 
         self.clear_uploads()
 
