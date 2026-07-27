@@ -144,6 +144,9 @@ class Org(SmartModel):
         return org_users.distinct()
 
     def get_user_org_group(self, user):
+        if hasattr(user, "_org_group"):
+            return user._org_group
+
         if self.administrators.filter(id=user.id).exists():
             user._org_group = Group.objects.get(name="Administrators")
         elif self.editors.filter(id=user.id).exists():
@@ -153,7 +156,7 @@ class Org(SmartModel):
         else:
             user._org_group = None
 
-        return getattr(user, "_org_group", None)
+        return user._org_group
 
     def get_user(self):
         user = self.administrators.filter(is_active=True).first()

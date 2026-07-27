@@ -6,11 +6,13 @@ from smartmin.tests import SmartminTest
 from temba_client.v2 import TembaClient
 
 from django.conf import settings
-from django.contrib.auth.models import Group, User
+from django.contrib.auth.models import AnonymousUser, Group, User
 from django.core import mail
 from django.core.exceptions import DisallowedHost
+from django.db import connection
 from django.db.utils import IntegrityError
 from django.http import HttpRequest, HttpResponse
+from django.test.utils import CaptureQueriesContext
 from django.urls import ResolverMatch, reverse
 from django.utils.encoding import force_str
 
@@ -412,21 +414,39 @@ class OrgTest(DashTest):
 
         self.org = self.create_org("uganda", self.admin)
 
-    def test_get_user_org_group_num_queries(self):
+    def test_get_user_org_group_queries(self):
         viewer = self.create_user("Viewer")
         editor = self.create_user("Editor")
         non_member = self.create_user("NonMember")
         self.org.viewers.add(viewer)
         self.org.editors.add(editor)
 
-        # membership is checked with existence queries rather than fetching entire member lists
-        with self.assertNumQueries(2):
+        self.assertIsNone(self.org.get_user_org_group(AnonymousUser()))
+
+        def assert_membership_queries(user, group_name):
+            with CaptureQueriesContext(connection) as context:
+                group = self.org.get_user_org_group(user)
+
+            self.assertEqual(group_name, group.name if group else None)
+
+            # ignore the query that fetches the group itself
+            membership_queries = [q["sql"] for q in context.captured_queries if '"auth_group"' not in q["sql"]]
+            self.assertTrue(membership_queries)
+
+            # membership is checked with existence queries rather than fetching entire member lists
+            for sql in membership_queries:
+                self.assertTrue(sql.startswith("SELECT 1 AS"), f"expected an existence query but got: {sql}")
+                self.assertNotIn('"auth_user"."password"', sql)
+
+        assert_membership_queries(self.admin, "Administrators")
+        assert_membership_queries(editor, "Editors")
+        assert_membership_queries(viewer, "Viewers")
+        assert_membership_queries(non_member, None)
+
+        # result is cached on the user object so repeated lookups don't hit the database
+        with self.assertNumQueries(0):
             self.assertEqual(self.org.get_user_org_group(self.admin).name, "Administrators")
-        with self.assertNumQueries(3):
-            self.assertEqual(self.org.get_user_org_group(editor).name, "Editors")
-        with self.assertNumQueries(4):
-            self.assertEqual(self.org.get_user_org_group(viewer).name, "Viewers")
-        with self.assertNumQueries(3):
+        with self.assertNumQueries(0):
             self.assertIsNone(self.org.get_user_org_group(non_member))
 
     def test_org_model(self):
