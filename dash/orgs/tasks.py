@@ -13,6 +13,8 @@ from .models import Invitation, TaskState
 
 ORG_TASK_LOCK_KEY = "org-task-lock:%s:%s"
 
+DEFAULT_LOCK_TIMEOUT = 60 * 60  # 1 hour
+
 logger = logging.getLogger(__name__)
 
 
@@ -60,58 +62,64 @@ def maybe_run_for_org(org, task_func, task_key, lock_timeout):
     :param org: the org
     :param task_func: the task function
     :param task_key: the task key
-    :param lock_timeout: the lock timeout in seconds
+    :param lock_timeout: the lock timeout in seconds (defaults to 1 hour so dead workers can't hold the lock forever)
     """
     r = get_valkey_connection()
 
     key = TaskState.get_lock_key(org, task_key)
 
-    if r.get(key):
+    lock = r.lock(key, timeout=lock_timeout if lock_timeout is not None else DEFAULT_LOCK_TIMEOUT)
+
+    if not lock.acquire(blocking=False):
         logger.warning("Skipping task %s for org #%d as it is still running" % (task_key, org.id))
-    else:
-        with r.lock(key, timeout=lock_timeout):
-            state = org.get_task_state(task_key)
-            if state.is_disabled:
-                logger.info("Skipping task %s for org #%d as is marked disabled" % (task_key, org.id))
-                return
+        return
 
-            logger.info("Started task %s for org #%d..." % (task_key, org.id))
+    try:
+        state = org.get_task_state(task_key)
+        if state.is_disabled:
+            logger.info("Skipping task %s for org #%d as is marked disabled" % (task_key, org.id))
+            return
 
-            prev_results = json.loads(state.last_results) if state.last_results else None
-            prev_started_on = state.last_successfully_started_on
-            this_started_on = timezone.now()
+        logger.info("Started task %s for org #%d..." % (task_key, org.id))
 
-            state.started_on = this_started_on
-            state.ended_on = None
-            state.save(update_fields=("started_on", "ended_on"))
+        prev_results = json.loads(state.last_results) if state.last_results else None
+        prev_started_on = state.last_successfully_started_on
+        this_started_on = timezone.now()
 
-            num_task_args = len(inspect.getfullargspec(task_func).args)
+        state.started_on = this_started_on
+        state.ended_on = None
+        state.save(update_fields=("started_on", "ended_on"))
 
-            assert num_task_args >= 1, "task signature must be foo(org) or foo(org, since, until)"
+        num_task_args = len(inspect.getfullargspec(task_func).args)
 
-            task_args = [org]
+        assert num_task_args >= 1, "task signature must be foo(org) or foo(org, since, until)"
 
-            try:
-                if num_task_args >= 3:
-                    task_args += [prev_started_on, this_started_on]
-                if num_task_args >= 4:
-                    task_args.append(prev_results)
+        task_args = [org]
 
-                results = task_func(*task_args)
+        try:
+            if num_task_args >= 3:
+                task_args += [prev_started_on, this_started_on]
+            if num_task_args >= 4:
+                task_args.append(prev_results)
 
-                state.ended_on = timezone.now()
-                state.last_successfully_started_on = this_started_on
-                state.last_results = json.dumps(results)
-                state.is_failing = False
-                state.save(update_fields=("ended_on", "last_successfully_started_on", "last_results", "is_failing"))
+            results = task_func(*task_args)
 
-                logger.info("Finished task %s for org #%d with result: %s" % (task_key, org.id, json.dumps(results)))
+            state.ended_on = timezone.now()
+            state.last_successfully_started_on = this_started_on
+            state.last_results = json.dumps(results)
+            state.is_failing = False
+            state.save(update_fields=("ended_on", "last_successfully_started_on", "last_results", "is_failing"))
 
-            except Exception as e:
-                state.ended_on = timezone.now()
-                state.last_results = None
-                state.is_failing = True
-                state.save(update_fields=("ended_on", "last_results", "is_failing"))
+            logger.info("Finished task %s for org #%d with result: %s" % (task_key, org.id, json.dumps(results)))
 
-                logger.exception("Task %s for org #%d failed" % (task_key, org.id))
-                raise e  # re-raise with original stack trace
+        except Exception as e:
+            # note we don't clear last_results here so that incremental tasks can resume from their last
+            # successful results after a transient failure
+            state.ended_on = timezone.now()
+            state.is_failing = True
+            state.save(update_fields=("ended_on", "is_failing"))
+
+            logger.exception("Task %s for org #%d failed" % (task_key, org.id))
+            raise e  # re-raise with original stack trace
+    finally:
+        lock.release()
