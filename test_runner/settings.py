@@ -102,11 +102,6 @@ STATIC_ROOT = ""
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = "/static/"
 
-# URL prefix for admin static files -- CSS, JavaScript and images.
-# Make sure to use a trailing slash.
-# Examples: "http://foo.com/static/admin/", "/static/admin/".
-ADMIN_MEDIA_PREFIX = "/static/admin/"
-
 # Additional locations of static files
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
@@ -159,13 +154,7 @@ GROUP_PERMISSIONS = {
         "dashblocks.dashblock.*",
         "dashblocks.dashblockimage.*",
         "dashblocks.dashblocktype.*",
-        "news.newsitem.*",
-        "news.video.*",
         "orgs.org_home",
-        "polls.poll.*",
-        "polls.pollcategory.*",
-        "polls.pollimage.*",
-        "polls.featuredresponse.*",
         "stories.story.*",
         "stories.storyimage.*",
         "tags.tag.*",
@@ -182,6 +171,8 @@ LOGOUT_REDIRECT_URL = "/"
 # ----------------------------------------------------------------------------
 CELERY_RESULT_BACKEND = None
 CELERY_BROKER_URL = "redis://localhost:6379/4"
+CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_EAGER_PROPAGATES = True
 
 # RapidPRO
 SITE_API_HOST = "http://localhost:8001"
