@@ -2313,6 +2313,88 @@ class StoryTest(DashTest):
 
         self.clear_uploads()
 
+    def test_images_story_preserves_extra_images(self):
+        import os
+
+        story1 = Story.objects.create(
+            title="foo",
+            content="bar",
+            category=self.health_uganda,
+            org=self.uganda,
+            created_by=self.admin,
+            modified_by=self.admin,
+        )
+
+        # a story can have more than 3 images when they are created outside the images form
+        for i in range(1, 5):
+            StoryImage.objects.create(
+                name="image %d" % i,
+                story=story1,
+                image="stories/someimage%d.jpg" % i,
+                created_by=self.admin,
+                modified_by=self.admin,
+            )
+
+        # a soft deleted image should not appear on the form nor be resurrected by saving it
+        inactive_image = StoryImage.objects.create(
+            name="inactive image",
+            story=story1,
+            image="stories/inactiveimage.jpg",
+            created_by=self.admin,
+            modified_by=self.admin,
+            is_active=False,
+        )
+
+        def active_images():
+            return list(
+                StoryImage.objects.filter(story=story1, is_active=True)
+                .order_by("pk")
+                .values_list("pk", "name", "image")
+            )
+
+        original_images = active_images()
+
+        images_url = reverse("stories.story_images", args=[story1.pk])
+
+        self.login(self.admin)
+        response = self.client.get(images_url, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context["form"].fields), 4)
+        for field in response.context["form"].fields:
+            self.assertTrue(response.context["form"].fields[field].initial)
+
+        # posting without changes should preserve all 4 images with their names and metadata intact
+        response = self.client.post(images_url, dict(), follow=True, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(response.request["PATH_INFO"], reverse("stories.story_list"))
+        self.assertEqual(active_images(), original_images)
+
+        # submitting a new image for one of the fields should only replace that image
+        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "rb")
+        post_data = dict(image_2=upload)
+        response = self.client.post(images_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(response.request["PATH_INFO"], reverse("stories.story_list"))
+
+        images = active_images()
+        self.assertEqual(len(images), 4)
+        self.assertEqual(images[:3], [original_images[0], original_images[2], original_images[3]])
+        self.assertNotIn(images[3], original_images)
+
+        # checking the clear checkbox for a field should remove exactly that image
+        post_data = {"image_2-clear": "on"}
+        response = self.client.post(images_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(response.request["PATH_INFO"], reverse("stories.story_list"))
+        self.assertEqual(active_images(), [original_images[0], original_images[3], images[3]])
+
+        # the soft deleted image was never resurrected
+        inactive_image.refresh_from_db()
+        self.assertFalse(inactive_image.is_active)
+        self.assertEqual(StoryImage.objects.filter(story=story1, is_active=False).count(), 1)
+
+        # remove the file we uploaded, other images do not have files on disk
+        for story_image in StoryImage.objects.filter(story=story1):
+            if os.path.exists(story_image.image.path):
+                os.remove(story_image.image.path)
+
 
 class DashBlockTypeTest(DashTest):
     def setUp(self):
