@@ -197,9 +197,16 @@ def sync_local_to_set(org, syncer, remote_set) -> dict:
     delete_locals = active_locals.exclude(**{syncer.local_id_attr + "__in": remote_identities})
 
     for local in delete_locals:
-        with syncer.lock(org, syncer.identify_local(local)):
-            syncer.delete_local(local)
-            outcome_counts[SyncOutcome.deleted] += 1
+        identity = syncer.identify_local(local)
+
+        with syncer.lock(org, identity):
+            # re-fetch inside the lock and re-check that this object still qualifies for deletion, as a concurrent
+            # sync may have changed it since the queryset was evaluated
+            local = syncer.fetch_local(org, identity)
+
+            if local and local.is_active and identity not in remote_identities:
+                syncer.delete_local(local)
+                outcome_counts[SyncOutcome.deleted] += 1
 
     return outcome_counts
 

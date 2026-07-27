@@ -1,4 +1,5 @@
 import time
+from contextlib import contextmanager
 
 from temba_client.v2.types import Contact as TembaContact
 
@@ -149,6 +150,43 @@ class SyncTest(DashTest):
         Contact.objects.get(org=self.unicef, uuid="CF-002", name="Bob", backend=self.floip_backend, is_active=True)
         Contact.objects.get(org=self.unicef, uuid="CF-003", name="Colm", backend=self.floip_backend, is_active=True)
         Contact.objects.get(org=self.unicef, uuid="CF-005", name="Edward", backend=self.floip_backend, is_active=True)
+
+    def test_sync_local_to_set_recheck_under_lock(self):
+        Contact.objects.all().delete()  # start with no contacts...
+
+        Contact.objects.create(org=self.unicef, uuid="C-001", name="Anne", backend=self.rapidpro_backend)
+        Contact.objects.create(org=self.unicef, uuid="C-002", name="Bob", backend=self.rapidpro_backend)
+        Contact.objects.create(org=self.unicef, uuid="C-003", name="Colin", backend=self.rapidpro_backend)
+
+        remote_set = [TembaContact.create(uuid="C-001", name="Anne", status="active")]
+
+        real_lock = self.syncer.lock
+
+        @contextmanager
+        def racing_lock(org, identity):
+            with real_lock(org, identity):
+                # simulate concurrent syncs changing objects after the deletion queryset was evaluated but
+                # before this sync got the lock on them
+                if identity == "C-002":
+                    Contact.objects.filter(uuid="C-002").update(is_active=False)  # deactivated concurrently
+                elif identity == "C-003":
+                    Contact.objects.filter(uuid="C-003").delete()  # deleted concurrently
+                yield
+
+        self.syncer.lock = racing_lock
+        try:
+            outcome_counts = sync_local_to_set(self.unicef, self.syncer, remote_set)
+        finally:
+            self.syncer.lock = real_lock
+
+        # neither C-002 nor C-003 should have been deleted by this sync as they were re-checked under the lock
+        self.assertEqual(
+            {SyncOutcome.created: 0, SyncOutcome.updated: 0, SyncOutcome.deleted: 0, SyncOutcome.ignored: 1},
+            outcome_counts,
+        )
+        Contact.objects.get(org=self.unicef, uuid="C-001", is_active=True)
+        Contact.objects.get(org=self.unicef, uuid="C-002", is_active=False)
+        self.assertFalse(Contact.objects.filter(uuid="C-003").exists())
 
     def test_sync_local_to_changes(self):
         Contact.objects.all().delete()  # start with no contacts...
