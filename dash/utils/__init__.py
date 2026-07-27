@@ -1,7 +1,7 @@
 import calendar
 import json
 import os
-import random
+import secrets
 from collections import OrderedDict
 from datetime import datetime, timezone as tzone
 from itertools import islice
@@ -32,16 +32,17 @@ def intersection(*args):
 
 def union(*args):
     """
-    Return the union of lists, ordering by first seen in any list
+    Return the union of the given iterables as a new list, ordering items by first seen and leaving the arguments
+    unmodified
     """
     if not args:
         return []
 
-    base = args[0]
-    for other in args[1:]:
-        base.extend(other)
+    combined = []
+    for arg in args:
+        combined.extend(arg)
 
-    return list(OrderedDict.fromkeys(base))  # remove duplicates whilst preserving order
+    return list(OrderedDict.fromkeys(combined))  # remove duplicates whilst preserving order
 
 
 def random_string(length):
@@ -50,7 +51,7 @@ def random_string(length):
     """
     # avoid things that could be mistaken ex: 'I' and '1'
     letters = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"
-    return "".join([random.choice(letters) for _ in range(length)])
+    return "".join([secrets.choice(letters) for _ in range(length)])
 
 
 def filter_dict(d, keys):
@@ -101,8 +102,8 @@ def ms_to_datetime(ms):
     """
     Converts a millisecond accuracy timestamp to a datetime
     """
-    dt = datetime.utcfromtimestamp(ms / 1000)
-    return dt.replace(microsecond=(ms % 1000) * 1000).replace(tzinfo=tzone.utc)
+    dt = datetime.fromtimestamp(ms / 1000, tz=tzone.utc)
+    return dt.replace(microsecond=(ms % 1000) * 1000)
 
 
 def get_month_range(d=None):

@@ -6,11 +6,13 @@ from smartmin.tests import SmartminTest
 from temba_client.v2 import TembaClient
 
 from django.conf import settings
-from django.contrib.auth.models import Group, Permission, User
+from django.contrib.auth.models import AnonymousUser, Group, Permission, User
 from django.core import mail
 from django.core.exceptions import DisallowedHost
+from django.db import connection
 from django.db.utils import IntegrityError
 from django.http import HttpRequest, HttpResponse
+from django.test.utils import CaptureQueriesContext
 from django.urls import ResolverMatch, reverse
 from django.utils.encoding import force_str
 
@@ -23,7 +25,7 @@ from dash.orgs.middleware import SetOrgMiddleware
 from dash.orgs.models import Invitation, Org, OrgBackend, OrgBackground, TaskState
 from dash.orgs.tasks import org_task
 from dash.orgs.templatetags.dashorgs import display_time, national_phone
-from dash.orgs.views import OrgBackendForm
+from dash.orgs.views import OrgBackendForm, OrgCRUDL
 from dash.stories.models import Story, StoryImage
 from dash.tags.models import Tag
 from dash.test import MockResponse
@@ -542,6 +544,41 @@ class OrgTest(DashTest):
 
         self.org = self.create_org("uganda", self.admin)
 
+    def test_get_user_org_group_queries(self):
+        viewer = self.create_user("Viewer")
+        editor = self.create_user("Editor")
+        non_member = self.create_user("NonMember")
+        self.org.viewers.add(viewer)
+        self.org.editors.add(editor)
+
+        self.assertIsNone(self.org.get_user_org_group(AnonymousUser()))
+
+        def assert_membership_queries(user, group_name):
+            with CaptureQueriesContext(connection) as context:
+                group = self.org.get_user_org_group(user)
+
+            self.assertEqual(group_name, group.name if group else None)
+
+            # ignore the query that fetches the group itself
+            membership_queries = [q["sql"] for q in context.captured_queries if '"auth_group"' not in q["sql"]]
+            self.assertTrue(membership_queries)
+
+            # membership is checked with existence queries rather than fetching entire member lists
+            for sql in membership_queries:
+                self.assertTrue(sql.startswith("SELECT 1 AS"), f"expected an existence query but got: {sql}")
+                self.assertNotIn('"auth_user"."password"', sql)
+
+        assert_membership_queries(self.admin, "Administrators")
+        assert_membership_queries(editor, "Editors")
+        assert_membership_queries(viewer, "Viewers")
+        assert_membership_queries(non_member, None)
+
+        # result is cached on the user object so repeated lookups don't hit the database
+        with self.assertNumQueries(0):
+            self.assertEqual(self.org.get_user_org_group(self.admin).name, "Administrators")
+        with self.assertNumQueries(0):
+            self.assertIsNone(self.org.get_user_org_group(non_member))
+
     def test_org_model(self):
         user = self.create_user("User")
 
@@ -653,7 +690,15 @@ class OrgTest(DashTest):
                 self.assertEqual(self.org.build_host_link(True), "https://uganda.localhost:8000")
 
             self.org.subdomain = ""
-            self.org.save()
+
+            self.assertEqual(self.org.build_host_link(), "http://localhost:8000")
+            self.assertEqual(self.org.build_host_link(True), "http://localhost:8000")
+
+            with self.settings(SESSION_COOKIE_SECURE=True):
+                self.assertEqual(self.org.build_host_link(), "https://localhost:8000")
+                self.assertEqual(self.org.build_host_link(True), "https://localhost:8000")
+
+            self.org.subdomain = None
 
             self.assertEqual(self.org.build_host_link(), "http://localhost:8000")
             self.assertEqual(self.org.build_host_link(True), "http://localhost:8000")
@@ -663,15 +708,33 @@ class OrgTest(DashTest):
                 self.assertEqual(self.org.build_host_link(True), "https://localhost:8000")
 
             self.org.domain = "ureport.ug"
+
+            self.assertEqual(self.org.build_host_link(), "http://localhost:8000")
+            self.assertEqual(self.org.build_host_link(True), "http://localhost:8000")
+
+            with self.settings(SESSION_COOKIE_SECURE=True):
+                self.assertEqual(self.org.build_host_link(), "https://ureport.ug")
+                self.assertEqual(self.org.build_host_link(True), "https://localhost:8000")
+
             self.org.subdomain = "uganda"
-            self.org.save()
 
             self.assertEqual(self.org.build_host_link(), "http://uganda.localhost:8000")
             self.assertEqual(self.org.build_host_link(True), "http://uganda.localhost:8000")
 
             with self.settings(SESSION_COOKIE_SECURE=True):
-                self.assertEqual(self.org.build_host_link(), "http://ureport.ug")
+                self.assertEqual(self.org.build_host_link(), "https://ureport.ug")
                 self.assertEqual(self.org.build_host_link(True), "https://uganda.localhost:8000")
+
+        # HOSTNAME empty falls back to localhost
+        self.org.domain = None
+        self.org.subdomain = "uganda"
+
+        with self.settings(HOSTNAME=""):
+            self.assertEqual(self.org.build_host_link(), "http://uganda.localhost")
+            self.assertEqual(self.org.build_host_link(True), "http://uganda.localhost")
+
+            self.org.subdomain = ""
+            self.assertEqual(self.org.build_host_link(), "http://localhost")
 
     def test_org_create(self):
         create_url = reverse("orgs.org_create")
@@ -1105,7 +1168,8 @@ class OrgTest(DashTest):
         # now post with right email
         post_data["emails"] = "norkans7@gmail.com"
         post_data["user_group"] = "A"
-        response = self.client.post(manage_accounts_url, post_data, SERVER_NAME="uganda.ureport.io")
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.post(manage_accounts_url, post_data, SERVER_NAME="uganda.ureport.io")
 
         # an invitation is created and sent by email
         self.assertEqual(1, Invitation.objects.all().count())
@@ -1123,7 +1187,8 @@ class OrgTest(DashTest):
         # send another invitation, different group
         post_data["emails"] = "norkans7@gmail.com"
         post_data["user_group"] = "E"
-        self.client.post(manage_accounts_url, post_data, SERVER_NAME="uganda.ureport.io")
+        with self.captureOnCommitCallbacks(execute=True):
+            self.client.post(manage_accounts_url, post_data, SERVER_NAME="uganda.ureport.io")
 
         # old invite should be updated
         new_invite = Invitation.objects.all().first()
@@ -1136,11 +1201,45 @@ class OrgTest(DashTest):
         # post many emails to the form
         post_data["emails"] = "norbert@nyaruka.com,code@nyaruka.com"
         post_data["user_group"] = "A"
-        self.client.post(manage_accounts_url, post_data, SERVER_NAME="uganda.ureport.io")
+        with self.captureOnCommitCallbacks(execute=True):
+            self.client.post(manage_accounts_url, post_data, SERVER_NAME="uganda.ureport.io")
 
         # now 2 new invitations are created and sent
         self.assertEqual(3, Invitation.objects.all().count())
         self.assertEqual(4, len(mail.outbox))
+
+        # emails with surrounding whitespace and a trailing comma are tolerated
+        post_data["emails"] = "spaced1@nyaruka.com, spaced2@nyaruka.com ,"
+        post_data["user_group"] = "E"
+        response = self.client.post(manage_accounts_url, post_data, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(302, response.status_code)
+
+        # 2 new invitations are created with clean addresses
+        self.assertEqual(5, Invitation.objects.all().count())
+        self.assertEqual(6, len(mail.outbox))
+        self.assertTrue(Invitation.objects.filter(email="spaced1@nyaruka.com", user_group="E").exists())
+        self.assertTrue(Invitation.objects.filter(email="spaced2@nyaruka.com", user_group="E").exists())
+
+        # duplicate addresses are collapsed to a single invitation and email
+        post_data["emails"] = "dup@nyaruka.com, dup@nyaruka.com"
+        post_data["user_group"] = "E"
+        response = self.client.post(manage_accounts_url, post_data, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(302, response.status_code)
+        self.assertEqual(6, Invitation.objects.all().count())
+        self.assertEqual(7, len(mail.outbox))
+        self.assertEqual(1, Invitation.objects.filter(email="dup@nyaruka.com").count())
+
+        # separator-only input is treated as no emails
+        post_data["emails"] = " , , "
+        response = self.client.post(manage_accounts_url, post_data, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(302, response.status_code)
+        self.assertEqual(6, Invitation.objects.all().count())
+        self.assertEqual(7, len(mail.outbox))
+
+    def test_invite_form_clean_emails(self):
+        form = OrgCRUDL.ManageAccounts.InviteForm(data={"emails": " A@x.com , b@y.com ,", "user_group": "E"})
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual("a@x.com,b@y.com", form.cleaned_data["emails"])
 
     def test_join(self):
         editor_invitation = Invitation.objects.create(
@@ -1200,6 +1299,24 @@ class OrgTest(DashTest):
             post_data = dict()
             response = self.client.post(join_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
             self.assertEqual(response.request["PATH_INFO"], "/example/home")
+
+        # posting again with an invitation that has already been used should not error, just redirect away
+        self.org.editors.remove(self.invited_editor)
+
+        response = self.client.post(editor_join_url, dict(), SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(302, response.status_code)
+        self.assertEqual("/", response.url)
+        self.assertFalse(self.invited_editor in self.org.editors.all())
+
+        # simulate a concurrent second submission: the invitation still looks active when the request
+        # is checked but has been consumed by the time it is claimed
+        with patch("dash.orgs.views.OrgCRUDL.Join.get_invitation") as mock_get_invitation:
+            mock_get_invitation.return_value = editor_invitation
+
+            response = self.client.post(editor_join_url, dict(), SERVER_NAME="uganda.ureport.io")
+            self.assertEqual(302, response.status_code)
+            self.assertEqual("/", response.url)
+            self.assertFalse(self.invited_editor in self.org.editors.all())
 
     def test_create_login(self):
         admin_invitation = Invitation.objects.create(
@@ -1281,6 +1398,31 @@ class OrgTest(DashTest):
         self.assertTrue(User.objects.filter(email="norkans7@gmail.com"))
         self.assertFalse(Invitation.objects.get(pk=admin_invitation.pk).is_active)
         self.assertTrue(Invitation.objects.get(pk=viewer_invitation.pk).is_active)
+
+        # posting again with an invitation that has already been used should not create a user, just redirect away
+        self.client.logout()
+
+        post_data = dict()
+        post_data["first_name"] = "Bob"
+        post_data["last_name"] = "User"
+        post_data["email"] = "bob@nyaruka.com"
+        post_data["password"] = "bobuserpassword"
+
+        response = self.client.post(admin_create_login_url, post_data, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(302, response.status_code)
+        self.assertEqual("/", response.url)
+        self.assertFalse(User.objects.filter(email="bob@nyaruka.com"))
+
+        # simulate a concurrent second submission: the invitation still looks active when the request
+        # is checked but has been consumed by the time it is claimed
+        with patch("dash.orgs.views.OrgCRUDL.CreateLogin.get_invitation") as mock_get_invitation:
+            mock_get_invitation.return_value = admin_invitation
+
+            response = self.client.post(admin_create_login_url, post_data, SERVER_NAME="uganda.ureport.io")
+            self.assertEqual(302, response.status_code)
+            self.assertEqual("/", response.url)
+            self.assertFalse(User.objects.filter(email="bob@nyaruka.com"))
+            self.assertEqual(1, self.org.administrators.filter(email="norkans7@gmail.com").count())
 
     def test_dashorgs_templatetags(self):
         self.assertEqual(display_time("2014-11-04T15:11:34Z", self.org), "Nov 04, 2014 15:11")
@@ -2299,6 +2441,88 @@ class StoryTest(DashTest):
         self.assertEqual(response.request["PATH_INFO"], reverse("stories.story_list"))
 
         self.clear_uploads()
+
+    def test_images_story_preserves_extra_images(self):
+        import os
+
+        story1 = Story.objects.create(
+            title="foo",
+            content="bar",
+            category=self.health_uganda,
+            org=self.uganda,
+            created_by=self.admin,
+            modified_by=self.admin,
+        )
+
+        # a story can have more than 3 images when they are created outside the images form
+        for i in range(1, 5):
+            StoryImage.objects.create(
+                name="image %d" % i,
+                story=story1,
+                image="stories/someimage%d.jpg" % i,
+                created_by=self.admin,
+                modified_by=self.admin,
+            )
+
+        # a soft deleted image should not appear on the form nor be resurrected by saving it
+        inactive_image = StoryImage.objects.create(
+            name="inactive image",
+            story=story1,
+            image="stories/inactiveimage.jpg",
+            created_by=self.admin,
+            modified_by=self.admin,
+            is_active=False,
+        )
+
+        def active_images():
+            return list(
+                StoryImage.objects.filter(story=story1, is_active=True)
+                .order_by("pk")
+                .values_list("pk", "name", "image")
+            )
+
+        original_images = active_images()
+
+        images_url = reverse("stories.story_images", args=[story1.pk])
+
+        self.login(self.admin)
+        response = self.client.get(images_url, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context["form"].fields), 4)
+        for field in response.context["form"].fields:
+            self.assertTrue(response.context["form"].fields[field].initial)
+
+        # posting without changes should preserve all 4 images with their names and metadata intact
+        response = self.client.post(images_url, dict(), follow=True, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(response.request["PATH_INFO"], reverse("stories.story_list"))
+        self.assertEqual(active_images(), original_images)
+
+        # submitting a new image for one of the fields should only replace that image
+        upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "rb")
+        post_data = dict(image_2=upload)
+        response = self.client.post(images_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(response.request["PATH_INFO"], reverse("stories.story_list"))
+
+        images = active_images()
+        self.assertEqual(len(images), 4)
+        self.assertEqual(images[:3], [original_images[0], original_images[2], original_images[3]])
+        self.assertNotIn(images[3], original_images)
+
+        # checking the clear checkbox for a field should remove exactly that image
+        post_data = {"image_2-clear": "on"}
+        response = self.client.post(images_url, post_data, follow=True, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(response.request["PATH_INFO"], reverse("stories.story_list"))
+        self.assertEqual(active_images(), [original_images[0], original_images[3], images[3]])
+
+        # the soft deleted image was never resurrected
+        inactive_image.refresh_from_db()
+        self.assertFalse(inactive_image.is_active)
+        self.assertEqual(StoryImage.objects.filter(story=story1, is_active=False).count(), 1)
+
+        # remove the file we uploaded, other images do not have files on disk
+        for story_image in StoryImage.objects.filter(story=story1):
+            if os.path.exists(story_image.image.path):
+                os.remove(story_image.image.path)
 
 
 class DashBlockTypeTest(DashTest):
