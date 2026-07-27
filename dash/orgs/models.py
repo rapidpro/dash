@@ -184,18 +184,15 @@ class Org(SmartModel):
         return TembaClient(host, api_token, user_agent=agent, transformer=transformer)
 
     def build_host_link(self, user_authenticated=False):
-        host_tld = getattr(settings, "HOSTNAME", "locahost")
+        host_tld = getattr(settings, "HOSTNAME", "localhost")
         is_secure = getattr(settings, "SESSION_COOKIE_SECURE", False)
 
-        prefix = "http://"
+        prefix = "https://" if is_secure else "http://"
 
         if self.domain and is_secure and not user_authenticated:
             return prefix + str(self.domain)
 
-        if is_secure:
-            prefix = "https://"
-
-        if self.subdomain == "":
+        if not self.subdomain:
             return prefix + host_tld
         return prefix + force_str(self.subdomain) + "." + host_tld
 

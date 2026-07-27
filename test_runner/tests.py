@@ -1,6 +1,5 @@
 import zoneinfo
-from dash.tags.models import Tag
-from unittest.mock import Mock, patch, call
+from unittest.mock import Mock, call, patch
 
 import valkey
 from smartmin.tests import SmartminTest
@@ -25,8 +24,9 @@ from dash.orgs.models import Invitation, Org, OrgBackend, OrgBackground, TaskSta
 from dash.orgs.tasks import org_task
 from dash.orgs.templatetags.dashorgs import display_time, national_phone
 from dash.stories.models import Story, StoryImage
-from dash.utils import random_string
+from dash.tags.models import Tag
 from dash.test import MockResponse
+from dash.utils import random_string
 
 
 class UserTest(SmartminTest):
@@ -532,6 +532,16 @@ class OrgTest(DashTest):
                 self.assertEqual(self.org.build_host_link(), "https://localhost:8000")
                 self.assertEqual(self.org.build_host_link(True), "https://localhost:8000")
 
+            self.org.subdomain = None
+            self.org.save()
+
+            self.assertEqual(self.org.build_host_link(), "http://localhost:8000")
+            self.assertEqual(self.org.build_host_link(True), "http://localhost:8000")
+
+            with self.settings(SESSION_COOKIE_SECURE=True):
+                self.assertEqual(self.org.build_host_link(), "https://localhost:8000")
+                self.assertEqual(self.org.build_host_link(True), "https://localhost:8000")
+
             self.org.domain = "ureport.ug"
             self.org.subdomain = "uganda"
             self.org.save()
@@ -540,7 +550,7 @@ class OrgTest(DashTest):
             self.assertEqual(self.org.build_host_link(True), "http://uganda.localhost:8000")
 
             with self.settings(SESSION_COOKIE_SECURE=True):
-                self.assertEqual(self.org.build_host_link(), "http://ureport.ug")
+                self.assertEqual(self.org.build_host_link(), "https://ureport.ug")
                 self.assertEqual(self.org.build_host_link(True), "https://uganda.localhost:8000")
 
     def test_org_create(self):
