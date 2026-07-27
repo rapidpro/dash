@@ -1082,7 +1082,8 @@ class OrgTest(DashTest):
         # emails with surrounding whitespace and a trailing comma are tolerated
         post_data["emails"] = "spaced1@nyaruka.com, spaced2@nyaruka.com ,"
         post_data["user_group"] = "E"
-        response = self.client.post(manage_accounts_url, post_data, SERVER_NAME="uganda.ureport.io")
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.post(manage_accounts_url, post_data, SERVER_NAME="uganda.ureport.io")
         self.assertEqual(302, response.status_code)
 
         # 2 new invitations are created with clean addresses
@@ -1094,7 +1095,8 @@ class OrgTest(DashTest):
         # duplicate addresses are collapsed to a single invitation and email
         post_data["emails"] = "dup@nyaruka.com, dup@nyaruka.com"
         post_data["user_group"] = "E"
-        response = self.client.post(manage_accounts_url, post_data, SERVER_NAME="uganda.ureport.io")
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.post(manage_accounts_url, post_data, SERVER_NAME="uganda.ureport.io")
         self.assertEqual(302, response.status_code)
         self.assertEqual(6, Invitation.objects.all().count())
         self.assertEqual(7, len(mail.outbox))
@@ -1102,7 +1104,8 @@ class OrgTest(DashTest):
 
         # separator-only input is treated as no emails
         post_data["emails"] = " , , "
-        response = self.client.post(manage_accounts_url, post_data, SERVER_NAME="uganda.ureport.io")
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.post(manage_accounts_url, post_data, SERVER_NAME="uganda.ureport.io")
         self.assertEqual(302, response.status_code)
         self.assertEqual(6, Invitation.objects.all().count())
         self.assertEqual(7, len(mail.outbox))
