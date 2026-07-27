@@ -37,11 +37,11 @@ def union(*args):
     if not args:
         return []
 
-    base = args[0]
-    for other in args[1:]:
-        base.extend(other)
+    combined = []
+    for arg in args:
+        combined.extend(arg)
 
-    return list(OrderedDict.fromkeys(base))  # remove duplicates whilst preserving order
+    return list(OrderedDict.fromkeys(combined))  # remove duplicates whilst preserving order
 
 
 def random_string(length):
@@ -101,8 +101,8 @@ def ms_to_datetime(ms):
     """
     Converts a millisecond accuracy timestamp to a datetime
     """
-    dt = datetime.utcfromtimestamp(ms / 1000)
-    return dt.replace(microsecond=(ms % 1000) * 1000).replace(tzinfo=tzone.utc)
+    dt = datetime.fromtimestamp(ms / 1000, tz=tzone.utc)
+    return dt.replace(microsecond=(ms % 1000) * 1000)
 
 
 def get_month_range(d=None):
