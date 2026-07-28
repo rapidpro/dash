@@ -2754,8 +2754,26 @@ class DashBlockTest(DashTest):
 
         self.assertEqual(force_str(dashblock2), "Bar - %d" % dashblock2.pk)
 
+        # block with a NULL title on a type with titles falls back to type name and pk
+        dashblock3 = DashBlock.objects.create(
+            dashblock_type=self.type_foo,
+            org=self.uganda,
+            content="Only content",
+            created_by=self.admin,
+            modified_by=self.admin,
+        )
+        self.assertEqual(force_str(dashblock3), "Foo - %d" % dashblock3.pk)
+
         self.assertEqual(dashblock1.teaser(dashblock1.content, 1), "First ...")
         self.assertEqual(dashblock1.teaser(dashblock1.content, 10), "First content")
+
+        # nothing appended when nothing was truncated
+        self.assertEqual(dashblock1.teaser(dashblock1.content, 2), "First content")
+
+        # None fields give an empty teaser
+        self.assertEqual(dashblock1.teaser(None, 10), "")
+        self.assertEqual(dashblock3.long_summary_teaser(), "")
+        self.assertEqual(dashblock3.short_summary_teaser(), "")
 
         self.assertEqual(dashblock1.long_content_teaser(), "First content")
         self.assertEqual(dashblock1.short_content_teaser(), "First content")
@@ -3346,6 +3364,49 @@ class DashBlockTest(DashTest):
         self.assertFalse(dashblock2 in context["foo"])
         self.assertFalse(dashblock3 in context["foo"])
         self.assertFalse(dashblock4 in context["foo"])
+
+        # a tag that is a substring of another tag should not match
+        self.assertEqual(load_qbs(context, self.uganda, "foo", "gali"), "")
+        self.assertEqual(len(context["foo"]), 0)
+
+        self.assertEqual(load_qbs(context, self.uganda, "foo", "kacyi"), "")
+        self.assertEqual(len(context["foo"]), 0)
+
+        # tag lookups are case insensitive since tags are stored lowercased
+        self.assertEqual(load_qbs(context, self.uganda, "foo", "KIGALI"), "")
+        self.assertTrue(dashblock1 in context["foo"])
+        self.assertTrue(dashblock4 in context["foo"])
+
+        # blocks created programmatically with raw tags are normalized on save
+        dashblock5 = DashBlock.objects.create(
+            dashblock_type=self.type_foo,
+            org=self.uganda,
+            title="Fifth",
+            content="Fifth content",
+            tags="Kigali\tNyarugenge\n Remera",
+            created_by=self.admin,
+            modified_by=self.admin,
+        )
+        self.assertEqual(dashblock5.tags, " kigali nyarugenge remera ")
+
+        self.assertEqual(load_qbs(context, self.uganda, "foo", "nyarugenge"), "")
+        self.assertTrue(dashblock5 in context["foo"])
+        self.assertFalse(dashblock1 in context["foo"])
+        self.assertFalse(dashblock4 in context["foo"])
+
+        self.assertEqual(load_qbs(context, self.uganda, "foo", "kigali"), "")
+        self.assertTrue(dashblock1 in context["foo"])
+        self.assertTrue(dashblock4 in context["foo"])
+        self.assertTrue(dashblock5 in context["foo"])
+
+        # an empty or None tag skips tag filtering entirely, returning all blocks of the type
+        for empty_tag in ("", "   ", None):
+            self.assertEqual(load_qbs(context, self.uganda, "foo", empty_tag), "")
+            self.assertTrue(dashblock1 in context["foo"])
+            self.assertFalse(dashblock2 in context["foo"])
+            self.assertFalse(dashblock3 in context["foo"])
+            self.assertTrue(dashblock4 in context["foo"])
+            self.assertTrue(dashblock5 in context["foo"])
 
 
 class TemplateTagsTest(DashTest):
