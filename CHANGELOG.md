@@ -1,3 +1,15 @@
+v1.21.1 (2026-07-28)
+-------------------------
+ * Make default org task lock timeout 2 hours
+ * Rework locale/timezone handling to save and restore around each request
+ * Guard lock release against expiry, make default lock timeout part of the API
+ * Normalize dashblock tags on model save and backfill existing rows
+ * Address review feedback on category prefetch
+ * Fix category prefetch in Story.get_main_stories
+ * Fix dashblock teaser and str with NULL fields, whole-tag filtering and image upload path
+ * Fix org task locking: acquire non-blocking with default expiry, preserve last results on failure
+ * Reset active language and timezone on requests without an org
+
 v1.21.0 (2026-07-27)
 -------------------------
  * Update .gitignore to cover AI agent files
