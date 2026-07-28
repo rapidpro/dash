@@ -352,6 +352,7 @@ class TaskState(models.Model):
 
     last_successfully_started_on = models.DateTimeField(null=True)
 
+    # the results of the last successful run - preserved on failure so incremental tasks can resume from them
     last_results = models.TextField(null=True)
 
     is_failing = models.BooleanField(default=False)

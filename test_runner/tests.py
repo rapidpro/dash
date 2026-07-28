@@ -2,6 +2,7 @@ import zoneinfo
 from unittest.mock import Mock, call, patch
 
 import valkey
+from django_valkey import get_valkey_connection
 from smartmin.tests import SmartminTest
 from temba_client.v2 import TembaClient
 
@@ -1663,12 +1664,22 @@ class OrgTaskTest(DashTest):
         self.assertGreater(task2_state3.ended_on, task2_state2.ended_on)
         self.assertEqual(task2_state3.last_successfully_started_on, task2_state2.started_on)  # hasn't changed
         self.assertFalse(task2_state3.is_running())
-        self.assertEqual(task2_state3.get_last_results(), None)
+        self.assertEqual(task2_state3.get_last_results(), {"foo": "bar", "zed": 123})  # previous results preserved
         self.assertTrue(task2_state3.is_failing)
 
         self.assertEqual(list(TaskState.get_failing()), [task2_state3])
 
         mock_over_time_window.assert_called_once_with(self.org, task2_state2.started_on, task2_state3.started_on)
+        mock_over_time_window.reset_mock()
+
+        # a failed run of a task that takes prev_results doesn't clear its previous successful results
+        self.assertRaises(ValueError, test_org_task_3, self.org.pk)
+
+        task3_state3 = TaskState.objects.get(org=self.org, task_key="test-task-3")
+
+        self.assertTrue(task3_state3.is_failing)
+        self.assertEqual(task3_state3.get_last_results(), {"foo": "bar", "zed": 123})
+
         mock_over_time_window.reset_mock()
 
         # test when called, again, start time is from last successful run
@@ -1685,6 +1696,18 @@ class OrgTaskTest(DashTest):
 
         mock_over_time_window.side_effect = None
         mock_over_time_window.return_value = {"foo": "bar", "zed": 123}
+
+        # when the task next succeeds it receives the results from the last successful run, despite the failure
+        test_org_task_3(self.org.pk)
+
+        task3_state4 = TaskState.objects.get(org=self.org, task_key="test-task-3")
+
+        self.assertFalse(task3_state4.is_failing)
+
+        mock_over_time_window.assert_called_once_with(
+            self.org, task3_state2.started_on, task3_state4.started_on, {"foo": "bar", "zed": 123}
+        )
+        mock_over_time_window.reset_mock()
 
         # disable the task for our org
         TaskState.objects.filter(org=self.org, task_key="test-task-2").update(is_disabled=True)
@@ -1709,6 +1732,76 @@ class OrgTaskTest(DashTest):
         self.assertGreater(state6.last_successfully_started_on, task2_state2.started_on)
 
         mock_over_time_window.assert_called_once_with(self.org, task2_state2.started_on, state6.started_on)
+
+    @patch("test_runner.tests.test_over_time_window")
+    def test_org_task_skipped_if_already_running(self, mock_over_time_window):
+        mock_over_time_window.return_value = {"foo": "bar"}
+
+        r = get_valkey_connection()
+        lock = r.lock(TaskState.get_lock_key(self.org, "test-task-2"), timeout=60)
+        self.assertTrue(lock.acquire(blocking=False))
+
+        try:
+            # while another worker holds the lock, invoking the task returns immediately without running it
+            test_org_task_2(self.org.id)
+
+            mock_over_time_window.assert_not_called()
+            self.assertFalse(TaskState.objects.filter(org=self.org, task_key="test-task-2").exists())
+
+            # and the skipped invocation didn't steal or release the other worker's lock
+            self.assertTrue(lock.owned())
+        finally:
+            lock.release()
+
+        # once the lock is released the task can run again
+        test_org_task_2(self.org.id)
+
+        mock_over_time_window.assert_called_once()
+        self.assertFalse(TaskState.objects.get(org=self.org, task_key="test-task-2").is_failing)
+
+    @patch("test_runner.tests.test_over_time_window")
+    def test_org_task_locks_with_expiry(self, mock_over_time_window):
+        r = get_valkey_connection()
+        key = TaskState.get_lock_key(self.org, "test-task-2")
+
+        def check_lock(org, prev_started_on, started_on):
+            ttl = r.ttl(key)
+            self.assertTrue(0 < ttl <= 60 * 60 * 2)  # lock is held with the default expiry whilst the task runs
+            return {}
+
+        mock_over_time_window.side_effect = check_lock
+
+        test_org_task_2(self.org.id)
+
+        mock_over_time_window.assert_called_once()
+        self.assertEqual(r.ttl(key), -2)  # lock released when the task finished
+
+    @patch("test_runner.tests.test_over_time_window")
+    def test_org_task_lock_expires_mid_run(self, mock_over_time_window):
+        r = get_valkey_connection()
+        key = TaskState.get_lock_key(self.org, "test-task-2")
+
+        def delete_lock_and_succeed(org, prev_started_on, started_on):
+            r.delete(key)  # simulate the lock expiring before the task finishes
+            return {"foo": "bar"}
+
+        mock_over_time_window.side_effect = delete_lock_and_succeed
+
+        # a run that outlives its lock still completes successfully
+        test_org_task_2(self.org.id)
+
+        self.assertFalse(TaskState.objects.get(org=self.org, task_key="test-task-2").is_failing)
+
+        def delete_lock_and_fail(org, prev_started_on, started_on):
+            r.delete(key)  # simulate the lock expiring before the task fails
+            raise ValueError("DOH!")
+
+        mock_over_time_window.side_effect = delete_lock_and_fail
+
+        # and a failing run's own exception isn't masked by the failure to release the expired lock
+        self.assertRaises(ValueError, test_org_task_2, self.org.id)
+
+        self.assertTrue(TaskState.objects.get(org=self.org, task_key="test-task-2").is_failing)
 
 
 class TaskCRUDLTest(DashTest):
