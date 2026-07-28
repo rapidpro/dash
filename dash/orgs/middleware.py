@@ -1,5 +1,6 @@
 import re
 import traceback
+from contextlib import nullcontext
 
 from django.conf import settings
 from django.core.exceptions import DisallowedHost
@@ -47,8 +48,26 @@ class SetOrgMiddleware(MiddlewareMixin):
     Sets the org on the request, based on the subdomain
     """
 
+    async_capable = False
+
     def __init__(self, get_response=None):
         super(SetOrgMiddleware, self).__init__(get_response)
+
+    def __call__(self, request):
+        response = self.process_request(request)
+        if response:
+            return response
+
+        org = request.org
+
+        # activate the org's language and timezone for the duration of the request only, restoring whatever was
+        # active before so that state never leaks into subsequent requests on the same thread, and org-less
+        # requests keep e.g. the language negotiated by LocaleMiddleware
+        lang_override = translation.override(org.language or settings.DEFAULT_LANGUAGE) if org else nullcontext()
+        tz_override = timezone.override(org.timezone) if org and org.timezone else nullcontext()
+
+        with lang_override, tz_override:
+            return self.get_response(request)
 
     def process_request(self, request):
 
@@ -82,20 +101,6 @@ class SetOrgMiddleware(MiddlewareMixin):
             request.user.set_org(org)
 
         request.org = org
-
-        self.set_language(request, org)
-        self.set_timezone(request, org)
-
-    def set_language(self, request, org):
-        """Set the current language from the org configuration."""
-        if org:
-            lang = org.language or settings.DEFAULT_LANGUAGE
-            translation.activate(lang)
-
-    def set_timezone(self, request, org):
-        """Set the current timezone from the org configuration."""
-        if org and org.timezone:
-            timezone.activate(org.timezone)
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         if not request.org:
