@@ -1,6 +1,7 @@
 import inspect
 import json
 import logging
+import threading
 from functools import wraps
 
 from celery import shared_task, signature
@@ -15,6 +16,32 @@ from .models import Invitation, TaskState
 DEFAULT_LOCK_TIMEOUT = 60 * 60 * 2  # 2 hours
 
 logger = logging.getLogger(__name__)
+
+# the lock held by the org task currently running in this worker process, so that task code
+# at any depth can renew it via renew_org_task_lock()
+_current_org_task = threading.local()
+
+
+def renew_org_task_lock():
+    """
+    Renews the lease of the lock held by the org task currently running in this worker.
+
+    Tasks that checkpoint their progress can call this after each unit of work and pass a
+    lock_timeout that only needs to outlive one unit rather than a worst-case full run - a
+    hard-killed worker then frees the org after one short lease instead of hours.
+
+    :return: whether the lock is still owned - False means the lease already expired and the
+             same task may have been started concurrently, so the caller should stop cleanly
+    """
+    lock = getattr(_current_org_task, "lock", None)
+    if not lock:
+        return True
+
+    try:
+        lock.extend(lock.timeout, replace_ttl=True)
+        return True
+    except LockError:
+        return False
 
 
 @shared_task(track_started=True, name="send_invitation_email_task")
@@ -48,7 +75,8 @@ def org_task(task_key, lock_timeout=DEFAULT_LOCK_TIMEOUT):
     The task holds a lock while it runs so that it can't run concurrently for the same org. The lock expires after
     lock_timeout seconds (2 hours by default) so that a dead worker can't hold it forever - which means a task that
     runs longer than its lock timeout may be started concurrently. Set lock_timeout to comfortably exceed the task's
-    worst-case runtime.
+    worst-case runtime, or have the task call renew_org_task_lock() after each unit of work so that lock_timeout
+    only needs to exceed one unit.
 
     :param task_key: the task key used for state storage and locking, e.g. 'do-stuff'
     :param lock_timeout: the lock timeout in seconds
@@ -81,6 +109,8 @@ def maybe_run_for_org(org, task_func, task_key, lock_timeout=DEFAULT_LOCK_TIMEOU
     if not lock.acquire(blocking=False):
         logger.warning("Skipping task %s for org #%d as it is still running" % (task_key, org.id))
         return
+
+    _current_org_task.lock = lock
 
     try:
         state = org.get_task_state(task_key)
@@ -130,6 +160,8 @@ def maybe_run_for_org(org, task_func, task_key, lock_timeout=DEFAULT_LOCK_TIMEOU
             logger.exception("Task %s for org #%d failed" % (task_key, org.id))
             raise e  # re-raise with original stack trace
     finally:
+        _current_org_task.lock = None
+
         try:
             lock.release()
         except LockError:

@@ -26,7 +26,7 @@ from dash.dashblocks.templatetags.dashblocks import load_qbs
 from dash.orgs.context_processors import GroupPermWrapper
 from dash.orgs.middleware import SetOrgMiddleware
 from dash.orgs.models import Invitation, Org, OrgBackend, OrgBackground, TaskState
-from dash.orgs.tasks import org_task
+from dash.orgs.tasks import org_task, renew_org_task_lock
 from dash.orgs.templatetags.dashorgs import display_time, national_phone
 from dash.orgs.views import OrgBackendForm, OrgCRUDL
 from dash.stories.models import Story, StoryImage
@@ -1884,6 +1884,40 @@ class OrgTaskTest(DashTest):
         self.assertRaises(ValueError, test_org_task_2, self.org.id)
 
         self.assertTrue(TaskState.objects.get(org=self.org, task_key="test-task-2").is_failing)
+
+    def test_renew_org_task_lock(self):
+        r = get_valkey_connection()
+        key = TaskState.get_lock_key(self.org, "test-renew-task")
+        renewals = []
+
+        @org_task("test-renew-task", lock_timeout=10)
+        def renewing_task(org):
+            renewals.append(renew_org_task_lock())
+            renewals.append(0 < r.ttl(key) <= 10)  # the lease was refreshed to the lock timeout
+
+        renewing_task(self.org.id)
+
+        self.assertEqual([True, True], renewals)
+        self.assertEqual(r.ttl(key), -2)  # lock released when the task finished
+
+        # outside of a running org task there is nothing to renew
+        self.assertTrue(renew_org_task_lock())
+
+    def test_renew_org_task_lock_lost_lease(self):
+        r = get_valkey_connection()
+        key = TaskState.get_lock_key(self.org, "test-renew-lost")
+        renewals = []
+
+        @org_task("test-renew-lost", lock_timeout=10)
+        def losing_task(org):
+            r.delete(key)  # simulate the lease expiring mid-run
+            renewals.append(renew_org_task_lock())
+
+        # a lost lease reports False so the task can stop cleanly, and doesn't fail the run
+        losing_task(self.org.id)
+
+        self.assertEqual([False], renewals)
+        self.assertFalse(TaskState.objects.get(org=self.org, task_key="test-renew-lost").is_failing)
 
 
 class TaskCRUDLTest(DashTest):
