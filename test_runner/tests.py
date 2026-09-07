@@ -2155,9 +2155,14 @@ class CategoryTest(DashTest):
         self.assertIsInstance(response.context["form"].fields["category"].choices.field, CategoryChoiceField)
         self.assertEqual(nigeria_health, response.context["form"].fields["category"].choices.queryset[0])
         self.assertEqual(nigeria_law, response.context["form"].fields["category"].choices.queryset[1])
+        category_field = response.context["form"].fields["category"]
         self.assertEqual(
-            list(response.context["form"].fields["category"].choices),
-            [("", "---------"), (nigeria_health.pk, "nigeria - Health"), (nigeria_law.pk, "nigeria - Law (Inactive)")],
+            list(category_field.choices),
+            [
+                ("", category_field.empty_label),
+                (nigeria_health.pk, "nigeria - Health"),
+                (nigeria_law.pk, "nigeria - Law (Inactive)"),
+            ],
         )
 
         self.clear_uploads()
@@ -2517,10 +2522,11 @@ class StoryTest(DashTest):
         self.assertIsInstance(response.context["form"].fields["category"].choices.field, CategoryChoiceField)
         self.assertEqual(self.education_nigeria, response.context["form"].fields["category"].choices.queryset[0])
         self.assertEqual(nigeria_law, response.context["form"].fields["category"].choices.queryset[1])
+        category_field = response.context["form"].fields["category"]
         self.assertEqual(
-            list(response.context["form"].fields["category"].choices),
+            list(category_field.choices),
             [
-                ("", "---------"),
+                ("", category_field.empty_label),
                 (self.education_nigeria.pk, "nigeria - Education"),
                 (nigeria_law.pk, "nigeria - Law (Inactive)"),
             ],
