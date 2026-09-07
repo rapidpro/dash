@@ -1,3 +1,7 @@
+v1.22.1 (2026-09-07)
+-------------------------
+ * Bump sqlparse from 0.5.5 to 0.6.0
+
 v1.22.0 (2026-09-07)
 -------------------------
  * Add support for Django 6.1 and drop support for Django 5.2
