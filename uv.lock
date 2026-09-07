@@ -270,16 +270,16 @@ wheels = [
 
 [[package]]
 name = "django"
-version = "5.2.16"
+version = "6.1.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "asgiref" },
     { name = "sqlparse" },
     { name = "tzdata", marker = "sys_platform == 'win32'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a9/26/889449d521ae508b26de715954faecd8bcf3f740affb81b2d146a83b42a5/django-5.2.16.tar.gz", hash = "sha256:59ea02020c3136fce14bef0bbece21a10a4febef5eed1c51c22ae468efa22200", size = 10890894, upload-time = "2026-07-07T13:52:17.005Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f8/d4/8314b5bdef20832f0ac6ae3b3e4d4924e4759fa3b4af27609dd747e7a6be/django-6.1.1.tar.gz", hash = "sha256:7ab93536d8e677aa14554c56426290c69480bf2ee68d7513d4a22f57d6bfeb84", size = 11284905, upload-time = "2026-09-02T17:20:45.621Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/4e/13/1e5e3e4c15dcecb04281b3cb2a46a4670e1cef131068e202f6040df19224/django-5.2.16-py3-none-any.whl", hash = "sha256:04f354bf9d807a86ad1a8392fe3808d362358a8eafc322848e0e43e59b24371d", size = 8311943, upload-time = "2026-07-07T13:52:11.223Z" },
+    { url = "https://files.pythonhosted.org/packages/8d/ca/c1040a4fd15754ede7df15fd72fc2e123045b473b253ab5f5284e11c651e/django-6.1.1-py3-none-any.whl", hash = "sha256:585fb82bf15053c42cf52e67c2f1b54a032dca384759315fd6678ab1870d1d72", size = 8419512, upload-time = "2026-09-02T17:20:39.153Z" },
 ]
 
 [[package]]
@@ -311,14 +311,14 @@ wheels = [
 
 [[package]]
 name = "django-timezone-field"
-version = "7.2.1"
+version = "7.2.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/da/05/9b93a66452cdb8a08ab26f08d5766d2332673e659a8b2aeb73f2a904d421/django_timezone_field-7.2.1.tar.gz", hash = "sha256:def846f9e7200b7b8f2a28fcce2b78fb2d470f6a9f272b07c4e014f6ba4c6d2e", size = 13096, upload-time = "2025-12-06T23:50:44.591Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/12/0b/22654abc2355f3b84e3e5b9d26569639c15d04b96d7186f3a477ec45c1ef/django_timezone_field-7.2.2.tar.gz", hash = "sha256:a004d0b19fe10bf5964cb21a65b36324b16a61879e4711c0dafdf8d6253e8ebc", size = 13158, upload-time = "2026-06-06T05:28:23.638Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/41/7f/d885667401515b467f84569c56075bc9add72c9fd425fca51a25f4c997e1/django_timezone_field-7.2.1-py3-none-any.whl", hash = "sha256:276915b72c5816f57c3baf9e43f816c695ef940d1b21f91ebf6203c09bf4ad44", size = 13284, upload-time = "2025-12-06T23:50:43.302Z" },
+    { url = "https://files.pythonhosted.org/packages/2b/5f/c8dfb67105c4ef391a3e9d0bcd35b7eae4c4c9d023d612c3999ae1cb32ef/django_timezone_field-7.2.2-py3-none-any.whl", hash = "sha256:30354d0f37462a0b9b5c289e271580a6be9b58dea30e7bf88435372882c8fa7a", size = 13322, upload-time = "2026-06-06T05:28:22.454Z" },
 ]
 
 [[package]]
@@ -644,9 +644,9 @@ requires-dist = [
     { name = "celery", extras = ["redis"], specifier = "~=5.5.3" },
     { name = "colorama", marker = "extra == 'dev'", specifier = ">=0.4.3" },
     { name = "coverage", extras = ["toml"], marker = "extra == 'dev'", specifier = ">=7.2.2" },
-    { name = "django", specifier = ">=5.2.12,<6.1" },
+    { name = "django", specifier = ">=6.0.8,<6.2" },
     { name = "django-compressor", specifier = ">=4.0" },
-    { name = "django-timezone-field", specifier = ">=6.1.0" },
+    { name = "django-timezone-field", specifier = ">=7.2.2" },
     { name = "django-valkey", specifier = ">=0.2.1,<0.3.0" },
     { name = "djlint", marker = "extra == 'dev'", specifier = ">=1.34.1" },
     { name = "phonenumbers", specifier = ">=8.12.16" },
@@ -655,7 +655,7 @@ requires-dist = [
     { name = "python-dateutil", specifier = ">=2.8.2" },
     { name = "rapidpro-python", specifier = ">=2.22.2,<3.0.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.15.7" },
-    { name = "smartmin", specifier = ">=6.1.0,<6.2.0" },
+    { name = "smartmin", specifier = ">=6.2.1,<6.3.0" },
     { name = "sorl-thumbnail", specifier = ">=12.9.0" },
 ]
 provides-extras = ["dev"]
@@ -887,7 +887,7 @@ wheels = [
 
 [[package]]
 name = "smartmin"
-version = "6.1.0"
+version = "6.2.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
@@ -895,9 +895,9 @@ dependencies = [
     { name = "xlrd" },
     { name = "xlwt" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/87/64/1b50519259470b9a5dcfb7f9cbdab7d9d8b40638343ec74eae59b3c6349d/smartmin-6.1.0.tar.gz", hash = "sha256:38e2cf29567cb578f7f589f083351c93c8a87985e0e3e07572640d0461e43bd9", size = 485925, upload-time = "2026-07-27T19:29:02.605Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/42/b4/e815508e3456f2816ed35d4456a780651419fd12cd06b11c640cc50021f1/smartmin-6.2.1.tar.gz", hash = "sha256:ae6b8d533a469f53adf9c56d1e98cdfa630951096fdb28b90cb4777a5b18e5d0", size = 474623, upload-time = "2026-08-21T15:13:23.217Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3c/b3/6a47e64f4d6b415f73a8aae9186fb9f435fa133a516911dc7fb2e55d3b7c/smartmin-6.1.0-py3-none-any.whl", hash = "sha256:525e989c40185d8a9ef2ef3db26a74b0c133fcd826784cda0f3bf388fce94d23", size = 351035, upload-time = "2026-07-27T19:29:01.304Z" },
+    { url = "https://files.pythonhosted.org/packages/d7/df/4c6f83c20d363f4469e555d8100d6c2e21d1eabe105383864cb351aaa4c0/smartmin-6.2.1-py3-none-any.whl", hash = "sha256:1f9d01fda0bdc0dd7f5a69d9134b739889aa099a5183445b38814af75dbc7253", size = 351118, upload-time = "2026-08-21T15:13:22.034Z" },
 ]
 
 [[package]]

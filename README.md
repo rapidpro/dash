@@ -9,4 +9,4 @@ Support library for building dashboards applications for [RapidPro](https://gith
 * Provides an organization app to support multi-tenant sites
 * Reusable user management views
 * Supports Python 3.12, 3.13 and 3.14 only
-* Supports Django 5.2 and 6.0
+* Supports Django 6.0 and 6.1
