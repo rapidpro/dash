@@ -1,3 +1,8 @@
+v1.22.0 (2026-09-07)
+-------------------------
+ * Add support for Django 6.1 and drop support for Django 5.2
+ * Update smartmin to 6.2
+
 v1.21.1 (2026-07-28)
 -------------------------
  * Make default org task lock timeout 2 hours
