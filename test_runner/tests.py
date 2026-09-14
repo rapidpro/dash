@@ -25,7 +25,7 @@ from dash.dashblocks.models import DashBlock, DashBlockImage, DashBlockType
 from dash.dashblocks.templatetags.dashblocks import load_qbs
 from dash.orgs.context_processors import GroupPermWrapper
 from dash.orgs.middleware import SetOrgMiddleware
-from dash.orgs.models import Invitation, Org, OrgBackend, OrgBackground, TaskState
+from dash.orgs.models import Invitation, Org, OrgBackend, OrgBackground, TaskState, has_global_access
 from dash.orgs.tasks import org_task
 from dash.orgs.templatetags.dashorgs import display_time, national_phone
 from dash.orgs.views import OrgBackendForm, OrgCRUDL
@@ -667,6 +667,99 @@ class OrgTest(DashTest):
             self.assertEqual(self.org.get_user_org_group(self.admin).name, "Administrators")
         with self.assertNumQueries(0):
             self.assertIsNone(self.org.get_user_org_group(non_member))
+
+    def test_has_global_access(self):
+        user = self.create_user("User")
+        staff = self.create_user("Staff")
+        staff.is_staff = True
+        staff.save()
+        member = self.create_user("Member", group_names=("Global",))
+
+        self.assertFalse(has_global_access(AnonymousUser()))
+        self.assertFalse(user.has_global_access())
+        self.assertTrue(staff.has_global_access())
+        self.assertTrue(member.has_global_access())
+
+        # result is cached on the user object
+        with self.assertNumQueries(0):
+            self.assertFalse(user.has_global_access())
+            self.assertTrue(member.has_global_access())
+
+        # the group name is configurable
+        with override_settings(SITE_GLOBAL_GROUP="Editors"):
+            self.assertFalse(User.objects.get(pk=member.pk).has_global_access())
+            self.assertTrue(User.objects.get(pk=staff.pk).has_global_access())
+
+    def test_get_user_orgs(self):
+        inactive = self.create_org("inactive", self.admin)
+        inactive.is_active = False
+        inactive.save()
+        user = self.create_user("User")
+        other = self.create_org("other", user)
+        staff = self.create_user("Staff")
+        staff.is_staff = True
+        staff.save()
+        member = self.create_user("Member", group_names=("Global",))
+
+        self.assertEqual({self.org, other, inactive}, set(self.superuser.get_user_orgs()))
+        self.assertEqual({self.org, inactive}, set(self.admin.get_user_orgs()))
+        self.assertEqual({other}, set(user.get_user_orgs()))
+
+        # global users get every active org without holding a role on any of them
+        self.assertEqual({self.org, other}, set(staff.get_user_orgs()))
+        self.assertEqual({self.org, other}, set(member.get_user_orgs()))
+
+    def test_get_user_org_group_global_access(self):
+        staff = self.create_user("Staff")
+        staff.is_staff = True
+        staff.save()
+        member = self.create_user("Member", group_names=("Global",))
+
+        # a global user is an administrator on an org they hold no role on...
+        self.assertEqual("Administrators", self.org.get_user_org_group(staff).name)
+        self.assertEqual("Administrators", self.org.get_user_org_group(member).name)
+
+        # ... and on one where they hold a lesser role
+        self.org.editors.add(member)
+        self.assertEqual("Administrators", self.org.get_user_org_group(User.objects.get(pk=member.pk)).name)
+
+    def test_global_access_views(self):
+        user = self.create_user("User")
+        other = self.create_org("other", user)
+        staff = self.create_user("Staff")
+        staff.is_staff = True
+        staff.save()
+        member = self.create_user("Member", group_names=("Global",))
+
+        for global_user in (staff, member):
+            self.login(global_user)
+
+            # the chooser offers every active org
+            response = self.client.get(reverse("orgs.org_choose"))
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual({self.org, other}, set(response.context["orgs"]))
+
+            response = self.client.post(reverse("orgs.org_choose"), dict(organization=other.pk), follow=True)
+            self.assertEqual(response.request["PATH_INFO"], reverse("orgs.org_home"))
+            self.assertEqual(other, response.context["org"])
+
+            # they get administrator permissions on an org site they hold no role on
+            response = self.client.get(reverse("orgs.org_home"), SERVER_NAME="other.ureport.io")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(other, response.context["org"])
+            self.assertTrue(response.context["org_perms"]["orgs"]["org_edit"])
+
+            response = self.client.get(reverse("orgs.org_edit"), SERVER_NAME="other.ureport.io")
+            self.assertEqual(response.status_code, 200)
+
+            response = self.client.get(reverse("orgs.org_manage_accounts"), SERVER_NAME="other.ureport.io")
+            self.assertEqual(response.status_code, 200)
+
+            # but superuser only views stay off limits
+            response = self.client.get(reverse("orgs.org_list"), SERVER_NAME="other.ureport.io")
+            self.assertLoginRedirect(response)
+
+            self.client.logout()
 
     def test_org_model(self):
         user = self.create_user("User")
