@@ -1,3 +1,7 @@
+v1.23.0 (2026-09-14)
+-------------------------
+ * Give staff users and global group members administrator access to every org
+
 v1.22.1 (2026-09-07)
 -------------------------
  * Bump sqlparse from 0.5.5 to 0.6.0
