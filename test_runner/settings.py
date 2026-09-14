@@ -160,6 +160,7 @@ GROUP_PERMISSIONS = {
         "tags.tag.*",
     ),
     "Viewers": [],
+    "Global": [],
 }
 
 LOGIN_URL = "/users/login/"

@@ -145,7 +145,8 @@ class Org(SmartModel):
         if hasattr(user, "_org_group"):
             return user._org_group
 
-        if self.administrators.filter(id=user.id).exists():
+        # users with global access are administrators of every org, whatever role they hold on this one
+        if has_global_access(user) or self.administrators.filter(id=user.id).exists():
             user._org_group = Group.objects.get(name="Administrators")
         elif self.editors.filter(id=user.id).exists():
             user._org_group = Group.objects.get(name="Editors")
@@ -230,9 +231,22 @@ def set_org(obj, org):
     obj._org = org
 
 
+def has_global_access(user):
+    """
+    Whether this user is an administrator of every org: staff users and members of the global group (named by the
+    SITE_GLOBAL_GROUP setting, "Global" by default). Superusers are checked separately by the views.
+    """
+    if not hasattr(user, "_has_global_access"):
+        global_group = getattr(settings, "SITE_GLOBAL_GROUP", "Global")
+        user._has_global_access = bool(user.is_staff or user.groups.filter(name=global_group).exists())
+    return user._has_global_access
+
+
 def get_user_orgs(user):
     if user.is_superuser:
         return Org.objects.all()
+    if user.has_global_access():
+        return Org.objects.filter(is_active=True)
     user_orgs = user.org_admins.all() | user.org_editors.all() | user.org_viewers.all()
     return user_orgs.distinct()
 
@@ -248,6 +262,7 @@ def get_org_group(obj):
 User.get_org = get_org
 User.set_org = set_org
 User.get_user_orgs = get_user_orgs
+User.has_global_access = has_global_access
 User.get_org_group = get_org_group
 
 
