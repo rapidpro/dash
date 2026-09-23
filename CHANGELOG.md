@@ -1,3 +1,9 @@
+v1.23.1 (2026-09-23)
+-------------------------
+ * Update smartmin to 6.2.3
+ * Fix dashblock list type filter and search form rendering
+ * Replace djlint with djangofmt for template formatting
+
 v1.23.0 (2026-09-14)
 -------------------------
  * Give staff users and global group members administrator access to every org
