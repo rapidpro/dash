@@ -3427,6 +3427,21 @@ class DashBlockTest(DashTest):
         self.assertIn(self.type_foo, response.context["types"])
         self.assertIn(self.type_bar, response.context["types"])
 
+        # no type filtered: search form lists all types with none selected, and the add form has its own type select
+        self.assertIsNone(response.context["filtered_type"])
+        self.assertContains(response, '<option value="0">-----</option>')
+        self.assertContains(response, '<option value="%d" >' % self.type_foo.pk, count=1)
+        self.assertContains(response, '<option value="%d" >' % self.type_bar.pk, count=1)
+        self.assertNotContains(response, '<option value="%d" selected>' % self.type_foo.pk)
+        self.assertNotContains(response, '<option value="%d" selected>' % self.type_bar.pk)
+        self.assertContains(response, '<option value="%d">Foo</option>' % self.type_foo.pk, count=1)
+        self.assertContains(response, '<option value="%d">Bar</option>' % self.type_bar.pk, count=1)
+        self.assertNotContains(response, '<input type="hidden" name="type"')
+        self.assertNotContains(response, "={")
+        self.assertContains(
+            response, '<input type="text" name="search" value="" class="input-medium search-query form-control">'
+        )
+
         response = self.client.get(list_url + "?type=%d" % self.type_bar.pk, SERVER_NAME="uganda.ureport.io")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context["object_list"]), 1)
@@ -3435,6 +3450,24 @@ class DashBlockTest(DashTest):
         self.assertNotIn(dashblock3, response.context["object_list"])
 
         self.assertContains(response, force_str(dashblock2))
+
+        # filtered type is preselected in the search form and locked in the add form via a hidden input
+        self.assertEqual(response.context["filtered_type"], self.type_bar)
+        self.assertContains(response, '<option value="%d" >' % self.type_foo.pk, count=1)
+        self.assertContains(response, '<option value="%d" selected>' % self.type_bar.pk, count=1)
+        self.assertNotContains(response, '<option value="%d">Foo</option>' % self.type_foo.pk)
+        self.assertNotContains(response, '<option value="%d">Bar</option>' % self.type_bar.pk)
+        self.assertContains(response, '<input type="hidden" name="type" value="%d">' % self.type_bar.pk, count=1)
+        self.assertNotContains(response, "={")
+
+        # search value is rendered back into the search input
+        response = self.client.get(list_url + "?type=%d&search=bar" % self.type_bar.pk, SERVER_NAME="uganda.ureport.io")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["search"], "bar")
+        self.assertContains(
+            response, '<input type="text" name="search" value="bar" class="input-medium search-query form-control">'
+        )
+        self.assertContains(response, '<option value="%d" selected>' % self.type_bar.pk, count=1)
 
         self.assertEqual(len(response.context["fields"]), 4)
         self.assertIn("tags", response.context["fields"])
