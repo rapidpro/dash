@@ -78,7 +78,7 @@ class UserTest(SmartminTest):
         self.login(self.admin)
 
         response = self.client.get(create_url)
-        self.assertLoginRedirect(response)
+        self.assertEqual(403, response.status_code)
 
         self.login(self.superuser)
         response = self.client.get(create_url)
@@ -96,7 +96,7 @@ class UserTest(SmartminTest):
         self.login(self.admin)
 
         response = self.client.get(update_url)
-        self.assertLoginRedirect(response)
+        self.assertEqual(403, response.status_code)
 
         self.login(self.superuser)
         response = self.client.get(update_url)
@@ -490,7 +490,7 @@ class OrgBackendTest(DashTest):
         # org admins can't create backends even with orgbackend model permissions
         self.login(self.admin)
         response = self.client.get(create_url, SERVER_NAME="uganda.ureport.io")
-        self.assertLoginRedirect(response)
+        self.assertEqual(403, response.status_code)
 
         post_data = dict(
             org=self.uganda.pk,
@@ -500,7 +500,7 @@ class OrgBackendTest(DashTest):
             api_token="token789",
         )
         response = self.client.post(create_url, post_data, SERVER_NAME="uganda.ureport.io")
-        self.assertLoginRedirect(response)
+        self.assertEqual(403, response.status_code)
         self.assertFalse(OrgBackend.objects.filter(slug="denied").exists())
 
         # staff users can create backends and pick the org
@@ -555,7 +555,7 @@ class OrgBackendTest(DashTest):
         # an administrator of another org can't update this backend
         self.login(uganda_admin)
         response = self.client.get(update_url, SERVER_NAME="uganda.ureport.io")
-        self.assertLoginRedirect(response)
+        self.assertEqual(403, response.status_code)
 
         post_data = dict(
             is_active=True,
@@ -565,7 +565,7 @@ class OrgBackendTest(DashTest):
             api_token="token789",
         )
         response = self.client.post(update_url, post_data, SERVER_NAME="uganda.ureport.io")
-        self.assertLoginRedirect(response)
+        self.assertEqual(403, response.status_code)
 
         self.nigeria_backend.refresh_from_db()
         self.assertEqual(self.nigeria_backend.slug, "rapidpro")
@@ -596,7 +596,7 @@ class OrgBackendTest(DashTest):
 
         self.login(self.admin)
         response = self.client.get(list_url)
-        self.assertLoginRedirect(response)
+        self.assertEqual(403, response.status_code)
 
         self.login(self.superuser)
         response = self.client.get(list_url)
@@ -757,7 +757,7 @@ class OrgTest(DashTest):
 
             # but superuser only views stay off limits
             response = self.client.get(reverse("orgs.org_list"), SERVER_NAME="other.ureport.io")
-            self.assertLoginRedirect(response)
+            self.assertEqual(403, response.status_code)
 
             self.client.logout()
 
@@ -926,7 +926,7 @@ class OrgTest(DashTest):
 
         self.login(self.admin)
         response = self.client.get(create_url)
-        self.assertLoginRedirect(response)
+        self.assertEqual(403, response.status_code)
 
         self.login(self.superuser)
         response = self.client.get(create_url)
@@ -986,7 +986,7 @@ class OrgTest(DashTest):
 
         self.login(self.admin)
         response = self.client.get(update_url)
-        self.assertLoginRedirect(response)
+        self.assertEqual(403, response.status_code)
 
         self.login(self.superuser)
         response = self.client.get(update_url)
@@ -1040,7 +1040,7 @@ class OrgTest(DashTest):
 
         self.login(self.admin)
         response = self.client.get(list_url)
-        self.assertLoginRedirect(response)
+        self.assertEqual(403, response.status_code)
 
         self.login(self.superuser)
         response = self.client.get(list_url)
@@ -1692,10 +1692,10 @@ class OrgBackgroundTest(DashTest):
         nigeria_bg_update_url = reverse("orgs.orgbackground_update", args=[nigeria_org_bg.pk])
 
         response = self.client.get(uganda_bg_update_url, SERVER_NAME="nigeria.ureport.io")
-        self.assertLoginRedirect(response)
+        self.assertEqual(403, response.status_code)
 
         response = self.client.get(nigeria_bg_update_url, SERVER_NAME="uganda.ureport.io")
-        self.assertLoginRedirect(response)
+        self.assertEqual(403, response.status_code)
 
         response = self.client.get(uganda_bg_update_url, follow=True, SERVER_NAME="uganda.ureport.io")
         self.assertEqual(response.request["PATH_INFO"], uganda_bg_update_url)
@@ -2162,10 +2162,10 @@ class CategoryTest(DashTest):
         self.login(self.admin)
 
         response = self.client.get(uganda_update_url, SERVER_NAME="nigeria.ureport.io")
-        self.assertLoginRedirect(response)
+        self.assertEqual(403, response.status_code)
 
         response = self.client.get(nigeria_update_url, SERVER_NAME="uganda.ureport.io")
-        self.assertLoginRedirect(response)
+        self.assertEqual(403, response.status_code)
 
         response = self.client.get(uganda_update_url, SERVER_NAME="uganda.ureport.io")
         self.assertEqual(response.status_code, 200)
@@ -2225,7 +2225,7 @@ class CategoryTest(DashTest):
         update_url = reverse("categories.categoryimage_update", args=[cat_image.pk])
 
         response = self.client.get(update_url, SERVER_NAME="nigeria.ureport.io")
-        self.assertLoginRedirect(response)
+        self.assertEqual(403, response.status_code)
 
         response = self.client.get(update_url, SERVER_NAME="uganda.ureport.io")
         self.assertEqual(len(response.context["form"].fields), 5)
@@ -2675,7 +2675,7 @@ class StoryTest(DashTest):
         self.assertEqual(response.request["PATH_INFO"], reverse(settings.SITE_CHOOSER_URL_NAME))
 
         response = self.client.get(update_url_nigeria, SERVER_NAME="uganda.ureport.io")
-        self.assertLoginRedirect(response)
+        self.assertEqual(403, response.status_code)
 
         response = self.client.get(update_url_uganda, SERVER_NAME="uganda.ureport.io")
         self.assertEqual(response.status_code, 200)
@@ -2809,7 +2809,7 @@ class StoryTest(DashTest):
 
         self.login(self.admin)
         response = self.client.get(images_url_nigeria, SERVER_NAME="uganda.ureport.io")
-        self.assertLoginRedirect(response)
+        self.assertEqual(403, response.status_code)
 
         response = self.client.get(images_url_uganda, SERVER_NAME="uganda.ureport.io")
         self.assertEqual(response.status_code, 200)
@@ -2937,7 +2937,7 @@ class DashBlockTypeTest(DashTest):
 
         self.login(self.admin)
         response = self.client.get(create_url, SERVER_NAME="uganda.ureport.io")
-        self.assertLoginRedirect(response)
+        self.assertEqual(403, response.status_code)
 
         self.login(self.superuser)
         response = self.client.get(create_url, SERVER_NAME="uganda.ureport.io")
@@ -2997,7 +2997,7 @@ class DashBlockTypeTest(DashTest):
 
         self.login(self.admin)
         response = self.client.get(list_url, SERVER_NAME="uganda.ureport.io")
-        self.assertLoginRedirect(response)
+        self.assertEqual(403, response.status_code)
 
         self.login(self.superuser)
         response = self.client.get(list_url, SERVER_NAME="uganda.ureport.io")
@@ -3034,7 +3034,7 @@ class DashBlockTypeTest(DashTest):
 
         self.login(self.admin)
         response = self.client.get(update_url, SERVER_NAME="uganda.ureport.io")
-        self.assertLoginRedirect(response)
+        self.assertEqual(403, response.status_code)
 
         self.login(self.superuser)
         response = self.client.get(update_url, SERVER_NAME="uganda.ureport.io")
@@ -3613,12 +3613,12 @@ class DashBlockTest(DashTest):
         update_url = reverse("dashblocks.dashblockimage_update", args=[nigeria_image.pk])
 
         response = self.client.get(update_url, SERVER_NAME="uganda.ureport.io")
-        self.assertLoginRedirect(response)
+        self.assertEqual(403, response.status_code)
 
         upload = open("%s/image.jpg" % settings.TESTFILES_DIR, "rb")
         post_data = dict(image=upload, caption="sneaky update", is_active=True, priority=0)
         response = self.client.post(update_url, post_data, SERVER_NAME="uganda.ureport.io")
-        self.assertLoginRedirect(response)
+        self.assertEqual(403, response.status_code)
         nigeria_image.refresh_from_db()
         self.assertEqual(nigeria_image.caption, "nigeria caption")
 
@@ -3639,13 +3639,13 @@ class DashBlockTest(DashTest):
         self.login(uganda_admin)
 
         response = self.client.get(update_url, SERVER_NAME="nigeria.ureport.io")
-        self.assertLoginRedirect(response)
+        self.assertEqual(403, response.status_code)
 
         response = self.client.get(list_url, SERVER_NAME="nigeria.ureport.io")
-        self.assertLoginRedirect(response)
+        self.assertEqual(403, response.status_code)
 
         response = self.client.get(create_url + "?dashblock=%d" % nigeria_block.pk, SERVER_NAME="nigeria.ureport.io")
-        self.assertLoginRedirect(response)
+        self.assertEqual(403, response.status_code)
 
         self.clear_uploads()
 
@@ -3908,10 +3908,10 @@ class TagTest(DashTest):
         self.login(self.admin)
 
         response = self.client.get(uganda_update_url, SERVER_NAME="nigeria.ureport.io")
-        self.assertLoginRedirect(response)
+        self.assertEqual(403, response.status_code)
 
         response = self.client.get(nigeria_update_url, SERVER_NAME="uganda.ureport.io")
-        self.assertLoginRedirect(response)
+        self.assertEqual(403, response.status_code)
 
         response = self.client.get(uganda_update_url, SERVER_NAME="uganda.ureport.io")
         self.assertEqual(response.status_code, 200)
@@ -3944,10 +3944,10 @@ class TagTest(DashTest):
         self.login(self.admin)
 
         response = self.client.get(uganda_delete_url, SERVER_NAME="nigeria.ureport.io")
-        self.assertLoginRedirect(response)
+        self.assertEqual(403, response.status_code)
 
         response = self.client.get(nigeria_delete_url, SERVER_NAME="uganda.ureport.io")
-        self.assertLoginRedirect(response)
+        self.assertEqual(403, response.status_code)
 
         response = self.client.get(uganda_delete_url, SERVER_NAME="uganda.ureport.io")
         self.assertEqual(response.status_code, 200)
