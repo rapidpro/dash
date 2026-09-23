@@ -11,8 +11,8 @@
                                 <div class="category-name">{% get_value obj field %}</div>
                                 <div class="category-image">
                                     {% thumbnail obj.image "640x360" crop="top" as im %}
-                                        <img width="100%" src="{{ im.url }}" />
-                                    {% empty %}
+                                        <img width="100%" src="{{ im.url }}">
+                                        {% empty %}
                                         <img width="100%" src="{{ STATIC_URL }}img/missing-image.png">
                                     {% endthumbnail %}
                                 </div>
@@ -27,14 +27,14 @@
 {% block extra-style %}
     {{ block.super }}
     <style type="text/css">
-    .category-obj{
-      margin-bottom: 25px;
-    }
-    
-    .category-name {
-      text-align: center;
-      color: #aaaaaa;
-      text-decoration: none;
-    }
+        .category-obj {
+            margin-bottom: 25px;
+        }
+
+        .category-name {
+            color: #aaaaaa;
+            text-align: center;
+            text-decoration: none;
+        }
     </style>
 {% endblock extra-style %}
