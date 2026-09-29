@@ -1,24 +1,19 @@
-v1.23.1 (2026-09-23)
--------------------------
+## v1.23.1 (2026-09-23)
  * Update smartmin to 6.2.3
  * Fix dashblock list type filter and search form rendering
  * Replace djlint with djangofmt for template formatting
 
-v1.23.0 (2026-09-14)
--------------------------
+## v1.23.0 (2026-09-14)
  * Give staff users and global group members administrator access to every org
 
-v1.22.1 (2026-09-07)
--------------------------
+## v1.22.1 (2026-09-07)
  * Bump sqlparse from 0.5.5 to 0.6.0
 
-v1.22.0 (2026-09-07)
--------------------------
+## v1.22.0 (2026-09-07)
  * Add support for Django 6.1 and drop support for Django 5.2
  * Update smartmin to 6.2
 
-v1.21.1 (2026-07-28)
--------------------------
+## v1.21.1 (2026-07-28)
  * Make default org task lock timeout 2 hours
  * Rework locale/timezone handling to save and restore around each request
  * Guard lock release against expiry, make default lock timeout part of the API
@@ -29,8 +24,7 @@ v1.21.1 (2026-07-28)
  * Fix org task locking: acquire non-blocking with default expiry, preserve last results on failure
  * Reset active language and timezone on requests without an org
 
-v1.21.0 (2026-07-27)
--------------------------
+## v1.21.0 (2026-07-27)
  * Update .gitignore to cover AI agent files
  * Restrict org backend creation to superusers and staff
  * Fix invitation email test to execute on-commit callbacks for posts added in a parallel change
@@ -70,22 +64,19 @@ v1.21.0 (2026-07-27)
  * Bump pillow from 12.1.1 to 12.2.0
  * Bump django from 5.2.12 to 5.2.13
 
-v1.20.0 (2026-04-06)
--------------------------
+## v1.20.0 (2026-04-06)
  * Update tests for Django 6.0 URLField behavior
  * Update smartmin to v6.0.0
  * Test against Django 6.0
  * Replace isort with ruff for import sorting
  * Update GH actions
 
-v1.19.2 (2026-03-30)
--------------------------
+## v1.19.2 (2026-03-30)
  * Update rapidpro-python to v2.22.2
  * Update GH actions
  * Bump requests from 2.32.5 to 2.33.0
 
-v1.19.1 (2026-03-25)
--------------------------
+## v1.19.1 (2026-03-25)
  * Fix typos
  * Support django 5.2.12 and later only
  * Update deps
@@ -106,15 +97,13 @@ v1.19.1 (2026-03-25)
  * Bump django from 5.2.2 to 5.2.6
  * Update django
 
-v1.19.0 (2025-06-17)
--------------------------
+## v1.19.0 (2025-06-17)
  * Merge pull request #211 from rapidpro/django_valkey
  * Update to smartmin 5.2.2
  * Use redis transport key
  * Replace django-redis with django-valkey
 
-v1.18.1 (2025-06-12)
--------------------------
+## v1.18.1 (2025-06-12)
  * Merge pull request #210 from rapidpro/update-depsss
  * Update deps
  * Update deps
@@ -123,17 +112,14 @@ v1.18.1 (2025-06-12)
  * Bump requests from 2.32.3 to 2.32.4
  * Bump django from 5.2.1 to 5.2.2
 
-v1.18.0 (2025-05-14)
--------------------------
+## v1.18.0 (2025-05-14)
  * Merge pull request #207 from rapidpro/update-django
  * Update to support django 5.2
 
-v1.17.1 (2025-02-24)
--------------------------
+## v1.17.1 (2025-02-24)
  * Remove user model references
 
-v1.17.0 (2025-02-21)
--------------------------
+## v1.17.0 (2025-02-21)
  * Update CHANGELOG.md for v1.16.1
  * Merge pull request #204 from rapidpro/update-poetry-2
  * Update GH action to use postgress image on CI
@@ -146,8 +132,7 @@ v1.17.0 (2025-02-21)
  * Merge pull request #200 from rapidpro/update-GH-actions
  * Update django and use GH actions services
 
-v1.16.1 (2025-02-21)
--------------------------
+## v1.16.1 (2025-02-21)
  * Merge pull request #204 from rapidpro/update-poetry-2
  * Update GH action to use postgress image on CI
  * Adjust dependencies config
@@ -159,19 +144,16 @@ v1.16.1 (2025-02-21)
  * Merge pull request #200 from rapidpro/update-GH-actions
  * Update django and use GH actions services
 
-v1.16.0 (2024-08-22)
--------------------------
+## v1.16.0 (2024-08-22)
  * Adjust old migrations to not use index_together
  * Support django 5.1
  * Change unique_together to use constraints, replace use of index_together
  * Update deps
 
-v1.15.4 (2024-07-12)
--------------------------
+## v1.15.4 (2024-07-12)
  * Order org admins on form
 
-v1.15.3 (2024-07-11)
--------------------------
+## v1.15.3 (2024-07-11)
  * Merge pull request #193 from rapidpro/update-deps
  * Update smartmin
  * Update deps
@@ -180,8 +162,7 @@ v1.15.3 (2024-07-11)
  * Merge pull request #189 from rapidpro/dependabot/pip/urllib3-2.2.2
  * Bump urllib3 from 2.2.1 to 2.2.2
 
-v1.15.2 (2024-05-23)
--------------------------
+## v1.15.2 (2024-05-23)
  * Merge pull request #188 from rapidpro/dependabot/pip/requests-2.32.0
  * Merge pull request #186 from rapidpro/dependabot/pip/tqdm-4.66.3
  * Bump tqdm from 4.66.2 to 4.66.3
@@ -189,8 +170,7 @@ v1.15.2 (2024-05-23)
  * Merge pull request #187 from rapidpro/update-CI-actions
  * Update Github actions to latest versions
 
-v1.15.1 (2024-04-17)
--------------------------
+## v1.15.1 (2024-04-17)
  * Merge pull request #185 from rapidpro/update-deps
  * Update deps
  * Merge pull request #184 from rapidpro/dependabot/pip/idna-3.7
@@ -202,8 +182,7 @@ v1.15.1 (2024-04-17)
  * Merge pull request #178 from rapidpro/dependabot/pip/pillow-10.2.0
  * Bump pillow from 10.1.0 to 10.2.0
 
-v1.15.0 (2024-01-03)
--------------------------
+## v1.15.0 (2024-01-03)
  * Merge pull request #177 from rapidpro/django5
  * Drop support for PG14
  * Merge pull request #176 from rapidpro/prep-django5
@@ -212,27 +191,23 @@ v1.15.0 (2024-01-03)
  * Use datetime timezone aliased as tzone
  * Remove use of deprecated pytz, self.assertEquals and index_together
 
-v1.14.3 (2023-11-03)
--------------------------
+## v1.14.3 (2023-11-03)
  * Merge pull request #175 from rapidpro/update-deps
  * Update deps
  * Merge pull request #174 from rapidpro/dependabot/pip/django-4.2.7
  * Bump django from 4.2.4 to 4.2.7
 
-v1.14.2 (2023-10-18)
--------------------------
+## v1.14.2 (2023-10-18)
  * Merge pull request #173 from rapidpro/dependabot/pip/urllib3-2.0.7
  * Bump urllib3 from 2.0.6 to 2.0.7
 
-v1.14.1 (2023-10-05)
--------------------------
+## v1.14.1 (2023-10-05)
  * Merge pull request #172 from rapidpro/dependabot/pip/pillow-10.0.1
  * Merge pull request #171 from rapidpro/dependabot/pip/urllib3-2.0.6
  * Bump pillow from 9.5.0 to 10.0.1
  * Bump urllib3 from 2.0.4 to 2.0.6
 
-v1.14.0 (2023-08-22)
--------------------------
+## v1.14.0 (2023-08-22)
  * Merge pull request #170 from rapidpro/convert_templates
  * lint templates
  * Use latest djlint
@@ -241,13 +216,11 @@ v1.14.0 (2023-08-22)
  * Convert haml templates
  * Update deps, add djlint
 
-v1.13.0 (2023-07-06)
--------------------------
+## v1.13.0 (2023-07-06)
  * Upgrade to psycopg non-binary
  * Bump django from 4.2.1 to 4.2.3
 
-v1.12.0 (2023-05-10)
--------------------------
+## v1.12.0 (2023-05-10)
  * Merge pull request #164 from rapidpro/update-client
  * Update rapidpro-python
  * Merge pull request #162 from rapidpro/dependabot/pip/sqlparse-0.4.4
@@ -255,8 +228,7 @@ v1.12.0 (2023-05-10)
  * Bump django from 4.1.7 to 4.1.9
  * Bump sqlparse from 0.4.3 to 0.4.4
 
-v1.11.1 (2023-04-19)
--------------------------
+## v1.11.1 (2023-04-19)
  * Merge pull request #161 from rapidpro/update-coverage-deps
  * Replace codecov with coverage
  * Merge pull request #160 from rapidpro/more-index-optimizations
@@ -267,22 +239,18 @@ v1.11.1 (2023-04-19)
  * Merge pull request #158 from rapidpro/dependabot/pip/redis-4.5.3
  * Bump redis from 4.5.1 to 4.5.3
 
-v1.11.0 (2023-03-07)
--------------------------
+## v1.11.0 (2023-03-07)
  * Update to latest rapidpro client
  * Update hamlpy
 
-v1.10.5 (2023-02-27)
--------------------------
+## v1.10.5 (2023-02-27)
  * Merge pull request #156 from rapidpro/fix-stories-links
  * Fix story audio link formatting
 
-v1.10.4 (2023-02-22)
--------------------------
+## v1.10.4 (2023-02-22)
  * Replace inspect removed method
 
-v1.10.3 (2023-02-20)
--------------------------
+## v1.10.3 (2023-02-20)
  * Merge pull request #153 from rapidpro/dependabot/pip/django-4.1.7
  * Merge pull request #154 from rapidpro/fix-ga-deps
  * Fix github action deps
@@ -290,19 +258,16 @@ v1.10.3 (2023-02-20)
  * Merge pull request #152 from rapidpro/dependabot/pip/django-4.1.6
  * Bump django from 4.1.5 to 4.1.6
 
-v1.10.2 (2023-01-24)
--------------------------
+## v1.10.2 (2023-01-24)
  * Merge pull request #151 from rapidpro/fix-compressor
  * Update deps
  * Update django compressor
 
-v1.10.1 (2023-01-24)
--------------------------
+## v1.10.1 (2023-01-24)
  * Merge pull request #150 from rapidpro/updates-django
  * Update django and celery
 
-v1.10.0 (2023-01-23)
--------------------------
+## v1.10.0 (2023-01-23)
  * Make python version for release 3.10
  * Merge pull request #149 from rapidpro/updates
  * Update to latest smartmin
@@ -331,8 +296,7 @@ v1.10.0 (2023-01-23)
  * Merge pull request #142 from rapidpro/dependabot/pip/django-4.0.4
  * Bump django from 4.0.2 to 4.0.4
 
-v1.9.3
-----------
+## v1.9.3 (2022-04-05)
  * Merge pull request #141 from rapidpro/optimize-queries
  * Remove unnecessary if block
  * Remove unnecessary codes
@@ -343,33 +307,27 @@ v1.9.3
  * Merge pull request #139 from rapidpro/dependabot/pip/django-4.0.2
  * Bump django from 4.0.1 to 4.0.2
 
-v1.9.2
-----------
+## v1.9.2 (2022-01-14)
  * Update to latest pillow, smartmin
 
-v1.9.1
-----------
+## v1.9.1 (2022-01-12)
  * Add missing migrations
 
-v1.9.0
-----------
+## v1.9.0 (2022-01-12)
  * Add support for Django 4
 
-v1.8.3
-----------
+## v1.8.3 (2021-11-10)
  * Merge pull request #133 from rapidpro/fix-dashblock_views
  * pin black
  * Update code checks
  * Fix dashblock views
 
-v1.8.2
-----------
+## v1.8.2 (2021-11-09)
  * Merge pull request #132 from rapidpro/report-attachments
  * Show has report stories
  * Add attachment field to story to upload PDF reports
 
-v1.8.1
-----------
+## v1.8.1 (2021-10-25)
  * Merge pull request #129 from rapidpro/images-names-conflicting
  * Merge pull request #131 from rapidpro/fix-dashblocks-link-label
  * Run code_checks
@@ -379,20 +337,16 @@ v1.8.1
  * Keep filename first 36 characters in the new filename
  * Generate a random name for images when uploading them
 
-v1.8.0
-----------
+## v1.8.0 (2021-10-06)
  * Update to latest celery 5.x and test on Python 3.9.x
 
-v1.7.4
-----------
+## v1.7.4 (2021-09-15)
  * Add missing migration
 
-v1.7.3
-----------
+## v1.7.3 (2021-09-15)
  * Update Org.config to newer JSONField to remove deprecaction warning
 
-v1.7.2
-----------
+## v1.7.2 (2021-09-02)
  * Merge pull request #126 from rapidpro/add-tags
  * Address PR comments
  * Few tweaks for ordering
@@ -405,116 +359,90 @@ v1.7.2
  * Merge pull request #127 from rapidpro/blackify
  * blackify
 
-v1.7.1
-----------
+## v1.7.1 (2021-08-11)
  * Allow a way to customize the creation and update of the local instance, defaults to the current behavior
 
-v1.7.0
-----------
+## v1.7.0 (2021-08-02)
  * Add support for Django 3.2 LTS
 
-v1.6.1
-----------
+## v1.6.1 (2021-06-24)
  * Update rapidpro-python
 
-v1.6.0
-----------
+## v1.6.0 (2021-03-18)
  * Add support for partial syncs in sync_local_to_changes
 
-v1.5.7
-----------
+## v1.5.7 (2021-03-18)
  * Allow previous results to be passed to org tasks
 
-v1.5.6
-----------
+## v1.5.6 (2021-03-15)
  * Update to latest smartmin
 
-v1.5.5
-----------
+## v1.5.5 (2021-03-15)
  * Update to latest smartmin
 
-v1.5.4
-----------
+## v1.5.4 (2021-03-12)
  * Rework dependencies to support older redis
 
-v1.5.3
-----------
+## v1.5.3 (2021-02-18)
  * Add some extra functionality to MockResponse
 
-v1.5.2
-----------
+## v1.5.2 (2021-02-17)
  * Merge pull request #119 from rapidpro/move-mock-response
  * Move MockResponse to dash.test to allow reuse
 
-v1.5.1
-----------
+## v1.5.1 (2021-01-24)
  * Task list shouldn't include inactive orgs
  * Bump CI testin to PG 11 and 12
 
-v1.5.0
-----------
+## v1.5.0 (2021-01-15)
  * Convert to poetry
 
-1.4.6 (2020-07-09)
-=================
+## 1.4.6 (2020-07-09)
  * Explicitly log failing org task to sentry
 
-1.4.5 (2019-02-06)
-=================
+## 1.4.5 (2019-02-06)
  * Explicitly log failing org task to sentry
 
-1.4.4 (2019-02-01)
-=================
+## 1.4.4 (2019-02-01)
  * Remove f-strings as we still test on python 3.5
 
-1.4.3 (2019-01-11)
-=================
+## 1.4.3 (2019-01-11)
  * Update summernote WYSIWYG library
 
-1.4.2 (2019-01-11)
-=================
+## 1.4.2 (2019-01-11)
  * Updates to support Django 2.1
  * Drop support for django 1.11
 
-1.4.1 (2019-01-09)
-=================
+## 1.4.1 (2019-01-09)
  * Upgrade to latest smartmin
 
-1.4 (2018-08-14)
-=================
+## 1.4 (2018-08-14)
  * Supports Python 3 only
  * Support Django 1.11 and 2.0
  * Code format tools (isort, black)
 
-1.3.7 (2018-05-28)
-=================
+## 1.3.7 (2018-05-28)
  * Include static folder in release
 
-1.3.6 (2018-05-28)
-=================
+## 1.3.6 (2018-05-28)
  * Switch Text editor to Summernote JS library
 
-1.3.4 (2018-04-27)
-=================
+## 1.3.4 (2018-04-27)
  * Add migrations to clean up org config
  
-1.3.3 (2018-04-26)
-=================
+## 1.3.3 (2018-04-26)
  * Make filtering by backend field on model optional
 
-1.3.2 (2018-04-06)
-==================
+## 1.3.2 (2018-04-06)
  * Use . paths on the Org config to set and retrieve the values
  * Use a foreign key for the backend fields and use OrgBackend object instead of slug as arguments
 
-1.3.1 (2018-03-22)
-==================
+## 1.3.1 (2018-03-22)
  * Add OrgBackend model to store the configurations for backends
  * Remove `api_token` key from Org config
  * Add DATA_API_BACKEND_TYPES settings for backend types
 
-1.3 (2018-03-15)
-==================
+## 1.3 (2018-03-15)
  * Remove Org api_token field
  * Convert Org config field to JSONField
  * Support multiple backend configurations
@@ -522,60 +450,46 @@ v1.5.0
  * Add BACKENDS_ORG_CONFIG_FIELDS settings
  * Migrations to move existing backend API specific under rapidpro config
 
-1.2.7 (2018-03-08)
-==================
+## 1.2.7 (2018-03-08)
  * Fix migrations
 
-1.2.6 (2018-03-08)
-==================
+## 1.2.6 (2018-03-08)
  * Fix migrations
 
-1.2.5 (2018-03-08)
-==================
+## 1.2.5 (2018-03-08)
  * Restructure org config dict
 
-1.2.4 (2018-01-09)
-==================
+## 1.2.4 (2018-01-09)
  * Fix derive fields to include read only fields
 
-1.2.3 (2018-01-09)
-==================
+## 1.2.3 (2018-01-09)
  * Add way to display read only org config fields to admins
 
-1.2.2 (2017-12-04)
-==================
+## 1.2.2 (2017-12-04)
  * Improve chunks util method so that it doesn't load the entire source iterator into a list
  
-1.2.1 (2017-06-15)
-==================
+## 1.2.1 (2017-06-15)
  * Support Django 1.10 new middleware style
 
-1.2 (2017-06-07)
-==================
+## 1.2 (2017-06-07)
  * Update to latest smartmin which adds support for Django 1.11 and Python 3.6
 
-1.1.1 (2017-03-01)
-==================
+## 1.1.1 (2017-03-01)
  * Update to latest smartmin which replaces uses of auto_now/auto_now_add in models with overridable defaults
 
-1.1 (2016-12-15)
-==================
+## 1.1 (2016-12-15)
  * Added support for Django 1.10 https://github.com/rapidpro/dash/pull/90
  * Dropped support for Django 1.8
 
-1.0.4 (2016-12-09)
-==================
+## 1.0.4 (2016-12-09)
  * Updated to latest django-hamlpy 1.x https://github.com/rapidpro/dash/pull/89
  
-1.0.3 (2016-11-11)
-==================
+## 1.0.3 (2016-11-11)
  * Added support for configurable timeouts on org tasks https://github.com/rapidpro/dash/pull/88
  
-1.0.2 (2016-10-31)
-==================
+## 1.0.2 (2016-10-31)
  * Switched org.timzeone to be an actual timezone field
 
-1.0.1 (2016-10-26)
-==================
+## 1.0.1 (2016-10-26)
  * Added support for Django 1.9
  * Improved support for Python 3
