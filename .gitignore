@@ -68,9 +68,6 @@ AGENTS.md
 db.sqlite3
 
 .vscode/
-deploy
-fabric
-fabfile.*
 
 # ruff 
 .ruff_cache
