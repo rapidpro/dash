@@ -1,3 +1,7 @@
+## v1.23.2 (2026-10-26)
+ * Update urllib3 to 2.8.0, certifi to 2026.10.19 and pillow to 13.0.0
+ * Drop .gitignore entries for the retired deploy tooling
+
 ## v1.23.1 (2026-09-23)
  * Update smartmin to 6.2.3
  * Fix dashblock list type filter and search form rendering
